@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "yxlp6Agrv0rVPR3LVThwH"
+uri = "file://attached_assets/index_fixed.zip"
+type = "unspecified"
+title = "index_fixed.zip — File HTML yang Sudah Diperbaiki"
