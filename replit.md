@@ -25,3 +25,15 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+
+## Artifacts
+
+### Smart Portal RT 005 Tegalsari (`artifacts/smart-portal-rt`)
+- **Kind**: Static HTML (Vite dev server, no React)
+- **Preview path**: `/`
+- **Port**: 25803
+- **Stack**: Standalone HTML + vanilla JS, semua CDN (SweetAlert2, html2canvas, jsPDF, XLSX, jQuery, Select2, FontAwesome)
+- **Data storage**: localStorage only — tidak ada Google Sheets atau backend API
+- **Logo**: `public/Lambang_Kota_Semarang.png`
+- **Fitur**: Login, data warga, kas RT, iuran, surat, arisan, berita, aduan, pengaturan
+- **Sync**: Semua fungsi sync (autoSync/saveToCloud/loadFromCloud) sudah dikonversi ke localStorage-only stubs — tidak ada error cloud
