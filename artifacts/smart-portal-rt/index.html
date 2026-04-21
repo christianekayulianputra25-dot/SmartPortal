@@ -1737,11 +1737,7 @@
         // 2. Langsung Refresh Tampilan (Bagan langsung terbentuk!)
         if(typeof loadPengurus === 'function') loadPengurus();
         
-        // 3. TEMBAK LANGSUNG KE CLOUD (Jangan pakai syncSemuaData agar tidak tertimpa!)
-            });
-        } else {
-            Toast.fire({icon: 'success', title: 'Tersimpan Lokal!'}); 
-        }
+                Toast.fire({icon: 'success', title: 'Tersimpan Lokal!'});
     };
     window.batalEditPengurus = function() { editPengurusId = null; document.getElementById('form-struktur').reset(); document.getElementById('btn-cancel-org').style.display = 'none'; document.getElementById('btn-submit-org').innerHTML = '<i class="fa-solid fa-save"></i> Simpan'; };
     window.editPengurus = function(id) { let db = JSON.parse(localStorage.getItem('db_pengurus')) || []; let p = db.find(x => x.id === id); if(p){ document.getElementById('org-jabatan').value=p.jabatan; document.getElementById('org-nama').value=p.nama; document.getElementById('org-kategori').value=p.kategori||'Staf'; editPengurusId=id; document.getElementById('btn-cancel-org').style.display='block'; document.getElementById('btn-submit-org').innerHTML='<i class="fa-solid fa-save"></i> Update'; window.scrollTo({top:0}); } };
