@@ -11,8 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
@@ -537,14 +537,14 @@
 <body>
 
 <div id="login-screen">
-    <div id="splash-view" ondblclick="bukaFormLogin()" style="cursor: pointer; text-align: center; width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div id="splash-view" onclick="bukaFormLogin()" style="cursor: pointer; text-align: center; width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="logo-wrap-3d-huge">
             <img src="Lambang_Kota_Semarang.png" alt="Logo" class="logo-3d-fast" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/1a/Lambang_Kota_Semarang.png';">
         </div>
         <h1 class="sipada-title">SMART PORTAL RT 005</h1>
         <p class="sipada-subtitle">TEGALASARI</p>
         <div class="sipada-hint">
-            <span class="pulse-text"><i class="fa-solid fa-hand-pointer"></i>LOGIN</span>
+            <span class="pulse-text"><i class="fa-solid fa-hand-pointer"></i> KLIK UNTUK MASUK</span>
         </div>
     </div>
 
@@ -592,7 +592,7 @@
         </div>
     </div>
 </div>
-		
+                
 <div class="app-container app-view" id="main-app">
     <div class="main-header no-print">
         <div style="display: flex; align-items: center; gap: 15px;">
@@ -683,7 +683,7 @@
             </div>
         </div>
 
-		<div id="warga-profil" class="warga-tab-content">
+                <div id="warga-profil" class="warga-tab-content">
             <div id="warga-view-data">
                 <div class="card-title-header"><h3><i class="fa-solid fa-users"></i> Data Keluarga Saya</h3><button class="btn-action bg-green" onclick="tampilFormKeluarga(true)"><i class="fa-solid fa-plus"></i> Tambah / Edit Data</button></div>
                 <div class="table-responsive" style="margin-bottom: 30px;"><table><thead><tr><th>Kepala Keluarga & NIK</th><th>Alamat Rumah</th><th>Aksi</th></tr></thead><tbody id="tbody-profil-saya"></tbody></table></div>
@@ -739,9 +739,9 @@
                 <div class="stat-box" style="border-color:var(--accent-gold);"><i class="fa-solid fa-chart-line bg-icon" style="color:var(--accent-gold) !important;"></i><h4>Estimasi Bunga (SHU)</h4><h2 id="w_kop_shu" style="color:var(--accent-gold);">Rp 0</h2></div>
             </div>
             <div class="card"><div class="card-title-header"><h3><i class="fa-solid fa-receipt"></i> Rincian Histori Angsuran Saya</h3></div><div class="table-responsive"><table><thead><tr><th>Angsuran Ke</th><th>Tanggal Bayar</th><th>ID Pinjaman</th><th>Nominal Dibayar</th></tr></thead><tbody id="tbody-w-cicilan"></tbody></table></div></div>
-			<div class="card" style="border-top: 4px solid var(--success);"><div class="card-title-header"><h3><i class="fa-solid fa-check-double"></i> Riwayat Pinjaman Lunas</h3></div><div class="table-responsive"><table><thead><tr><th>Tanggal Pelunasan</th><th>ID Pinjaman</th><th>Plafon Awal</th><th>Total Dikembalikan</th><th>Status</th></tr></thead><tbody id="tbody-w-pinjaman-lunas"></tbody></table></div></div>
+                        <div class="card" style="border-top: 4px solid var(--success);"><div class="card-title-header"><h3><i class="fa-solid fa-check-double"></i> Riwayat Pinjaman Lunas</h3></div><div class="table-responsive"><table><thead><tr><th>Tanggal Pelunasan</th><th>ID Pinjaman</th><th>Plafon Awal</th><th>Total Dikembalikan</th><th>Status</th></tr></thead><tbody id="tbody-w-pinjaman-lunas"></tbody></table></div></div>
         </div>
-		
+                
         <div id="warga-surat" class="warga-tab-content">
             <div class="card-header-premium">
                 <div><h2>Layanan Surat Mandiri</h2><p>Ajukan surat pengantar dan pantau statusnya secara real-time.</p></div>
@@ -803,8 +803,8 @@
                 </div>
             </div>
         </div>
-		
-		<div id="warga-aduan" class="warga-tab-content">
+                
+                <div id="warga-aduan" class="warga-tab-content">
             <div class="card" style="border-top: 4px solid var(--danger);">
                 <div class="card-title-header"><h3><i class="fa-solid fa-bullhorn" style="color:var(--danger);"></i> Form Laporan & Aduan Warga</h3></div>
                 <form onsubmit="kirimAduanWarga(event)" class="form-grid">
@@ -835,7 +835,7 @@
             </div>
         </div>
     </div>
-	<div id="view-bendahara" class="tab-view">
+        <div id="view-bendahara" class="tab-view">
         <div class="admin-nav-tabs no-print">
             <button class="admin-tab-btn active" onclick="openBenTab('ben-input')"><i class="fa-solid fa-cash-register"></i><span>Input Data</span></button>
             <button class="admin-tab-btn" onclick="openBenTab('ben-laporan')"><i class="fa-solid fa-book"></i><span>Laporan Kas</span></button>
@@ -1091,9 +1091,9 @@
 </button>
         </div>
 
-		<div id="admin-datakk" class="admin-tab-content active">
-		    
-		    <div style="margin: 20px 0; padding: 15px; background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--gold-luxury); border-radius: 12px; text-align: center;">
+                <div id="admin-datakk" class="admin-tab-content active">
+                    
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--gold-luxury); border-radius: 12px; text-align: center;">
             <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px;"><i class="fa-solid fa-flask"></i> Panel Pengujian Developer</p>
             <button type="button" onclick="suntikDataTest()" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; box-shadow: 0 4px 10px rgba(16,185,129,0.3);"><i class="fa-solid fa-syringe"></i> Suntik 50 Data Test</button>
             <button type="button" onclick="bersihkanDataTest()" style="background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; box-shadow: 0 4px 10px rgba(239,68,68,0.3);"><i class="fa-solid fa-broom"></i> Sapu Bersih Data Test</button>
@@ -1240,7 +1240,7 @@
             </div>
 
         </div>
-		<div id="admin-aduan" class="admin-tab-content">
+                <div id="admin-aduan" class="admin-tab-content">
             <div class="card" style="border-top: 4px solid var(--danger);">
                 <div class="card-title-header">
                     <h3><i class="fa-solid fa-inbox" style="color:var(--danger);"></i> Kotak Aduan & Keluhan Warga</h3>
@@ -1255,7 +1255,7 @@
                 <div class="table-responsive"><table><thead><tr><th>Tgl & Pelapor</th><th>Kategori</th><th>Detail Laporan</th><th>Bukti Lampiran</th><th>Status (Tindakan)</th></tr></thead><tbody id="tbody-aduan-admin"></tbody></table></div>
             </div>
         </div>
-		<div id="darurat" class="admin-tab-content">
+                <div id="darurat" class="admin-tab-content">
             <div class="card form-input-section" style="border-top: 4px solid var(--danger);">
                 <div class="card-title-header"><h3><i class="fa-solid fa-truck-medical" style="color:var(--danger) !important;"></i> Kelola Kontak Darurat Kota</h3></div>
                 <form id="form-darurat" onsubmit="event.preventDefault(); simpanDarurat();">
@@ -1334,7 +1334,7 @@
         </div>
 
     </div> </div>
-	<div id="hidden-pdf-container" style="display: none !important;">
+        <div id="hidden-pdf-container" style="display: none !important;">
     <div class="letter-paper" id="surat-warga-paper">
         <div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" class="kop-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kota_Semarang.png/600px-Lambang_Kota_Semarang.png'"><div class="kop-teks"><h2>KOTA SEMARANG</h2><h3>KECAMATAN CANDISARI</h3><h3>KELURAHAN TEGALSARI</h3><h3>RT. 005 / RW. 012</h3></div></div><div class="kop-garis"></div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:1.05rem; color:#000;"><div style="width:55%;"><div>Nomor : <b id="pdf-no"></b></div><div>Lampiran : -</div><div style="font-weight:bold; text-decoration:underline; margin-top:5px;">Hal : Surat Pengantar</div></div><div style="text-align:right;"><div>Semarang, <span id="pdf-tgl"></span></div><div style="margin-top:10px;">Kepada Yth.<br><b>Kepala Kelurahan Tegalsari</b><br>di -<br>    <b style="text-transform:uppercase; text-decoration:underline;">Semarang</b></div></div></div>
