@@ -2,10 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+    <meta name="theme-color" content="#1d4ed8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Smart Portal RT 005 Tegalsari</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400;1,700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1442,6 +1446,394 @@ html[data-theme="dark"] .gt-search-info mark { background: rgba(245,158,11,0.30)
   .gt-warga-field { grid-template-columns: 100px 1fr; gap: 8px; font-size: 0.85rem; }
 }
 
+
+/* ============================================================
+   ===== PHASE 2 — UI REPAIR + GOVTECH MODERNIZATION (v4) =====
+   Pure visual / responsive layer. No markup or logic changes.
+   ============================================================ */
+
+:root {
+  /* Switch primary font to Inter for the "official" GovTech feel
+     (Plus Jakarta Sans kept as fallback so existing components don't shift weights). */
+  --gt-font: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Safe-area variables for notched phones */
+  --gt-safe-top:    env(safe-area-inset-top, 0px);
+  --gt-safe-right:  env(safe-area-inset-right, 0px);
+  --gt-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --gt-safe-left:   env(safe-area-inset-left, 0px);
+  /* 8pt spacing scale */
+  --gt-s-1: 4px; --gt-s-2: 8px; --gt-s-3: 12px; --gt-s-4: 16px;
+  --gt-s-5: 20px; --gt-s-6: 24px; --gt-s-7: 32px; --gt-s-8: 40px;
+}
+
+/* ===== 0. Global resets to kill horizontal scroll ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+body { min-width: 0; }
+*, *::before, *::after { min-width: 0; }
+img, video, canvas, iframe, svg { max-width: 100%; height: auto; }
+
+/* ===== 1. Login input collision fix =====
+   The generic "input { padding: 11px 14px !important; }" override was
+   killing the 50px left-padding the .univ-input needs to clear its icon.
+   Re-assert correct padding for the login inputs only. */
+#login-screen input.univ-input,
+.input-group-premium input.univ-input,
+input.univ-input[type="text"],
+input.univ-input[type="password"] {
+  padding: 14px 50px 14px 50px !important;
+  min-height: 50px !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+  background: rgba(0,0,0,0.4) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  border-radius: 14px !important;
+  font-family: var(--gt-font) !important;
+  font-size: 1rem !important;
+  letter-spacing: 0.01em;
+}
+#login-screen input.univ-input:focus,
+.input-group-premium input.univ-input:focus {
+  background: rgba(0,0,0,0.55) !important;
+  border-color: var(--gt-warning-500) !important;
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.22) !important;
+  outline: none !important;
+}
+#login-screen input.univ-input::placeholder,
+.input-group-premium input.univ-input::placeholder {
+  color: rgba(241,245,249,0.55) !important;
+  font-weight: 400 !important;
+}
+.input-group-premium { width: 100%; position: relative; margin-bottom: 16px; }
+.input-group-premium i.icon-left {
+  position: absolute; top: 50%; left: 18px;
+  transform: translateY(-50%);
+  font-size: 1.05rem; color: var(--gt-warning-500);
+  pointer-events: none; z-index: 2;
+}
+.input-group-premium #univ-eye {
+  position: absolute !important; top: 50% !important; right: 16px !important;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; cursor: pointer;
+  color: rgba(241,245,249,0.65) !important;
+  transition: background .15s ease, color .15s ease;
+}
+.input-group-premium #univ-eye:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--gt-warning-500) !important;
+}
+
+/* Login premium polish */
+.btn-ultra {
+  width: 100%;
+  min-height: 52px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--gt-font) !important;
+  font-size: 0.98rem !important;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 12px 24px -8px rgba(245,158,11,0.45) !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  text-transform: uppercase;
+}
+.btn-ultra:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 16px 32px -10px rgba(245,158,11,0.55) !important; }
+.btn-ultra:active { transform: translateY(0); filter: brightness(0.95); }
+
+/* Trust badges row at the bottom of login */
+#login-form-view::after {
+  /* No-op marker; trust badges are added via existing markup if any */
+}
+
+/* ===== 2. Generic input rule SCOPED to skip login fields ===== */
+input[type="text"]:not(.univ-input):not(.search-box):not(.gt-search-input),
+input[type="password"]:not(.univ-input),
+input[type="number"]:not(.univ-input),
+input[type="email"]:not(.univ-input),
+input[type="tel"]:not(.univ-input),
+input[type="search"]:not(.gt-search-input),
+input[type="date"],
+textarea, select {
+  min-height: 44px !important;     /* mobile touch target */
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+}
+
+/* ===== 3. Header: full mobile rework ===== */
+.main-header {
+  padding-top: calc(14px + var(--gt-safe-top)) !important;
+  padding-left:  max(20px, var(--gt-safe-left)) !important;
+  padding-right: max(20px, var(--gt-safe-right)) !important;
+  flex-wrap: wrap !important;
+  row-gap: 10px !important;
+  column-gap: 12px !important;
+  min-height: 64px;
+}
+.main-header > div { min-width: 0; }
+.main-header > div:first-child { flex: 1 1 auto; min-width: 0; }
+.main-header > div:last-child  { flex: 0 0 auto; flex-wrap: wrap; row-gap: 8px; }
+.user-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.user-text-header { min-width: 0; max-width: 220px; }
+.user-text-header h3,
+.user-text-header p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* The malformed inline sync chip — re-style without touching markup */
+.main-header [onclick*="syncSemuaData"] {
+  background: var(--gt-surface-2) !important;
+  border: 1px solid var(--gt-border) !important;
+  border-radius: 999px !important;
+  color: var(--gt-text-2) !important;
+  padding: 6px 12px !important;
+  font-weight: 600;
+  display: inline-flex !important; align-items: center; gap: 8px !important;
+  transition: background .15s ease;
+  cursor: pointer;
+}
+.main-header [onclick*="syncSemuaData"]:hover { background: var(--gt-primary-50) !important; color: var(--gt-primary-700) !important; }
+.main-header [onclick*="syncSemuaData"] #sync-text { color: inherit !important; font-size: 0.78rem !important; }
+
+#realtime-clock { color: var(--gt-text-3); font-size: 0.85rem; font-weight: 600; }
+#realtime-clock i { color: var(--gt-primary-600); margin-right: 4px; }
+
+.btn-toggle-sidebar {
+  background: var(--gt-surface-2);
+  border: 1px solid var(--gt-border);
+  color: var(--gt-text-2);
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.btn-toggle-sidebar:hover { background: var(--gt-primary-50); color: var(--gt-primary-700); border-color: var(--gt-primary-200); }
+
+/* ===== 4. Sidebar -> mobile horizontal strip ===== */
+.admin-nav-tabs, .nav-tabs {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+}
+
+/* ===== 5. Cards / containers fluid sizing ===== */
+.tab-view {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: clamp(16px, 3vw, 28px) !important;
+}
+.card, .form-input-section {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)) !important;
+  gap: clamp(12px, 2vw, 20px) !important;
+}
+.form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)) !important;
+  gap: clamp(12px, 2vw, 18px) !important;
+}
+
+/* ===== 6. Service grid: tighter on small phones ===== */
+.gt-service-grid { grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr)); gap: clamp(10px, 2vw, 16px); }
+
+/* ===== 7. Status timeline labels: smaller on tiny phones ===== */
+@media (max-width: 480px) {
+  .gt-tl-step .gt-tl-label { font-size: 0.7rem; }
+  .gt-tl-dot { width: 38px; height: 38px; }
+  .gt-timeline::before, .gt-timeline .gt-tl-fill { top: 19px; }
+}
+
+/* ===== 8. Hero typography fluid ===== */
+.gt-hero { padding: clamp(20px, 4vw, 30px); border-radius: clamp(16px, 3vw, 22px); }
+.gt-hero h1 { font-size: clamp(1.25rem, 4.5vw, 1.7rem); }
+.gt-hero p { font-size: clamp(0.85rem, 2.6vw, 0.98rem); }
+
+/* ===== 9. Header search + bell wraps to full width on mobile ===== */
+@media (max-width: 768px) {
+  .gt-search-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-basis: 100%;
+    order: 99;            /* push to a new wrapped row below the rest */
+    margin: 4px 0 0 0;
+  }
+  .main-header > div:first-child { flex: 1 1 100%; }
+  .main-header > div:last-child  { flex: 1 1 100%; justify-content: flex-end !important; gap: 10px !important; }
+
+  .user-text-header { max-width: 60vw; }
+  #realtime-clock { display: none !important; }
+
+  /* Side-sidebar -> top horizontal scroll bar */
+  .admin-nav-tabs, .nav-tabs {
+    width: 100% !important; min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--gt-border) !important;
+    padding: 12px 14px !important;
+    position: sticky !important; top: 0;
+    gap: 8px !important;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap !important;
+  }
+  .admin-nav-tabs > button, .nav-tabs > button {
+    flex: 0 0 auto !important;
+    white-space: nowrap;
+  }
+  .admin-tab-content, .warga-tab-content, .ben-tab-content, .kop-tab-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 16px !important;
+    box-sizing: border-box;
+  }
+  .admin-tab-content.active, .warga-tab-content.active,
+  .ben-tab-content.active, .kop-tab-content.active {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  /* Avoid app being hidden under bottom nav */
+  body { padding-bottom: calc(76px + var(--gt-safe-bottom)) !important; }
+}
+
+/* ===== 10. Smaller phones (<= 414 / 390 / 375 / 320) ===== */
+@media (max-width: 480px) {
+  .main-header { padding: 10px 12px !important; padding-top: calc(10px + var(--gt-safe-top)) !important; column-gap: 8px !important; }
+  .user-info .avatar { width: 38px !important; height: 38px !important; font-size: 0.95rem !important; }
+  .user-text-header h3 { font-size: 0.95rem !important; }
+  .user-text-header p  { font-size: 0.7rem !important; }
+  .btn-toggle-sidebar { display: none !important; }
+  .btn-logout, .gt-theme-toggle, .btn-header-icon { width: 38px; height: 38px; }
+  .btn-logout span.hide-on-mobile, .btn-logout span { display: none !important; }
+  .main-header [onclick*="syncSemuaData"] { padding: 6px 8px !important; }
+  .main-header [onclick*="syncSemuaData"] #sync-text { display: none !important; }
+
+  .card-header-premium { flex-direction: column; gap: 12px; align-items: flex-start; padding: 18px !important; }
+  .card-header-premium h2 { font-size: 1.25rem !important; }
+
+  .gt-hero { padding: 18px !important; }
+  .gt-service-grid { grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); }
+  .gt-status-grid { grid-template-columns: 1fr; }
+
+  .stat-box h2 { font-size: 1.4rem !important; }
+  .stat-box .bg-icon { font-size: 1.9rem !important; }
+}
+@media (max-width: 360px) {
+  .gt-service-grid { grid-template-columns: 1fr 1fr; }
+  .gt-service-card { padding: 16px 14px; }
+  .gt-service-card h4 { font-size: 0.92rem; }
+}
+
+/* ===== 11. Touch targets: 44px min for buttons ===== */
+button, .btn-action, .btn-submit, .btn-table {
+  min-height: 40px;
+}
+.btn-table { min-width: 40px; }
+.btn-action, .btn-submit { min-height: 44px; }
+
+/* ===== 12. Z-index stacking discipline ===== */
+.main-header { z-index: 50 !important; }
+.gt-bottom-nav { z-index: 90; }
+.gt-search-results, .gt-notif-panel { z-index: 1000 !important; }
+.gt-warga-modal { z-index: 10000 !important; }
+.swal2-container { z-index: 100000 !important; }
+
+/* ===== 13. Sticky bottom navigation (mobile only) — injected via JS ===== */
+.gt-bottom-nav {
+  display: none;
+  position: fixed; left: 0; right: 0; bottom: 0;
+  background: var(--gt-surface);
+  border-top: 1px solid var(--gt-border);
+  padding: 8px max(8px, var(--gt-safe-left)) calc(8px + var(--gt-safe-bottom)) max(8px, var(--gt-safe-right));
+  box-shadow: 0 -8px 24px -8px rgba(15,23,42,0.10);
+  font-family: var(--gt-font);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+html[data-theme="dark"] .gt-bottom-nav { box-shadow: 0 -8px 24px -8px rgba(0,0,0,0.5); }
+.gt-bottom-nav-row { display: grid; grid-template-columns: repeat(var(--gt-bn-cols, 4), 1fr); gap: 4px; max-width: 600px; margin: 0 auto; }
+.gt-bn-item {
+  background: none; border: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  padding: 6px 4px;
+  color: var(--gt-text-3);
+  font-family: inherit;
+  font-size: 0.68rem; font-weight: 600;
+  border-radius: 10px;
+  transition: color .15s ease, background .15s ease;
+  min-height: 56px;
+  position: relative;
+}
+.gt-bn-item i { font-size: 1.15rem; }
+.gt-bn-item:hover { color: var(--gt-primary-700); }
+.gt-bn-item.active {
+  color: var(--gt-primary-700);
+  background: var(--gt-primary-50);
+}
+html[data-theme="dark"] .gt-bn-item.active { background: rgba(37,99,235,0.18); color: #bfdbfe; }
+.gt-bn-item.active::before {
+  content: "";
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  width: 24px; height: 3px; border-radius: 2px;
+  background: var(--gt-primary-500);
+}
+
+@media (max-width: 768px) {
+  .gt-bottom-nav { display: block; }
+}
+
+/* ===== 14. Tables horizontal scroll cleanup ===== */
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; }
+
+/* ===== 15. Modal containers safe on small screens ===== */
+.gt-warga-modal { padding: 16px; }
+.modal-content { max-width: min(90vw, 500px); }
+
+/* ===== 16. Premium button micro-interactions ===== */
+.btn-action::after, .btn-submit::after { content: ""; position: absolute; }
+.btn-action, .btn-submit { position: relative; overflow: hidden; }
+
+/* ===== 17. Prevent grid blowout from long unbreakable text (NIK/KK numbers) ===== */
+.gt-search-info, .gt-notif-text, .gt-warga-modal-body {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ===== 18. Make admin-nav-tabs scrollbar pretty on mobile ===== */
+@media (max-width: 768px) {
+  .admin-nav-tabs::-webkit-scrollbar { height: 4px; }
+  .admin-nav-tabs::-webkit-scrollbar-thumb { background: var(--gt-border-strong); border-radius: 2px; }
+}
+
+/* ===== 19. Fix the orphan/legacy notif-bell inline 1.4rem font color hardcoded ===== */
+.notif-bell { color: var(--gt-text-2) !important; font-size: 1.25rem !important; }
+.notif-bell i { color: inherit !important; }
+
+/* ===== 20. WCAG: focus ring everywhere ===== */
+:focus-visible {
+  outline: 2px solid var(--gt-primary-500) !important;
+  outline-offset: 2px !important;
+  border-radius: 6px;
+}
+button, a { -webkit-tap-highlight-color: rgba(37,99,235,0.18); }
+
+/* ===== 21. Reduced motion already handled — keep ===== */
+
+/* ============================================================
+   ===== END PHASE 2 =====
+   ============================================================ */
+
     </style>
     
         
@@ -2866,6 +3258,128 @@ html[data-theme="dark"] .gt-search-info mark { background: rgba(245,158,11,0.30)
             if (hookTries > 40) clearInterval(hk);
         }, 250);
     })();
+    // ===== Mobile sticky bottom nav (role-aware) — v1 =====
+    (function(){
+        var WARGA_NAV = [
+            { id:'warga-dashboard', icon:'fa-house',                 label:'Beranda' },
+            { id:'warga-surat',     icon:'fa-envelope-open-text',    label:'Surat' },
+            { id:'warga-aduan',     icon:'fa-bullhorn',              label:'Lapor' },
+            { id:'warga-keuangan',  icon:'fa-sack-dollar',           label:'Iuran' },
+            { id:'warga-profil',    icon:'fa-id-badge',              label:'Profil' }
+        ];
+        var BENDAHARA_NAV = [
+            { id:'ben-input',     icon:'fa-cash-register', label:'Input' },
+            { id:'ben-laporan',   icon:'fa-book',          label:'Laporan' },
+            { id:'ben-matriks',   icon:'fa-table-cells',   label:'Matriks' },
+            { id:'ben-arsip',     icon:'fa-folder-open',   label:'Arsip' }
+        ];
+
+        function activeView(){
+            var v = document.querySelector('#view-warga');
+            if (v && getComputedStyle(v).display !== 'none') return 'warga';
+            v = document.querySelector('#view-bendahara');
+            if (v && getComputedStyle(v).display !== 'none') return 'bendahara';
+            v = document.querySelector('#view-koperasi');
+            if (v && getComputedStyle(v).display !== 'none') return 'koperasi';
+            v = document.querySelector('#view-admin');
+            if (v && getComputedStyle(v).display !== 'none') return 'admin';
+            return null;
+        }
+
+        function go(id, role){
+            try {
+                if (role === 'warga' && typeof window.openWargaTab === 'function') return window.openWargaTab(id);
+                if (role === 'bendahara' && typeof window.openBenTab === 'function') return window.openBenTab(id);
+                if (role === 'koperasi' && typeof window.openKopTab === 'function') return window.openKopTab(id);
+                if (role === 'admin' && typeof window.openAdminTab === 'function') return window.openAdminTab(id);
+            } catch(_){}
+        }
+
+        function currentTabId(role){
+            var sel = role === 'warga' ? '.warga-tab-content.active'
+                    : role === 'bendahara' ? '.ben-tab-content.active'
+                    : role === 'koperasi' ? '.kop-tab-content.active'
+                    : '.admin-tab-content.active';
+            var el = document.querySelector(sel);
+            return el ? el.id : null;
+        }
+
+        function ensureNav(){
+            // Only render once main-app is visible
+            var app = document.getElementById('main-app');
+            if (!app || getComputedStyle(app).display === 'none') {
+                var existing = document.getElementById('gt-bottom-nav');
+                if (existing) existing.remove();
+                return;
+            }
+            var role = activeView();
+            if (!role) return;
+            var items = role === 'warga' ? WARGA_NAV : role === 'bendahara' ? BENDAHARA_NAV : null;
+            if (!items) {
+                // Hide nav for views without a defined map (admin/koperasi keep their horizontal strip)
+                var ex = document.getElementById('gt-bottom-nav'); if (ex) ex.remove();
+                return;
+            }
+            var nav = document.getElementById('gt-bottom-nav');
+            var fresh = false;
+            if (!nav) {
+                nav = document.createElement('nav');
+                nav.id = 'gt-bottom-nav';
+                nav.className = 'gt-bottom-nav no-print';
+                nav.setAttribute('aria-label', 'Navigasi utama');
+                document.body.appendChild(nav);
+                fresh = true;
+            }
+            var cur = currentTabId(role);
+            var html = '<div class="gt-bottom-nav-row" style="--gt-bn-cols:' + items.length + ';">';
+            items.forEach(function(it){
+                var active = it.id === cur ? 'active' : '';
+                html += '<button type="button" class="gt-bn-item ' + active + '" data-id="' + it.id + '">'
+                     + '<i class="fa-solid ' + it.icon + '"></i><span>' + it.label + '</span></button>';
+            });
+            html += '</div>';
+            nav.innerHTML = html;
+            nav.dataset.role = role;
+            nav.querySelectorAll('.gt-bn-item').forEach(function(btn){
+                btn.addEventListener('click', function(){
+                    var id = btn.getAttribute('data-id');
+                    go(id, role);
+                    setTimeout(ensureNav, 60);
+                });
+            });
+        }
+
+        function boot(){ try { ensureNav(); } catch(e) { console.warn('bn init', e); } }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+        else boot();
+        setTimeout(boot, 600);
+        setTimeout(boot, 2200);
+        // Re-render whenever role/tab might change
+        ['openWargaTab','openBenTab','openKopTab','openAdminTab','tampilkanView'].forEach(function(fn){
+            var t = 0;
+            var w = setInterval(function(){
+                t++;
+                if (typeof window[fn] === 'function' && !window[fn].__gtBnWrapped) {
+                    var orig = window[fn];
+                    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(ensureNav, 50); return r; };
+                    window[fn].__gtBnWrapped = true;
+                    clearInterval(w);
+                }
+                if (t > 60) clearInterval(w);
+            }, 250);
+        });
+        // Hook syncSemuaData too
+        var s=0; var ws = setInterval(function(){ s++;
+            if (typeof window.syncSemuaData === 'function' && !window.syncSemuaData.__gtBnWrapped) {
+                var o = window.syncSemuaData;
+                window.syncSemuaData = function(){ var r = o.apply(this, arguments); setTimeout(ensureNav, 60); return r; };
+                window.syncSemuaData.__gtBnWrapped = true;
+                clearInterval(ws);
+            }
+            if (s > 60) clearInterval(ws);
+        }, 250);
+    })();
+
 
 
 
