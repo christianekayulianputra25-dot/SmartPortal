@@ -6,3 +6,9 @@ id = "yxlp6Agrv0rVPR3LVThwH"
 uri = "file://attached_assets/index_fixed.zip"
 type = "unspecified"
 title = "index_fixed.zip — File HTML yang Sudah Diperbaiki"
+
+[[outputs]]
+id = "s1HSEcSfjicXiqenzKJHi"
+uri = "file://artifacts/smart-portal-rt/public/smart-portal-rt-source.zip"
+type = "unspecified"
+title = "Smart Portal RT 005 Tegalsari — Source Code (ZIP)"

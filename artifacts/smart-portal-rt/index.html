@@ -1444,6 +1444,180 @@
         var b = document.getElementById('btn-submit-darurat'); if (b) b.innerHTML = '<i class="fa-solid fa-save"></i> Tambahkan ke Layar Warga';
     };
 
+    // ===== HELPER CETAK VIA IFRAME (preview muncul untuk Notulen, BA Kas, Rekap, dll) =====
+    window.printViaIframe = function(htmlBody, title) {
+        var iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute'; iframe.style.left = '-9999px';
+        iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+        var doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + (title||'Cetak Dokumen') + '</title>' +
+            '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">' +
+            '<style>' +
+            '@page { size: A4; margin: 15mm; }' +
+            'body { margin:0; padding:0; background:white; color:black; font-family: "Times New Roman", Times, serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
+            '.letter-paper { background:white !important; color:black !important; padding:0 !important; box-shadow:none !important; }' +
+            'table { border-collapse: collapse; width:100%; }' +
+            'th, td { padding:6px 8px; }' +
+            '.kop-surat-resmi { display:flex; align-items:center; gap:15px; margin-bottom:10px; }' +
+            '@media print { body { -webkit-print-color-adjust: exact !important; } }' +
+            '</style></head><body>' + htmlBody + '</body></html>');
+        doc.close();
+        Swal.fire({ title:'Menyiapkan Dokumen...', text:'Mohon tunggu, preview cetak akan terbuka.', timer: 900, showConfirmButton:false, didOpen:function(){ Swal.showLoading(); } }).then(function(){
+            try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){ console.error(e); }
+            setTimeout(function(){ try { document.body.removeChild(iframe); } catch(e){} }, 3000);
+        });
+    };
+
+    // ===== KOPERASI: Cetak BA Rekap Tabungan (per bulan/global) =====
+    window.cetakRekapTabungan = function() {
+        var sel = document.getElementById('kop-rekap-bulan');
+        var bulan = sel ? sel.value : 'Global';
+        var dbS = JSON.parse(localStorage.getItem('db_kop_simpan')) || [];
+        var settings = JSON.parse(localStorage.getItem('db_settings')) || { namaRT:'Bapak Kasimin', namaRW:'Bapak Mulyono', namaBen:'Bapak Parmin' };
+        var data = (bulan && bulan !== 'Global')
+            ? dbS.filter(function(x){ return (x.tgl||'').indexOf(bulan) !== -1 || new Date(x.tgl).toLocaleDateString('id-ID',{month:'long'}) === bulan; })
+            : dbS.slice();
+        if (!data.length) return Swal.fire('Kosong', 'Belum ada data tabungan untuk dicetak.', 'info');
+        var totalSetor = 0, totalTarik = 0;
+        var rows = data.map(function(x, i){
+            var n = Number(x.nominal)||0;
+            if ((x.jenis||'').toLowerCase().indexOf('tarik')!==-1) totalTarik += n; else totalSetor += n;
+            return '<tr><td style="border:1px solid #000; text-align:center;">'+(i+1)+'</td>'+
+                   '<td style="border:1px solid #000;">'+x.tgl+'</td>'+
+                   '<td style="border:1px solid #000;"><b>'+(x.namaWarga||'-')+'</b></td>'+
+                   '<td style="border:1px solid #000;">'+(x.jenis||'-')+'</td>'+
+                   '<td style="border:1px solid #000; text-align:right;">'+fmt(n)+'</td></tr>';
+        }).join('');
+        var saldo = totalSetor - totalTarik;
+        var tgl = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+        var html = '<div class="letter-paper" style="padding:0;">'+
+            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">KOPERASI WARGA RT 005 / RW 012</h2>'+
+            '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; SEMARANG</h3></div></div>'+
+            '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">BERITA ACARA REKAP TABUNGAN ('+bulan+')</h3>'+
+            '<p>Pada hari ini, '+tgl+', telah dilakukan rekapitulasi transaksi tabungan koperasi warga sebagai berikut:</p>'+
+            '<table style="width:100%; border-collapse:collapse; margin:10px 0;"><thead><tr style="background:#eee;">'+
+            '<th style="border:1px solid #000;">No</th><th style="border:1px solid #000;">Tanggal</th><th style="border:1px solid #000;">Nama Anggota</th>'+
+            '<th style="border:1px solid #000;">Jenis</th><th style="border:1px solid #000;">Nominal</th></tr></thead><tbody>'+rows+
+            '<tr style="background:#f8f8f8; font-weight:bold;"><td colspan="4" style="border:1px solid #000; text-align:right;">Total Setoran</td><td style="border:1px solid #000; text-align:right;">'+fmt(totalSetor)+'</td></tr>'+
+            '<tr style="background:#f8f8f8; font-weight:bold;"><td colspan="4" style="border:1px solid #000; text-align:right;">Total Penarikan</td><td style="border:1px solid #000; text-align:right;">'+fmt(totalTarik)+'</td></tr>'+
+            '<tr style="background:#fff3cd; font-weight:bold;"><td colspan="4" style="border:1px solid #000; text-align:right;">SALDO BERSIH</td><td style="border:1px solid #000; text-align:right;">'+fmt(saldo)+'</td></tr>'+
+            '</tbody></table>'+
+            '<table style="width:100%; margin-top:40px; text-align:center; border:none;"><tr>'+
+            '<td style="width:50%; border:none;">Mengetahui,<br>Ketua RT 005<br><br><br><br><b style="text-decoration:underline;">'+settings.namaRT+'</b></td>'+
+            '<td style="width:50%; border:none;">Semarang, '+tgl+'<br>Bendahara<br><br><br><br><b style="text-decoration:underline;">'+settings.namaBen+'</b></td>'+
+            '</tr></table></div>';
+        printViaIframe(html, 'BA_Rekap_Tabungan_'+bulan);
+    };
+
+    // ===== KOPERASI: Cetak BA Rekap Pinjaman =====
+    window.cetakRekapPinjaman = function() {
+        var sel = document.getElementById('kop-rekap-pinjam-bulan');
+        var bulan = sel ? sel.value : 'Global';
+        var dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        var settings = JSON.parse(localStorage.getItem('db_settings')) || { namaRT:'Bapak Kasimin', namaBen:'Bapak Parmin' };
+        var data = (bulan && bulan !== 'Global')
+            ? dbP.filter(function(x){ return (x.tgl||'').indexOf(bulan)!==-1; })
+            : dbP.slice();
+        if (!data.length) return Swal.fire('Kosong', 'Belum ada data pinjaman untuk dicetak.', 'info');
+        var totPlafon=0, totSisa=0;
+        var rows = data.map(function(x,i){ totPlafon += Number(x.plafon)||0; totSisa += Number(x.sisa)||0;
+            return '<tr><td style="border:1px solid #000; text-align:center;">'+(i+1)+'</td>'+
+                   '<td style="border:1px solid #000;">'+x.tgl+'</td>'+
+                   '<td style="border:1px solid #000;"><b>'+(x.namaWarga||'-')+'</b></td>'+
+                   '<td style="border:1px solid #000; text-align:right;">'+fmt(x.plafon)+'</td>'+
+                   '<td style="border:1px solid #000; text-align:center;">'+(x.bunga||10)+'%</td>'+
+                   '<td style="border:1px solid #000; text-align:right;">'+fmt(x.sisa)+'</td>'+
+                   '<td style="border:1px solid #000; text-align:center;">'+(x.status||'Aktif')+'</td></tr>';
+        }).join('');
+        var tgl = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+        var html = '<div class="letter-paper" style="padding:0;">'+
+            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">KOPERASI WARGA RT 005 / RW 012</h2>'+
+            '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; SEMARANG</h3></div></div>'+
+            '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">BERITA ACARA REKAP PINJAMAN ('+bulan+')</h3>'+
+            '<p>Pada hari ini, '+tgl+', telah dilakukan rekapitulasi pinjaman koperasi warga sebagai berikut:</p>'+
+            '<table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:0.9rem;"><thead><tr style="background:#eee;">'+
+            '<th style="border:1px solid #000;">No</th><th style="border:1px solid #000;">Tanggal</th><th style="border:1px solid #000;">Peminjam</th>'+
+            '<th style="border:1px solid #000;">Plafon</th><th style="border:1px solid #000;">Bunga</th>'+
+            '<th style="border:1px solid #000;">Sisa Hutang</th><th style="border:1px solid #000;">Status</th></tr></thead><tbody>'+rows+
+            '<tr style="background:#fff3cd; font-weight:bold;"><td colspan="3" style="border:1px solid #000; text-align:right;">TOTAL</td>'+
+            '<td style="border:1px solid #000; text-align:right;">'+fmt(totPlafon)+'</td>'+
+            '<td style="border:1px solid #000;"></td>'+
+            '<td style="border:1px solid #000; text-align:right;">'+fmt(totSisa)+'</td>'+
+            '<td style="border:1px solid #000;"></td></tr></tbody></table>'+
+            '<table style="width:100%; margin-top:40px; text-align:center; border:none;"><tr>'+
+            '<td style="width:50%; border:none;">Mengetahui,<br>Ketua RT 005<br><br><br><br><b style="text-decoration:underline;">'+settings.namaRT+'</b></td>'+
+            '<td style="width:50%; border:none;">Semarang, '+tgl+'<br>Bendahara<br><br><br><br><b style="text-decoration:underline;">'+settings.namaBen+'</b></td>'+
+            '</tr></table></div>';
+        printViaIframe(html, 'BA_Rekap_Pinjaman_'+bulan);
+    };
+
+    // ===== KOPERASI: Hitung & Bagikan SHU (Sisa Hasil Usaha) =====
+    window.hitungSHUMassal = function() {
+        var dbS = JSON.parse(localStorage.getItem('db_kop_simpan')) || [];
+        var dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        var totalLaba = dbP.reduce(function(t,p){
+            var plafon = Number(p.plafon)||0; var bunga = (Number(p.bunga)||10)/100;
+            return t + (plafon * bunga);
+        }, 0);
+        // Map kontribusi tabungan per warga (setor - tarik)
+        var kontribusi = {}; var totalKontribusi = 0;
+        dbS.forEach(function(x){
+            var key = x.idWarga || x.namaWarga;
+            var n = Number(x.nominal)||0;
+            var sign = ((x.jenis||'').toLowerCase().indexOf('tarik')!==-1) ? -1 : 1;
+            kontribusi[key] = kontribusi[key] || { nama: x.namaWarga, total: 0 };
+            kontribusi[key].total += sign * n;
+            totalKontribusi += sign * n;
+        });
+        if (totalKontribusi <= 0) return Swal.fire('Belum Ada SHU', 'Belum ada total tabungan bersih untuk dibagi.', 'info');
+        if (totalLaba <= 0) return Swal.fire('Belum Ada Laba', 'Belum ada laba bunga pinjaman untuk dibagikan.', 'info');
+        var rows = Object.keys(kontribusi).map(function(k){
+            var c = kontribusi[k]; if (c.total <= 0) return '';
+            var bagian = (c.total / totalKontribusi) * totalLaba;
+            return '<tr><td style="border:1px solid #ccc; padding:6px;"><b>'+c.nama+'</b></td>'+
+                   '<td style="border:1px solid #ccc; padding:6px; text-align:right;">'+fmt(c.total)+'</td>'+
+                   '<td style="border:1px solid #ccc; padding:6px; text-align:right; color:#10b981;"><b>'+fmt(bagian)+'</b></td></tr>';
+        }).join('');
+        Swal.fire({
+            title: 'Tinjau Pembagian SHU',
+            html: '<p>Total laba bunga: <b>'+fmt(totalLaba)+'</b><br>Total tabungan bersih: <b>'+fmt(totalKontribusi)+'</b></p>'+
+                  '<div style="max-height:300px; overflow-y:auto; text-align:left;">'+
+                  '<table style="width:100%; border-collapse:collapse; font-size:0.9rem;"><thead><tr style="background:#f59e0b; color:white;">'+
+                  '<th style="padding:6px;">Nama</th><th style="padding:6px;">Tabungan</th><th style="padding:6px;">Bagian SHU</th></tr></thead>'+
+                  '<tbody>'+rows+'</tbody></table></div>',
+            width: 700, showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-check"></i> Bagikan & Catat ke Kas',
+            confirmButtonColor: '#f59e0b'
+        }).then(function(r){
+            if (!r.isConfirmed) return;
+            var dbKas = JSON.parse(localStorage.getItem('db_kas')) || [];
+            var tgl = new Date().toISOString().split('T')[0];
+            Object.keys(kontribusi).forEach(function(k){
+                var c = kontribusi[k]; if (c.total <= 0) return;
+                var bagian = (c.total / totalKontribusi) * totalLaba;
+                dbKas.push({ id: Date.now()+Math.random(), tgl: tgl, uraian: 'Bagi SHU Koperasi - '+c.nama, tipe: 'keluar', nominal: Math.round(bagian) });
+            });
+            localStorage.setItem('db_kas', JSON.stringify(dbKas));
+            if (typeof syncSemuaData === 'function') syncSemuaData(true);
+            Swal.fire('Berhasil', 'SHU sudah dibagikan & dicatat di kas RT.', 'success');
+        });
+    };
+
+    // ===== KOPERASI: Refresh kartu Kas Liquid & Total Laba =====
+    window.loadKopLaporan = function() {
+        var dbS = JSON.parse(localStorage.getItem('db_kop_simpan')) || [];
+        var dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        var totalSetor = dbS.reduce(function(t,x){ var n=Number(x.nominal)||0; return t + (((x.jenis||'').toLowerCase().indexOf('tarik')!==-1)? -n : n); }, 0);
+        var totalPiutang = dbP.filter(function(x){ return x.status!=='Lunas'; }).reduce(function(t,x){ return t + (Number(x.sisa)||0); }, 0);
+        var totalLaba = dbP.reduce(function(t,x){ return t + ((Number(x.plafon)||0) * ((Number(x.bunga)||10)/100)); }, 0);
+        var liquid = totalSetor - totalPiutang;
+        var elL = document.getElementById('kop_tot_liquid'); if (elL) elL.innerText = fmt(liquid);
+        var elB = document.getElementById('kop_tot_laba');   if (elB) elB.innerText = fmt(totalLaba);
+    };
+
     // Pencarian kontak darurat (dipakai input search-darurat di portal warga)
     window.filterKontakDarurat = function() {
         var q = (document.getElementById('search-darurat') || {value:''}).value.toLowerCase().trim();
@@ -1631,7 +1805,7 @@
     const kLoaders = {
         'kop-simpanan':  function(){ if(typeof loadKoperasiData==='function') loadKoperasiData(); if(typeof populateDropdownWarga==='function') populateDropdownWarga(); },
         'kop-pinjaman':  function(){ if(typeof loadKoperasiData==='function') loadKoperasiData(); if(typeof populateDropdownWarga==='function') populateDropdownWarga(); },
-        'kop-laporan':   function(){ if(typeof loadKoperasiData==='function') loadKoperasiData(); },
+        'kop-laporan':   function(){ if(typeof loadKoperasiData==='function') loadKoperasiData(); if(typeof loadKopLaporan==='function') loadKopLaporan(); },
     };
     if(kLoaders[t]) kLoaders[t]();
 };
@@ -2386,7 +2560,33 @@
     window.hapusAduan = function(id) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; localStorage.setItem('db_aduan', JSON.stringify(db.filter(x=>x.id!==id))); syncSemuaData(); };
     window.loadAduanWarga = function() { if(!loggedInWarga) return; let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let my = db.filter(x => String(x.idPelapor)===String(loggedInWarga.id)); let tb = document.getElementById('tbody-aduan-warga'); if(tb) { tb.innerHTML=''; my.forEach(a => { let bd = a.status==='Selesai'?'badge-selesai':'badge-menunggu'; tb.innerHTML+=`<tr><td>${a.tglTampil}</td><td>${a.kategori}</td><td><b>${a.judul}</b></td><td><button class="btn-action bg-blue" onclick="lihatBuktiAduan(${a.id})"><i class="fa-solid fa-image"></i></button></td><td><span class="badge ${bd}">${a.status}</span></td></tr>`; }); } };
     window.loadAduanAdmin = function() { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let fb = document.getElementById('filter-bulan-aduan').value; let tb = document.getElementById('tbody-aduan-admin'); if(tb) { tb.innerHTML=''; if(fb!=='Semua') db=db.filter(x=>x.tglAsli.split('-')[1]===fb); db.forEach(a => { let s = `<select style="padding:6px;font-size:0.8rem;" onchange="updateStatusAduan(${a.id}, this.value)"><option value="Menunggu" ${a.status==='Menunggu'?'selected':''}>Menunggu</option><option value="Diproses" ${a.status==='Diproses'?'selected':''}>Diproses</option><option value="Selesai" ${a.status==='Selesai'?'selected':''}>Selesai</option></select>`; tb.innerHTML+=`<tr><td><b>${a.tglTampil}</b><br><small>${a.namaPelapor}</small></td><td>${a.kategori}</td><td><b>${a.judul}</b><br><small>${a.isi}</small></td><td><button class="btn-action bg-blue" onclick="lihatBuktiAduan(${a.id})"><i class="fa-solid fa-image"></i></button> <button class="btn-table btn-tbl-del" onclick="hapusAduan(${a.id})"><i class="fa-solid fa-trash"></i></button></td><td>${s}</td></tr>`; }); } };
-    window.cetakRekapAduan = function() { let p = document.getElementById('print-ba-container'); p.innerHTML='<h2 style="text-align:center; margin-top:50px;">Silakan copy data tabel ke Excel untuk Print.</h2>'; document.getElementById('main-app').style.display = 'none'; p.style.display = 'block'; window.print(); p.style.display = 'none'; document.getElementById('main-app').style.display = 'block'; };
+    window.cetakRekapAduan = function() {
+        let db = JSON.parse(localStorage.getItem('db_aduan')) || [];
+        let fb = (document.getElementById('filter-bulan-aduan')||{}).value || 'Semua';
+        if (fb !== 'Semua') db = db.filter(x => (x.tglAsli||'').split('-')[1] === fb);
+        if (!db.length) return Swal.fire('Kosong','Belum ada aduan untuk periode ini.','info');
+        let settings = JSON.parse(localStorage.getItem('db_settings')) || { namaRT:'Bapak Kasimin' };
+        let tgl = new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+        let rows = db.map((a,i) => '<tr><td style="border:1px solid #000; text-align:center;">'+(i+1)+'</td>'+
+            '<td style="border:1px solid #000;">'+(a.tglTampil||'-')+'</td>'+
+            '<td style="border:1px solid #000;"><b>'+(a.namaPelapor||'-')+'</b></td>'+
+            '<td style="border:1px solid #000;">'+(a.kategori||'-')+'</td>'+
+            '<td style="border:1px solid #000;"><b>'+(a.judul||'-')+'</b><br><small>'+(a.isi||'')+'</small></td>'+
+            '<td style="border:1px solid #000; text-align:center;">'+(a.status||'-')+'</td></tr>').join('');
+        let html = '<div class="letter-paper" style="padding:0;">'+
+            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">PENGURUS RT 005 / RW 012</h2>'+
+            '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; CANDISARI &bull; SEMARANG</h3></div></div>'+
+            '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">REKAPITULASI ADUAN WARGA ('+fb+')</h3>'+
+            '<p>Berikut rekap aduan warga periode '+fb+', dicetak '+tgl+':</p>'+
+            '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;"><thead><tr style="background:#eee;">'+
+            '<th style="border:1px solid #000;">No</th><th style="border:1px solid #000;">Tanggal</th><th style="border:1px solid #000;">Pelapor</th>'+
+            '<th style="border:1px solid #000;">Kategori</th><th style="border:1px solid #000;">Aduan</th><th style="border:1px solid #000;">Status</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody></table>'+
+            '<div style="margin-top:40px; text-align:right;">Semarang, '+tgl+'<br>Ketua RT. 005<br><br><br><br><b style="text-decoration:underline;">'+settings.namaRT+'</b></div>'+
+            '</div>';
+        printViaIframe(html, 'Rekap_Aduan_'+fb);
+    };
 
     // === 9. KEUANGAN (BENDAHARA & KOPERASI) ===
     window.simpanSaldoAwal = function() { localStorage.setItem('db_saldo_awal', document.getElementById('ben-saldo-awal-input').value); syncSemuaData(); Toast.fire({icon:'success',title:'Dikunci'}); };
@@ -2777,10 +2977,21 @@
     window.cetakNotulen = function(id) {
         let db = JSON.parse(localStorage.getItem('db_notulen')) || []; let n = db.find(x => x.id === id); if(!n) return;
         let set = JSON.parse(localStorage.getItem('db_settings')) || { namaRT: "Bapak Kasimin" };
-        document.getElementById('cetak_n_tgl').innerText = n.tgl; document.getElementById('cetak_n_judul').innerText = n.judul;
-        document.getElementById('cetak_n_isi').innerHTML = n.isi.replace(/\n/g, '<br>'); document.getElementById('cetak_n_nama_rt').innerText = set.namaRT;
-        let p = document.getElementById('print-ba-container'); p.innerHTML = ''; p.appendChild(document.getElementById('notulen-paper').cloneNode(true));
-        document.getElementById('main-app').style.display = 'none'; p.style.display = 'block'; window.print(); p.style.display = 'none'; document.getElementById('main-app').style.display = 'block';
+        // Bangun konten kop surat agar preview cetak benar-benar muncul
+        let isiHTML = (n.isi||'').replace(/\n/g, '<br>');
+        let html = '<div class="letter-paper" style="padding:0;">'+
+            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.4rem; font-weight:bold; text-transform:uppercase;">PENGURUS RUKUN TETANGGA 005 RUKUN WARGA 012</h2>'+
+            '<h3 style="margin:2px 0; font-size:1.1rem; font-weight:normal; text-transform:uppercase;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; KOTA SEMARANG</h3></div></div>'+
+            '<div style="border-top:3px solid black; border-bottom:1px solid black; height:1px; margin-bottom:20px;"></div>'+
+            '<h3 style="text-align:center; text-decoration:underline; font-weight:bold; margin-bottom:25px;">NOTULENSI RAPAT</h3>'+
+            '<table style="width:100%; font-size:1.05rem; border:none; margin-bottom:25px;">'+
+            '<tr><td style="width:170px; border:none; padding:3px 0;">Hari, Tanggal</td><td style="width:20px; border:none;">:</td><td style="border:none;"><b>'+n.tgl+'</b></td></tr>'+
+            '<tr><td style="border:none; padding:3px 0;">Agenda Utama</td><td style="border:none;">:</td><td style="border:none;"><b>'+n.judul+'</b></td></tr></table>'+
+            '<div style="line-height:1.7; text-align:justify; margin-bottom:50px; min-height:200px;">'+isiHTML+'</div>'+
+            '<div style="margin-top:40px; text-align:right; font-size:1.05rem; padding-right:20px;">Mengetahui,<br>Ketua RT. 005 / RW. 012<br><br><br><br><br><b style="text-decoration:underline;">'+(set.namaRT||'Bapak Kasimin')+'</b></div>'+
+            '</div>';
+        printViaIframe(html, 'Notulen_'+(n.judul||'Rapat').replace(/\s+/g,'_'));
     };
     window.susunNotulenAI = function() {
         let isi = document.getElementById('inp_notul_isi').value; if(!isi) return Swal.fire('Gagal', 'Tulis poin rapat dulu sebelum dirapikan AI.', 'warning');
@@ -3074,15 +3285,16 @@
         let dbBA = JSON.parse(localStorage.getItem('db_arsip_ba')) || []; let tb = document.getElementById('tbody-arsip-ba'); if(!tb) return; tb.innerHTML = '';
         if(dbBA.length === 0) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray; padding:20px;">Belum ada arsip dokumen BA Kas.</td></tr>'; return; }
         dbBA.sort((a,b) => b.id - a.id).forEach(b => {
-            tb.innerHTML += `<tr><td>${b.tgl}</td><td><b style="color:var(--primary-dark);">Laporan Kas</b><br><small style="color:var(--success); font-weight:bold;">Saldo Utama: Rp ${fmt(b.saldoUtama)}</small></td><td><b style="font-size:1.05rem;">${b.periode}</b></td><td style="text-align:center;"><button class="btn-action bg-blue" onclick="cetakBA(${b.id})" title="Cetak / Download PDF" style="padding:6px 12px; font-size:0.85rem;"><i class="fa-solid fa-download"></i> Cetak</button> <button class="btn-table btn-tbl-del" onclick="hapusBA(${b.id})" title="Hapus Arsip" style="margin-left:5px;"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            tb.innerHTML += `<tr><td>${b.tgl}</td><td><b style="color:var(--primary-dark);">Laporan Kas</b><br><small style="color:var(--success); font-weight:bold;">Saldo Utama: ${fmt(b.saldoUtama)}</small></td><td><b style="font-size:1.05rem;">${b.periode}</b></td><td style="text-align:center;"><button class="btn-action bg-blue" onclick="cetakBA(${b.id})" title="Cetak / Download PDF" style="padding:6px 12px; font-size:0.85rem;"><i class="fa-solid fa-download"></i> Cetak</button> <button class="btn-table btn-tbl-del" onclick="hapusBA(${b.id})" title="Hapus Arsip" style="margin-left:5px;"><i class="fa-solid fa-trash"></i></button></td></tr>`;
         });
     };
 
     window.cetakBA = function(id) {
         let dbBA = JSON.parse(localStorage.getItem('db_arsip_ba')) || []; let ba = dbBA.find(x => x.id === id);
         let settings = JSON.parse(localStorage.getItem('db_settings')) || { namaRT: "Bapak Kasimin", namaBen: "Bapak Parmin" };
-        if(!ba) return; let p = document.getElementById('print-ba-container'); p.innerHTML = buatTemplateSuratBA(ba, settings);
-        document.getElementById('main-app').style.display = 'none'; p.style.display = 'block'; window.print(); p.style.display = 'none'; document.getElementById('main-app').style.display = 'block';
+        if(!ba) return;
+        let html = buatTemplateSuratBA(ba, settings);
+        printViaIframe(html, 'BA_Kas_'+(ba.periode||'').replace(/\s+/g,'_'));
     };
 
     window.hapusBA = function(id) {
