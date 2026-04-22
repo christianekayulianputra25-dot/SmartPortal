@@ -2265,7 +2265,7 @@ html[data-theme="dark"] .gt-service-card:hover { border-color: #1e3a8a; }
             var shell = document.createElement('div');
             shell.id = 'gt-citizen-shell';
 
-            var hero = '<div class="gt-hero"><h1>'+greet+', '+escapeHtml(name)+'</h1><p>Pusat layanan dan transparansi RT 005 Tegalsari dalam genggaman Anda.</p><div class="gt-hero-meta"><span class="gt-hero-chip"><i class="fa-regular fa-calendar"></i>'+today+'</span><span class="gt-hero-chip"><i class="fa-solid fa-shield-halved"></i>Akses Aman</span></div></div>';
+            var hero = '<div class="gt-hero"><div class="gt-hero-text"><h1>'+greet+', '+escapeHtml(name)+'</h1><p>Pusat layanan dan transparansi RT 005 Tegalsari dalam genggaman Anda.</p><div class="gt-hero-meta"><span class="gt-hero-chip"><i class="fa-regular fa-calendar"></i>'+today+'</span><span class="gt-hero-chip"><i class="fa-solid fa-shield-halved"></i>Akses Aman</span></div></div><div class="gt-hero-logo no-print"><img src="Lambang_Kota_Semarang.png" alt="Lambang" onerror="this.onerror=null;this.src=\'https://upload.wikimedia.org/wikipedia/commons/1/1a/Lambang_Kota_Semarang.png\';"></div></div>';
 
             var svcCards = SERVICES.map(function(s){
                 return '<button type="button" class="gt-service-card" onclick="openWargaTab(\''+s.id+'\')">'
