@@ -1225,6 +1225,223 @@ html[data-theme="dark"] .gt-service-card:hover { border-color: #1e3a8a; }
    ===== END FIX LAYER + DASHBOARD WIDGETS =====
    ============================================================ */
 
+
+/* ============================================================
+   ===== NOTIFICATION CENTER & GLOBAL SEARCH (audit v3) =====
+   ============================================================ */
+
+/* Override the existing .notif-bell to position dropdown */
+.main-header .notif-bell { position: relative !important; cursor: pointer !important; margin-right: 6px !important; }
+.main-header .notif-bell .notif-badge {
+  position: absolute !important;
+  top: -2px !important; right: -2px !important;
+  background: var(--gt-danger-500) !important;
+  color: #fff !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: 999px;
+  display: inline-flex !important; align-items: center; justify-content: center;
+  border: 2px solid var(--gt-surface) !important;
+  box-shadow: var(--gt-shadow-xs) !important;
+}
+
+/* Notification dropdown panel */
+.gt-notif-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  background: var(--gt-surface);
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+  box-shadow: var(--gt-shadow-xl);
+  z-index: 9999;
+  overflow: hidden;
+  display: none;
+  font-family: var(--gt-font);
+  animation: gtSlideDown .18s ease;
+}
+.gt-notif-panel.open { display: block; }
+@keyframes gtSlideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.gt-notif-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--gt-border);
+  background: var(--gt-surface-2);
+}
+.gt-notif-head h4 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--gt-text); display: inline-flex; align-items: center; gap: 8px; }
+.gt-notif-head h4 i { color: var(--gt-primary-600); }
+.gt-notif-mark { background: none; border: 0; color: var(--gt-primary-600); font-size: 0.82rem; font-weight: 600; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+.gt-notif-mark:hover { background: var(--gt-primary-50); }
+html[data-theme="dark"] .gt-notif-mark:hover { background: rgba(37,99,235,0.18); }
+.gt-notif-body { max-height: 460px; overflow-y: auto; }
+.gt-notif-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--gt-border);
+  cursor: pointer;
+  transition: background .12s ease;
+  position: relative;
+}
+.gt-notif-item:last-child { border-bottom: 0; }
+.gt-notif-item:hover { background: var(--gt-surface-2); }
+.gt-notif-item.unread { background: var(--gt-primary-50); }
+html[data-theme="dark"] .gt-notif-item.unread { background: rgba(37,99,235,0.10); }
+.gt-notif-item.unread::before {
+  content: ""; position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gt-primary-500);
+}
+.gt-notif-icon {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.95rem;
+}
+.gt-notif-icon.aduan   { background: var(--gt-grad-rose); }
+.gt-notif-icon.surat   { background: var(--gt-grad-primary); }
+.gt-notif-icon.berita  { background: var(--gt-grad-amber); }
+.gt-notif-text { flex: 1; min-width: 0; }
+.gt-notif-text .gt-notif-title { font-weight: 600; color: var(--gt-text); font-size: 0.9rem; line-height: 1.3; margin: 0 0 3px 0; }
+.gt-notif-text .gt-notif-sub   { font-size: 0.8rem; color: var(--gt-text-3); line-height: 1.35; margin: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gt-notif-text .gt-notif-time  { font-size: 0.72rem; color: var(--gt-text-muted); margin-top: 4px; font-weight: 500; }
+.gt-notif-empty { padding: 36px 20px; text-align: center; color: var(--gt-text-3); }
+.gt-notif-empty i { font-size: 2rem; color: var(--gt-text-muted); display: block; margin-bottom: 10px; }
+.gt-notif-foot { padding: 10px 18px; border-top: 1px solid var(--gt-border); text-align: center; background: var(--gt-surface-2); }
+.gt-notif-foot small { color: var(--gt-text-muted); font-size: 0.75rem; }
+
+/* Global Warga search box (header) */
+.gt-search-wrap {
+  position: relative;
+  width: 320px; max-width: 36vw;
+  margin: 0 12px;
+}
+.gt-search-input {
+  width: 100%;
+  background: var(--gt-surface-2) !important;
+  border: 1px solid var(--gt-border) !important;
+  color: var(--gt-text) !important;
+  padding: 9px 14px 9px 38px !important;
+  border-radius: var(--gt-radius-sm) !important;
+  font-family: var(--gt-font) !important;
+  font-size: 0.9rem !important;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.gt-search-input:focus {
+  outline: none !important;
+  background: var(--gt-surface) !important;
+  border-color: var(--gt-primary-500) !important;
+  box-shadow: var(--gt-ring) !important;
+}
+.gt-search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--gt-text-muted); font-size: 0.9rem; pointer-events: none;
+}
+.gt-search-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: 0; color: var(--gt-text-muted);
+  width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+  display: none;
+}
+.gt-search-clear:hover { background: var(--gt-surface-3); color: var(--gt-text); }
+.gt-search-wrap.has-query .gt-search-clear { display: inline-flex; align-items: center; justify-content: center; }
+
+.gt-search-results {
+  position: absolute;
+  top: calc(100% + 8px); left: 0; right: 0;
+  background: var(--gt-surface);
+  border: 1px solid var(--gt-border);
+  border-radius: var(--gt-radius-lg);
+  box-shadow: var(--gt-shadow-xl);
+  max-height: 420px; overflow-y: auto;
+  z-index: 9999;
+  display: none;
+}
+.gt-search-results.open { display: block; }
+.gt-search-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; cursor: pointer;
+  border-bottom: 1px solid var(--gt-border);
+  transition: background .12s ease;
+}
+.gt-search-row:last-child { border-bottom: 0; }
+.gt-search-row:hover, .gt-search-row.active { background: var(--gt-primary-50); }
+html[data-theme="dark"] .gt-search-row:hover, html[data-theme="dark"] .gt-search-row.active { background: rgba(37,99,235,0.18); }
+.gt-search-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--gt-grad-primary);
+  color: #fff; font-weight: 700; font-size: 0.85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.gt-search-info { flex: 1; min-width: 0; }
+.gt-search-info .gt-sr-name { color: var(--gt-text); font-weight: 700; font-size: 0.9rem; margin: 0; line-height: 1.2; }
+.gt-search-info .gt-sr-meta { color: var(--gt-text-3); font-size: 0.78rem; margin-top: 2px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gt-search-info mark { background: var(--gt-warning-50); color: var(--gt-text); padding: 0 2px; border-radius: 3px; font-weight: 700; }
+html[data-theme="dark"] .gt-search-info mark { background: rgba(245,158,11,0.30); color: #fde68a; }
+
+.gt-search-empty { padding: 28px 18px; text-align: center; color: var(--gt-text-3); font-size: 0.88rem; }
+.gt-search-foot { padding: 8px 14px; border-top: 1px solid var(--gt-border); background: var(--gt-surface-2); font-size: 0.74rem; color: var(--gt-text-muted); display: flex; justify-content: space-between; }
+.gt-search-foot kbd { background: var(--gt-surface-3); border: 1px solid var(--gt-border); padding: 1px 6px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--gt-text-2); }
+
+/* Warga detail modal */
+.gt-warga-modal {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 99999; padding: 20px;
+}
+.gt-warga-modal.open { display: flex; animation: gtFadeIn .15s ease; }
+@keyframes gtFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.gt-warga-modal-content {
+  background: var(--gt-surface);
+  border-radius: var(--gt-radius-xl);
+  width: 100%; max-width: 540px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--gt-shadow-xl);
+  border: 1px solid var(--gt-border);
+}
+.gt-warga-modal-head {
+  padding: 24px;
+  background: linear-gradient(135deg, var(--gt-primary-700), var(--gt-primary-500));
+  color: #fff;
+  display: flex; gap: 16px; align-items: center;
+  border-radius: var(--gt-radius-xl) var(--gt-radius-xl) 0 0;
+}
+.gt-warga-modal-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  border: 3px solid rgba(255,255,255,0.35);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.gt-warga-modal-head h3 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #fff; }
+.gt-warga-modal-head p  { margin: 4px 0 0 0; opacity: 0.92; font-size: 0.85rem; color: #f1f5f9; }
+.gt-warga-modal-close {
+  position: absolute; top: 18px; right: 18px;
+  background: rgba(255,255,255,0.18); border: 0; color: #fff;
+  width: 34px; height: 34px; border-radius: 50%;
+  cursor: pointer; font-size: 1rem;
+}
+.gt-warga-modal-close:hover { background: rgba(255,255,255,0.32); }
+.gt-warga-modal-body { padding: 22px 24px; }
+.gt-warga-field {
+  display: grid; grid-template-columns: 130px 1fr; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--gt-border);
+  font-size: 0.9rem;
+}
+.gt-warga-field:last-child { border-bottom: 0; }
+.gt-warga-field .gt-fld-label { color: var(--gt-text-3); font-weight: 600; }
+.gt-warga-field .gt-fld-value { color: var(--gt-text); font-weight: 500; word-break: break-word; }
+
+@media (max-width: 768px) {
+  .gt-search-wrap { width: 180px; max-width: 38vw; margin: 0 6px; }
+  .gt-notif-panel { width: calc(100vw - 24px); right: -8px; }
+  .gt-warga-field { grid-template-columns: 100px 1fr; gap: 8px; font-size: 0.85rem; }
+}
+
     </style>
     
         
@@ -2318,6 +2535,338 @@ html[data-theme="dark"] .gt-service-card:hover { border-color: #1e3a8a; }
             }, 250);
         }
     })();
+    // ===== Notification Center & Global Warga Search — v1 =====
+    (function(){
+        function safeJSON(k, fb){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch(_){ return fb; } }
+        function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+        function timeAgo(ts){
+            var d = ts instanceof Date ? ts : new Date(ts);
+            if (isNaN(d)) return '';
+            var s = Math.max(0, Math.floor((Date.now() - d.getTime())/1000));
+            if (s < 60) return 'baru saja';
+            if (s < 3600) return Math.floor(s/60) + ' menit lalu';
+            if (s < 86400) return Math.floor(s/3600) + ' jam lalu';
+            if (s < 604800) return Math.floor(s/86400) + ' hari lalu';
+            return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+        }
+        function getReadMap(){ return safeJSON('gt_notif_read', {}) || {}; }
+        function setReadMap(m){ try { localStorage.setItem('gt_notif_read', JSON.stringify(m)); } catch(_){} }
+
+        /* -------------------- 1. NOTIFICATION CENTER -------------------- */
+        function buildNotifications(){
+            var out = [];
+            // Aduan: each aduan creates a notif. If status changed, show as update.
+            var aduan = safeJSON('db_aduan', []) || [];
+            aduan.forEach(function(a){
+                out.push({
+                    id: 'aduan-' + a.id,
+                    type: 'aduan',
+                    icon: 'fa-bullhorn',
+                    title: 'Aduan: ' + (a.judul || a.kategori || 'Laporan'),
+                    sub: (a.namaPelapor ? a.namaPelapor + ' • ' : '') + (a.kategori || '') + ' • Status: ' + (a.status || 'Menunggu'),
+                    ts: a.id || Date.now(),
+                    onClick: function(){
+                        if (typeof openWargaTab === 'function') { try { openWargaTab('warga-aduan'); } catch(_){} }
+                        if (typeof window.openAdminTab === 'function') { try { openAdminTab('admin-aduan'); } catch(_){} }
+                    }
+                });
+            });
+            // Berita / pengumuman: latest news
+            var berita = safeJSON('db_berita', []) || [];
+            berita.forEach(function(b){
+                out.push({
+                    id: 'berita-' + b.id,
+                    type: 'berita',
+                    icon: 'fa-newspaper',
+                    title: 'Pengumuman: ' + (b.judul || '-'),
+                    sub: (b.kategori ? '['+b.kategori+'] ' : '') + (b.isi ? String(b.isi).substring(0,120) : ''),
+                    ts: b.id || Date.now(),
+                    onClick: function(){
+                        if (typeof openWargaTab === 'function') { try { openWargaTab('warga-dashboard'); } catch(_){} }
+                    }
+                });
+            });
+            // Surat
+            var surat = safeJSON('riwayatSurat', []) || safeJSON('dataSurat', []) || [];
+            if (Array.isArray(surat)) {
+                surat.forEach(function(s, i){
+                    var sid = s.id || s.no_surat || ('surat-'+i);
+                    out.push({
+                        id: 'surat-' + sid,
+                        type: 'surat',
+                        icon: 'fa-envelope-open-text',
+                        title: 'Surat: ' + (s.keperluan || s.req_keperluan || 'Pengajuan'),
+                        sub: 'Status: ' + (s.status || 'Diproses') + (s.no_surat ? ' • '+s.no_surat : ''),
+                        ts: new Date(s.tgl || s.tanggal || Date.now()).getTime() || Date.now(),
+                        onClick: function(){
+                            if (typeof openWargaTab === 'function') { try { openWargaTab('warga-surat'); } catch(_){} }
+                        }
+                    });
+                });
+            }
+            // Sort newest first, cap to 30
+            out.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+            return out.slice(0, 30);
+        }
+
+        function unreadCount(items){
+            var read = getReadMap();
+            var c = 0;
+            items.forEach(function(i){ if (!read[i.id]) c++; });
+            return c;
+        }
+
+        function ensureNotifPanel(){
+            if (document.getElementById('gt-notif-panel')) return document.getElementById('gt-notif-panel');
+            var bell = document.querySelector('.main-header .notif-bell');
+            if (!bell) return null;
+            var panel = document.createElement('div');
+            panel.id = 'gt-notif-panel';
+            panel.className = 'gt-notif-panel';
+            // Make sure click-out closes
+            document.addEventListener('click', function(e){
+                var p = document.getElementById('gt-notif-panel');
+                var b = document.querySelector('.main-header .notif-bell');
+                if (!p || !p.classList.contains('open')) return;
+                if (p.contains(e.target) || (b && b.contains(e.target))) return;
+                p.classList.remove('open');
+            });
+            bell.appendChild(panel);
+            return panel;
+        }
+
+        function renderNotif(){
+            var bell = document.querySelector('.main-header .notif-bell');
+            if (!bell) return;
+            var items = buildNotifications();
+            var read = getReadMap();
+            var unread = unreadCount(items);
+
+            var badge = bell.querySelector('.notif-badge');
+            if (badge) {
+                if (unread > 0) { badge.style.display = 'inline-flex'; badge.textContent = unread > 99 ? '99+' : String(unread); }
+                else { badge.style.display = 'none'; }
+            }
+
+            var panel = ensureNotifPanel();
+            if (!panel) return;
+            var html = '<div class="gt-notif-head"><h4><i class="fa-solid fa-bell"></i> Notifikasi <span style="color:var(--gt-text-3);font-weight:500;font-size:0.82rem;">('+unread+' baru)</span></h4>'
+                + (items.length ? '<button type="button" class="gt-notif-mark" onclick="window.gtMarkAllRead()">Tandai semua dibaca</button>' : '')
+                + '</div><div class="gt-notif-body">';
+            if (items.length === 0) {
+                html += '<div class="gt-notif-empty"><i class="fa-regular fa-bell-slash"></i>Belum ada notifikasi.</div>';
+            } else {
+                items.forEach(function(it){
+                    var u = !read[it.id];
+                    html += '<div class="gt-notif-item ' + (u?'unread':'') + '" data-id="'+esc(it.id)+'">'
+                        + '<div class="gt-notif-icon '+it.type+'"><i class="fa-solid '+it.icon+'"></i></div>'
+                        + '<div class="gt-notif-text"><p class="gt-notif-title">'+esc(it.title)+'</p>'
+                        + '<p class="gt-notif-sub">'+esc(it.sub)+'</p>'
+                        + '<div class="gt-notif-time">'+esc(timeAgo(it.ts))+'</div></div></div>';
+                });
+            }
+            html += '</div><div class="gt-notif-foot"><small>Diperbarui otomatis setiap 30 detik</small></div>';
+            panel.innerHTML = html;
+
+            // wire item clicks
+            panel.querySelectorAll('.gt-notif-item').forEach(function(el){
+                el.addEventListener('click', function(){
+                    var id = el.getAttribute('data-id');
+                    var rmap = getReadMap(); rmap[id] = Date.now(); setReadMap(rmap);
+                    var item = items.find(function(x){ return x.id === id; });
+                    if (item && typeof item.onClick === 'function') { try { item.onClick(); } catch(_){} }
+                    panel.classList.remove('open');
+                    renderNotif();
+                });
+            });
+        }
+
+        window.gtMarkAllRead = function(){
+            var items = buildNotifications();
+            var rmap = getReadMap();
+            items.forEach(function(i){ rmap[i.id] = Date.now(); });
+            setReadMap(rmap);
+            renderNotif();
+        };
+
+        function wireBell(){
+            var bell = document.querySelector('.main-header .notif-bell');
+            if (!bell || bell.__gtWired) return;
+            // Strip the legacy onclick (Swal alert) — use property reset, not removeAttribute (would re-fire on reload)
+            try { bell.onclick = null; bell.removeAttribute('onclick'); } catch(_){}
+            bell.addEventListener('click', function(e){
+                e.stopPropagation();
+                var p = ensureNotifPanel();
+                if (!p) return;
+                var open = p.classList.toggle('open');
+                if (open) renderNotif();
+            });
+            bell.__gtWired = true;
+            renderNotif();
+        }
+
+        /* -------------------- 2. GLOBAL WARGA SEARCH -------------------- */
+        function getWarga(){
+            var arr = safeJSON('db_warga', []) || [];
+            return Array.isArray(arr) ? arr : [];
+        }
+        function highlight(text, q){
+            if (!q) return esc(text);
+            var t = String(text||''); var lo = t.toLowerCase(); var ql = q.toLowerCase();
+            var i = lo.indexOf(ql);
+            if (i < 0) return esc(t);
+            return esc(t.substring(0,i)) + '<mark>' + esc(t.substring(i, i+q.length)) + '</mark>' + esc(t.substring(i+q.length));
+        }
+        function searchWarga(q){
+            var arr = getWarga();
+            if (!q || q.length < 1) return [];
+            var ql = q.toLowerCase();
+            var matches = [];
+            for (var i = 0; i < arr.length && matches.length < 30; i++) {
+                var w = arr[i] || {};
+                var hay = [w.nama, w.nik, w.kk, w.alamat, w.pekerjaan, w.telp, w.istri].filter(Boolean).join(' ').toLowerCase();
+                if (hay.indexOf(ql) >= 0) matches.push(w);
+            }
+            return matches.slice(0, 8);
+        }
+
+        function showWargaModal(w){
+            var m = document.getElementById('gt-warga-modal');
+            if (!m) {
+                m = document.createElement('div');
+                m.id = 'gt-warga-modal';
+                m.className = 'gt-warga-modal';
+                document.body.appendChild(m);
+                m.addEventListener('click', function(e){
+                    if (e.target === m || e.target.classList.contains('gt-warga-modal-close')) m.classList.remove('open');
+                });
+            }
+            var initial = (w.nama || '?').trim().charAt(0).toUpperCase();
+            var anak = Array.isArray(w.anak) ? w.anak.filter(Boolean).join(', ') : '';
+            m.innerHTML = '<div class="gt-warga-modal-content" style="position:relative;">'
+                + '<button type="button" class="gt-warga-modal-close">&times;</button>'
+                + '<div class="gt-warga-modal-head">'
+                +   '<div class="gt-warga-modal-avatar">'+esc(initial)+'</div>'
+                +   '<div><h3>'+esc(w.nama || '-')+'</h3><p>'+esc(w.pekerjaan || 'Warga RT 005 Tegalsari')+'</p></div>'
+                + '</div>'
+                + '<div class="gt-warga-modal-body">'
+                +   '<div class="gt-warga-field"><span class="gt-fld-label">Nomor KK</span><span class="gt-fld-value">'+esc(w.kk || '-')+'</span></div>'
+                +   '<div class="gt-warga-field"><span class="gt-fld-label">NIK</span><span class="gt-fld-value">'+esc(w.nik || '-')+'</span></div>'
+                +   '<div class="gt-warga-field"><span class="gt-fld-label">Alamat</span><span class="gt-fld-value">'+esc(w.alamat || '-')+'</span></div>'
+                +   '<div class="gt-warga-field"><span class="gt-fld-label">Pekerjaan</span><span class="gt-fld-value">'+esc(w.pekerjaan || '-')+'</span></div>'
+                +   (w.telp ? '<div class="gt-warga-field"><span class="gt-fld-label">Telepon</span><span class="gt-fld-value"><a href="tel:'+esc(w.telp)+'" style="color:var(--gt-primary-600);text-decoration:none;">'+esc(w.telp)+'</a></span></div>' : '')
+                +   (w.istri ? '<div class="gt-warga-field"><span class="gt-fld-label">Nama Istri</span><span class="gt-fld-value">'+esc(w.istri)+'</span></div>' : '')
+                +   (anak ? '<div class="gt-warga-field"><span class="gt-fld-label">Data Anak</span><span class="gt-fld-value">'+esc(anak)+'</span></div>' : '')
+                +   (w.bpjs ? '<div class="gt-warga-field"><span class="gt-fld-label">No. BPJS</span><span class="gt-fld-value">'+esc(w.bpjs)+'</span></div>' : '')
+                + '</div></div>';
+            m.classList.add('open');
+        }
+
+        function ensureSearchBox(){
+            if (document.getElementById('gt-search-input')) return;
+            var hdr = document.querySelector('.main-header');
+            if (!hdr) return;
+            var wrap = document.createElement('div');
+            wrap.className = 'gt-search-wrap no-print';
+            wrap.innerHTML = '<i class="fa-solid fa-magnifying-glass gt-search-icon"></i>'
+                + '<input id="gt-search-input" class="gt-search-input" type="search" autocomplete="off" placeholder="Cari warga (nama, NIK, KK, alamat...)" />'
+                + '<button type="button" class="gt-search-clear" aria-label="Clear" title="Bersihkan"><i class="fa-solid fa-xmark"></i></button>'
+                + '<div id="gt-search-results" class="gt-search-results"></div>';
+            // Insert before the action-btns (right cluster) so it sits in the middle/right
+            var rightArea = hdr.querySelector('.action-btns') || hdr.lastElementChild;
+            try { hdr.insertBefore(wrap, rightArea); } catch(_) { hdr.appendChild(wrap); }
+
+            var input = wrap.querySelector('#gt-search-input');
+            var box   = wrap.querySelector('#gt-search-results');
+            var clearBtn = wrap.querySelector('.gt-search-clear');
+            var activeIdx = -1;
+            var current = [];
+
+            function render(q){
+                current = searchWarga(q);
+                activeIdx = -1;
+                if (!q) { box.classList.remove('open'); box.innerHTML = ''; return; }
+                if (current.length === 0) {
+                    box.innerHTML = '<div class="gt-search-empty"><i class="fa-regular fa-face-frown" style="font-size:1.5rem;display:block;margin-bottom:8px;color:var(--gt-text-muted);"></i>Tidak ada warga cocok dengan "<b>'+esc(q)+'</b>"</div>';
+                } else {
+                    var html = '';
+                    current.forEach(function(w, i){
+                        var initial = (w.nama || '?').trim().charAt(0).toUpperCase();
+                        html += '<div class="gt-search-row" data-idx="'+i+'">'
+                            + '<div class="gt-search-avatar">'+esc(initial)+'</div>'
+                            + '<div class="gt-search-info">'
+                            +   '<p class="gt-sr-name">'+highlight(w.nama || '-', q)+'</p>'
+                            +   '<div class="gt-sr-meta">NIK '+highlight(w.nik || '-', q)+' • '+highlight(w.alamat || '-', q)+'</div>'
+                            + '</div></div>';
+                    });
+                    html += '<div class="gt-search-foot"><span>'+current.length+' hasil</span><span><kbd>↑</kbd><kbd>↓</kbd> navigasi • <kbd>Enter</kbd> buka • <kbd>Esc</kbd> tutup</span></div>';
+                    box.innerHTML = html;
+                    box.querySelectorAll('.gt-search-row').forEach(function(row){
+                        row.addEventListener('mousedown', function(e){
+                            e.preventDefault();
+                            var idx = parseInt(row.getAttribute('data-idx'),10);
+                            showWargaModal(current[idx]);
+                            box.classList.remove('open');
+                        });
+                    });
+                }
+                box.classList.add('open');
+            }
+
+            input.addEventListener('input', function(){
+                var q = input.value.trim();
+                if (q) wrap.classList.add('has-query'); else wrap.classList.remove('has-query');
+                render(q);
+            });
+            input.addEventListener('focus', function(){ if (input.value.trim()) render(input.value.trim()); });
+            input.addEventListener('keydown', function(e){
+                var rows = box.querySelectorAll('.gt-search-row');
+                if (e.key === 'ArrowDown' && rows.length) { e.preventDefault(); activeIdx = Math.min(rows.length-1, activeIdx+1); rows.forEach(function(r,i){ r.classList.toggle('active', i===activeIdx); }); rows[activeIdx].scrollIntoView({block:'nearest'}); }
+                else if (e.key === 'ArrowUp' && rows.length) { e.preventDefault(); activeIdx = Math.max(0, activeIdx-1); rows.forEach(function(r,i){ r.classList.toggle('active', i===activeIdx); }); rows[activeIdx].scrollIntoView({block:'nearest'}); }
+                else if (e.key === 'Enter') { e.preventDefault(); if (activeIdx >= 0 && current[activeIdx]) { showWargaModal(current[activeIdx]); box.classList.remove('open'); } else if (current[0]) { showWargaModal(current[0]); box.classList.remove('open'); } }
+                else if (e.key === 'Escape') { input.value=''; wrap.classList.remove('has-query'); box.classList.remove('open'); input.blur(); }
+            });
+            clearBtn.addEventListener('click', function(){ input.value=''; wrap.classList.remove('has-query'); box.classList.remove('open'); input.focus(); });
+
+            document.addEventListener('click', function(e){
+                if (!wrap.contains(e.target)) box.classList.remove('open');
+            });
+
+            // Global keyboard shortcut: Ctrl+K / Cmd+K focuses search
+            document.addEventListener('keydown', function(e){
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+                    e.preventDefault(); input.focus(); input.select();
+                }
+            });
+        }
+
+        /* -------------------- BOOT + POLLING -------------------- */
+        function boot(){
+            try { wireBell(); } catch(e){ console.warn('notif wire', e); }
+            try { ensureSearchBox(); } catch(e){ console.warn('search inject', e); }
+            try { renderNotif(); } catch(e){}
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+        else boot();
+        setTimeout(boot, 800);
+        setTimeout(boot, 2500);
+        // Poll for new notifications every 30s; also re-render after data sync
+        setInterval(function(){ try { renderNotif(); } catch(_){} }, 30000);
+
+        // Hook into existing syncSemuaData if present so notifications refresh immediately after writes
+        var hookTries = 0;
+        var hk = setInterval(function(){
+            hookTries++;
+            if (typeof window.syncSemuaData === 'function' && !window.syncSemuaData.__gtWrapped) {
+                var orig = window.syncSemuaData;
+                window.syncSemuaData = function(){ var r = orig.apply(this, arguments); try { renderNotif(); } catch(_){} return r; };
+                window.syncSemuaData.__gtWrapped = true;
+                clearInterval(hk);
+            }
+            if (hookTries > 40) clearInterval(hk);
+        }, 250);
+    })();
+
 
 
     // Penomoran surat undangan kegiatan untuk admin (counter `surat_counter`)
