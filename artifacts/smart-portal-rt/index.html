@@ -1413,6 +1413,26 @@
 
 
 <script>
+    // === Global state & helpers (must be initialized before any handler runs) ===
+    var loggedInWarga = null;
+    var Toast = (typeof Swal !== 'undefined') ? Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2200,
+        timerProgressBar: true
+    }) : { fire: function(o){ try { console.log('[Toast]', o && o.title); } catch(e){} } };
+    window.Toast = Toast;
+
+    // Pencarian kontak darurat (dipakai input search-darurat di portal warga)
+    window.filterKontakDarurat = function() {
+        var q = (document.getElementById('search-darurat') || {value:''}).value.toLowerCase().trim();
+        document.querySelectorAll('.darurat-item').forEach(function(el){
+            var txt = (el.innerText || el.textContent || '').toLowerCase();
+            el.style.display = (!q || txt.indexOf(q) !== -1) ? '' : 'none';
+        });
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const currentPage = window.location.pathname.split("/").pop();
@@ -2326,10 +2346,11 @@
         document.getElementById('req_keperluan_lengkap').value = '';
     };
 
-    // Tambahkan pengisian form otomatis saat portal warga dibuka
-    // Masukkan kode ini di dalam fungsi window.BukaPortal('warga')
+    // Tambahkan pengisian form otomatis (dipanggil ulang oleh loadSuratWarga)
+    // Guard supaya tidak crash saat skrip dimuat sebelum login.
     setTimeout(() => {
-        if(document.getElementById('req_nama')) document.getElementById('req_nama').value = loggedInWarga.nama;
+        if(!loggedInWarga) return;
+        if(document.getElementById('req_nama')) document.getElementById('req_nama').value = loggedInWarga.nama || '';
         if(document.getElementById('req_nik')) document.getElementById('req_nik').value = loggedInWarga.nik || '-';
         if(document.getElementById('req_alamat')) document.getElementById('req_alamat').value = loggedInWarga.alamat || '-';
     }, 500);
@@ -3502,7 +3523,7 @@
                 let btnAction = s.status === 'Selesai' 
                     ? `<button class="btn-action bg-red" onclick="cetakPDFSurat(${s.id}, false)"><i class="fa-solid fa-file-pdf"></i> Download Asli</button>` 
                     : `<span style="color:#94a3b8;"><i class="fa-solid fa-hourglass-half"></i> Sedang Diproses</span>`;
-                tb.innerHTML += `<tr><td>${s.tglPengajuan}</td><td><b style="color:var(--primary-dark);">${s.keperluan.substring(0,25)}...</b></td><td>${s.noSurat}</td><td><span class="badge ${badge}">${s.status}</span></td><td>${btnAction}</td></tr>`;
+                tb.innerHTML += `<tr><td>${s.tglPengajuan}</td><td><b style="color:var(--primary-dark);">${(s.keperluan||'').substring(0,25)}...</b></td><td>${s.noSurat}</td><td><span class="badge ${badge}">${s.status}</span></td><td>${btnAction}</td></tr>`;
             });
         }
     };
@@ -3521,7 +3542,7 @@
                 } else {
                     btnAction = `<button class="btn-action bg-gold" onclick="cetakPDFSurat(${s.id}, true)"><i class="fa-solid fa-copy"></i> Download Salinan</button> <button class="btn-table btn-tbl-del" onclick="hapusSuratPengajuan(${s.id})"><i class="fa-solid fa-trash"></i></button>`;
                 }
-                tb.innerHTML += `<tr><td>${s.tglPengajuan}</td><td><b style="color:var(--primary-dark);">${s.nama}</b><br><small>NIK: ${s.nik}</small></td><td>${s.keperluan.substring(0,30)}...</td><td><span class="badge ${badge}">${s.status}</span><br><b style="font-size:0.85rem; margin-top:5px; display:inline-block;">${s.noSurat}</b></td><td>${btnAction}</td></tr>`;
+                tb.innerHTML += `<tr><td>${s.tglPengajuan}</td><td><b style="color:var(--primary-dark);">${s.nama}</b><br><small>NIK: ${s.nik}</small></td><td>${(s.keperluan||'').substring(0,30)}...</td><td><span class="badge ${badge}">${s.status}</span><br><b style="font-size:0.85rem; margin-top:5px; display:inline-block;">${s.noSurat}</b></td><td>${btnAction}</td></tr>`;
             });
         }
     };
@@ -3613,7 +3634,7 @@ window.cetakPDFSurat = function(id, isSalinan) {
                 <td style="padding:6px 0; font-weight:bold; vertical-align:top; border:none;">9. Keperluan</td>
                 <td style="vertical-align:top; font-weight:bold; border:none;">:</td>
                 <td style="border:none; border-bottom: 1px dotted #ccc; text-transform:uppercase; font-weight:bold; vertical-align:top; word-wrap:break-word; line-height:1.4; padding-top:4px;">
-                    ${dt.keperluan.replace(/\n/g, '<br>')}
+                    ${(dt.keperluan||'').replace(/\n/g, '<br>')}
                 </td>
             </tr>
         </table>

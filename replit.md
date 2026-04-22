@@ -37,3 +37,4 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Logo**: `public/Lambang_Kota_Semarang.png`
 - **Fitur**: Login, data warga, kas RT, iuran, surat, arisan, berita, aduan, pengaturan
 - **Sync**: Semua fungsi sync (autoSync/saveToCloud/loadFromCloud) sudah dikonversi ke localStorage-only stubs — tidak ada error cloud
+- **Phase 1 fixes (portal warga)**: deklarasi global `loggedInWarga`, helper `Toast` (Swal.mixin), dan `filterKontakDarurat()` ditambahkan di awal `<script>` utama; `setTimeout` autofill form surat dibungkus guard `if(!loggedInWarga) return`; `keperluan.substring/replace` diberi fallback `''` agar tidak crash bila field kosong
