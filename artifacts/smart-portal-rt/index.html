@@ -416,6 +416,18 @@
         /* ======================================================= */
         /* EFEK GLOW DARURAT (DENYUT)                              */
         /* ======================================================= */
+                @keyframes syncPulse {
+            0%   { box-shadow: 0 0 4px 0px currentColor; opacity: 1; }
+            50%  { box-shadow: 0 0 14px 4px currentColor; opacity: 0.7; }
+            100% { box-shadow: 0 0 4px 0px currentColor; opacity: 1; }
+        }
+        .sync-syncing { animation: syncPulse 0.8s ease-in-out infinite; }
+        .sync-success { animation: syncPulse 1.5s ease-in-out 2; }
+        .last-update-text { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; margin-top: 4px; font-weight: 600; }
+        .last-update-text i { font-size: 0.65rem; }
+        .upd-fresh { color: var(--success) !important; }
+        .upd-stale { color: var(--text-muted) !important; }
+        
         @keyframes daruratGlow {
             0% { filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.4)); }
             50% { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 1)); }
@@ -1631,7 +1643,7 @@
         let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.kk_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); });
         let data = { nama: document.getElementById('kk-nama').value, kk: document.getElementById('kk-nokk').value, nik: document.getElementById('kk-nik').value, pekerjaan: document.getElementById('kk-pekerjaan').value, bpjs: document.getElementById('kk-bpjs').value, istri: document.getElementById('kk-istri').value, alamat: document.getElementById('kk-alamat').value, anak: anak };
         let idx = db.findIndex(x => String(x.id) === String(loggedInWarga.id)); if(idx !== -1) { db[idx] = { ...db[idx], ...data }; } else { db.push({ id: loggedInWarga.id, ...data }); }
-        localStorage.setItem('db_warga', JSON.stringify(db)); 
+        localStorage.setItem('db_warga', JSON.stringify(db)); localStorage.setItem('ts_warga', new Date().toISOString());
         if(loggedInWarga.isNew && passBaru !== '') {
             let dbMandiri = JSON.parse(localStorage.getItem('data_warga_mandiri')) || []; let mIdx = dbMandiri.findIndex(x => String(x.id) === String(loggedInWarga.id));
             if(mIdx !== -1) { dbMandiri[mIdx].password = passBaru; } else { dbMandiri.push({ id: loggedInWarga.id, nama: data.nama, password: passBaru }); }
@@ -1661,7 +1673,7 @@
 
     window.tampilFormKKAdmin = function(show) { document.getElementById('admin-view-kk').style.display = show ? 'none' : 'block'; document.getElementById('admin-form-kk').style.display = show ? 'block' : 'none'; if(!show) { document.getElementById('form-kk-admin').reset(); document.getElementById('adm-kk-id').value = ''; document.getElementById('adm-container-anak').innerHTML=''; } };
     window.tambahKolomAnakAdmin = function() { let d = document.createElement('div'); d.innerHTML = `<input type="text" class="adm_anak" placeholder="Nama Lengkap Anak" style="margin-top:10px; width:100%; padding:14px 18px; border:2px solid #e2e8f0; border-radius:12px;">`; document.getElementById('adm-container-anak').appendChild(d); };
-    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); tampilFormKKAdmin(false); loadTabelKKAdmin(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success', title:'Disimpan!'}); };
+    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); localStorage.setItem('ts_warga', new Date().toISOString()); tampilFormKKAdmin(false); loadTabelKKAdmin(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success', title:'Disimpan!'}); };
     window.prosesImportExcelWarga = function(e) { let file = e.target.files[0]; if(!file) return; let reader = new FileReader(); reader.onload = function(evt) { let data = new Uint8Array(evt.target.result); let wb = XLSX.read(data, {type: 'array'}); let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1}); let db = JSON.parse(localStorage.getItem('db_warga')) || []; let added = 0; for(let i=1; i<rows.length; i++) { let r=rows[i]; if(r&&r[0]){ db.push({ id: Date.now()+Math.random(), nama: String(r[0]).trim(), kk: r[1]||'', nik: r[2]||'', alamat: r[3]||'', istri: '', anak: [] }); added++; } } localStorage.setItem('db_warga', JSON.stringify(db)); loadTabelKKAdmin();  Swal.fire('Selesai', `${added} KK terupload.`, 'success'); }; reader.readAsArrayBuffer(file); e.target.value = ''; };
     window.closeModalProfil = function() { document.getElementById('modal-profil').classList.remove('show'); };
     window.loadTabelKKAdmin = function() { 
@@ -2337,7 +2349,7 @@
 
     // === 9. KEUANGAN (BENDAHARA & KOPERASI) ===
     window.simpanSaldoAwal = function() { localStorage.setItem('db_saldo_awal', document.getElementById('ben-saldo-awal-input').value); syncSemuaData(); Toast.fire({icon:'success',title:'Dikunci'}); };
-    window.simpanKas = function(e) { e.preventDefault(); let db = JSON.parse(localStorage.getItem('db_kas')) || []; db.push({ id: Date.now(), tgl: document.getElementById('ben-tgl').value, uraian: document.getElementById('ben-desc').value, tipe: document.getElementById('ben-tipe').value, nominal: parseInt(document.getElementById('ben-amt').value) }); localStorage.setItem('db_kas', JSON.stringify(db)); e.target.reset(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success',title:'Disimpan'}); };
+    window.simpanKas = function(e) { e.preventDefault(); let db = JSON.parse(localStorage.getItem('db_kas')) || []; db.push({ id: Date.now(), tgl: document.getElementById('ben-tgl').value, uraian: document.getElementById('ben-desc').value, tipe: document.getElementById('ben-tipe').value, nominal: parseInt(document.getElementById('ben-amt').value) }); localStorage.setItem('db_kas', JSON.stringify(db)); localStorage.setItem('ts_kas', new Date().toISOString()); e.target.reset(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success',title:'Disimpan'}); };
     window.hitungOtomatisIuran = function() { let t = document.querySelectorAll('.cb-bulan:checked').length * 20000; if(document.getElementById('ben-iuran-amt')) document.getElementById('ben-iuran-amt').value = t; };
     window.simpanIuranKolektif = function(e) {
     if(e && e.preventDefault) e.preventDefault();
@@ -2625,8 +2637,61 @@
     window.simpanDarurat = function() { let db = JSON.parse(localStorage.getItem('db_darurat')) || []; let ikonVal = document.getElementById('d_icon').value.split('|'); db.push({ id: Date.now(), nama: document.getElementById('d_nama').value, telp: document.getElementById('d_telp').value, wa: document.getElementById('d_wa').value, maps: document.getElementById('d_maps').value, icon: ikonVal[0], color: ikonVal[1] }); localStorage.setItem('db_darurat', JSON.stringify(db)); document.getElementById('form-darurat').reset(); syncSemuaData(); Toast.fire({icon:'success',title:'Kontak Disimpan'}); };
     window.hapusDarurat = function(id) { let db = JSON.parse(localStorage.getItem('db_darurat')) || []; db = db.filter(x => x.id !== id); localStorage.setItem('db_darurat', JSON.stringify(db)); syncSemuaData(); };
     window.loadDaruratWarga = function() { let db = JSON.parse(localStorage.getItem('db_darurat')) || []; let cg = document.getElementById('container-darurat-warga'); if(cg){ cg.innerHTML = ''; db.forEach(d => { cg.innerHTML += `<div class="contact-card darurat-item"><i class="fa-solid ${d.icon}" style="font-size:2rem; color:${d.color};"></i><h4 class="darurat-nama">${d.nama}</h4><h3>${d.telp}</h3><div class="action-btns"><a href="tel:${d.telp}" class="call-btn"><i class="fa-solid fa-phone"></i></a></div></div>`; }); } };
-    window.simpanInfoArisan = function(e) { e.preventDefault(); let d = { arisanNama: document.getElementById('inp_arisan_nama').value, arisanTgl: document.getElementById('inp_arisan_tgl').value, hostNama: document.getElementById('inp_host_nama').value, hostTgl: document.getElementById('inp_host_tgl').value }; localStorage.setItem('db_info_arisan', JSON.stringify(d)); syncSemuaData(); e.target.reset(); Toast.fire({icon:'success',title:'Arisan Disimpan'}); };
-    window.loadDashboardWarga = function() { let w = document.getElementById('warga-total-kk'); if(w) w.innerText = (JSON.parse(localStorage.getItem('db_warga'))||[]).length + " KK"; let ar = JSON.parse(localStorage.getItem('db_info_arisan')); if(ar){ if(document.getElementById('warga-arisan-nama')) document.getElementById('warga-arisan-nama').innerText=ar.arisanNama; if(document.getElementById('warga-host-nama')) document.getElementById('warga-host-nama').innerText=ar.hostNama; } };
+    window.simpanInfoArisan = function(e) { e.preventDefault(); let d = { arisanNama: document.getElementById('inp_arisan_nama').value, arisanTgl: document.getElementById('inp_arisan_tgl').value, hostNama: document.getElementById('inp_host_nama').value, hostTgl: document.getElementById('inp_host_tgl').value }; localStorage.setItem('db_info_arisan', JSON.stringify(d)); localStorage.setItem('ts_arisan', new Date().toISOString()); syncSemuaData(); e.target.reset(); Toast.fire({icon:'success',title:'Arisan Disimpan'}); };
+    window.loadDashboardWarga = function() {
+    // Helper: format waktu relatif
+    function relWaktu(tsStr) {
+        if(!tsStr) return 'Belum pernah diperbarui';
+        const ts = new Date(tsStr), now = new Date();
+        const diffMs = now - ts;
+        const diffMnt = Math.floor(diffMs / 60000);
+        const diffJam = Math.floor(diffMs / 3600000);
+        const diffHari = Math.floor(diffMs / 86400000);
+        const jam = ts.getHours().toString().padStart(2,'0');
+        const mnt = ts.getMinutes().toString().padStart(2,'0');
+        const tgl = ts.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+        let rel;
+        if(diffMnt < 1) rel = 'Baru saja';
+        else if(diffMnt < 60) rel = diffMnt + ' menit lalu';
+        else if(diffJam < 24) rel = diffJam + ' jam lalu';
+        else rel = diffHari + ' hari lalu';
+        const freshClass = diffMnt < 10 ? 'upd-fresh' : 'upd-stale';
+        return { text: rel + ' (' + tgl + ', ' + jam + ':' + mnt + ')', freshClass };
+    }
+    function setUpd(id, tsKey) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        const ts = localStorage.getItem(tsKey);
+        if(!ts) { el.innerHTML = '<i class="fa-solid fa-rotate"></i> Belum pernah diperbarui'; el.className = 'last-update-text upd-stale'; return; }
+        const r = relWaktu(ts);
+        el.innerHTML = '<i class="fa-solid fa-rotate-right"></i> ' + r.text;
+        el.className = 'last-update-text ' + r.freshClass;
+    }
+    // Hitung saldo kas
+    let dbKas = JSON.parse(localStorage.getItem('db_kas')) || [];
+    let sAwal = parseInt(localStorage.getItem('db_saldo_awal')) || 0;
+    let sAkhir = sAwal;
+    dbKas.forEach(k => { if(k.tipe==='masuk') sAkhir += k.nominal; else sAkhir -= k.nominal; });
+    let fmt = v => 'Rp ' + Number(v).toLocaleString('id-ID');
+    let elKas = document.getElementById('warga-saldo-kas');
+    if(elKas) elKas.innerText = fmt(sAkhir);
+    // Total warga
+    let w = document.getElementById('warga-total-kk');
+    if(w) w.innerText = (JSON.parse(localStorage.getItem('db_warga'))||[]).length + ' KK';
+    // Arisan & host
+    let ar = JSON.parse(localStorage.getItem('db_info_arisan'));
+    if(ar) {
+        if(document.getElementById('warga-arisan-nama')) document.getElementById('warga-arisan-nama').innerText = ar.arisanNama || 'Belum ada data';
+        if(document.getElementById('warga-arisan-tgl'))  document.getElementById('warga-arisan-tgl').innerText  = ar.arisanTgl  ? 'Jadwal: ' + ar.arisanTgl  : '';
+        if(document.getElementById('warga-host-nama'))   document.getElementById('warga-host-nama').innerText   = ar.hostNama   || 'Belum ada data';
+        if(document.getElementById('warga-host-tgl'))    document.getElementById('warga-host-tgl').innerText    = ar.hostTgl    ? 'Jadwal: ' + ar.hostTgl    : '';
+    }
+    // Update timestamp tiap kartu
+    setUpd('upd-kas',    'ts_kas');
+    setUpd('upd-arisan', 'ts_arisan');
+    setUpd('upd-host',   'ts_arisan');
+    setUpd('upd-warga',  'ts_warga');
+};
 
     // === MESIN NOTULEN (RAPAT RT) ===
     window.simpanNotulen = function(e) {
@@ -3304,8 +3369,8 @@
           ];
           let loaded = false;
 
-          if(dot) { dot.style.background = 'var(--accent-gold)'; dot.style.boxShadow = '0 0 10px var(--accent-gold)'; }
-          if(txt) { txt.innerText = 'Memuat...'; txt.style.color = 'var(--accent-gold)'; }
+          if(dot) { dot.style.background = 'var(--accent-gold)'; dot.style.color = 'var(--accent-gold)'; dot.style.boxShadow = '0 0 10px var(--accent-gold)'; dot.classList.remove('sync-success'); dot.classList.add('sync-syncing'); }
+          if(txt) { txt.innerText = 'Menyinkron...'; txt.style.color = 'var(--accent-gold)'; }
 
           if(typeof populateDropdownWarga === 'function') { populateDropdownWarga(); loaded = true; }
           if(typeof loadTabelKKAdmin === 'function') { loadTabelKKAdmin(); loaded = true; }
@@ -3339,8 +3404,14 @@
               }
           });
 
-          if(dot) { dot.style.background = 'var(--success)'; dot.style.boxShadow = '0 0 12px var(--success)'; }
-          if(txt) { txt.innerText = loaded ? 'Tersimpan Lokal' : 'Siap'; txt.style.color = 'var(--success)'; }
+          let nowSyncStr = new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+          localStorage.setItem('ts_last_sync', new Date().toISOString());
+          if(dot) { dot.style.background = 'var(--success)'; dot.style.color = 'var(--success)'; dot.style.boxShadow = '0 0 14px var(--success)'; dot.classList.remove('sync-syncing'); dot.classList.add('sync-success'); }
+          if(txt) { txt.innerText = '✓ ' + nowSyncStr + ' WIB'; txt.style.color = 'var(--success)'; }
+          setTimeout(function() {
+              if(dot) { dot.style.background = '#3b82f6'; dot.style.boxShadow = '0 0 8px #3b82f6'; dot.classList.remove('sync-syncing','sync-success'); }
+              if(txt) { txt.innerText = 'Siap'; txt.style.color = '#3b82f6'; }
+          }, 4000);
 
           if(!isAuto && typeof Toast !== 'undefined') {
               Toast.fire({ icon: 'success', title: 'Data Diperbarui!' });
