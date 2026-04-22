@@ -1428,9 +1428,38 @@
     window.fmt = function(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID'); };
     var fmt = window.fmt;
 
+    // ===== PRODUCTION-SAFE STORAGE & ESCAPE HELPERS (added by audit) =====
+    window.safeGet = function(key, fallback) {
+        try {
+            var raw = localStorage.getItem(key);
+            if (raw === null || raw === undefined || raw === '') return (fallback === undefined ? null : fallback);
+            return JSON.parse(raw);
+        } catch (e) {
+            console.warn('[safeGet] corrupt key ' + key, e);
+            return (fallback === undefined ? null : fallback);
+        }
+    };
+    window.safeSet = function(key, value) {
+        try {
+            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+            return true;
+        } catch (e) {
+            console.error('[safeSet] failed to write ' + key, e);
+            try { Toast.fire({ icon: 'error', title: 'Gagal menyimpan (storage penuh)' }); } catch(_) {}
+            return false;
+        }
+    };
+    window.escapeHtml = function(v) {
+        if (v === null || v === undefined) return '';
+        return String(v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    };
+    var esc = window.escapeHtml;
+
     // Penomoran surat undangan kegiatan untuk admin (counter `surat_counter`)
     window.getNextSuratNumber = function() {
-        var count = parseInt(localStorage.getItem('surat_counter'));
+        var count = parseInt(localStorage.getItem('surat_counter'), 10);
         if (isNaN(count) || count < 178) count = 178;
         var d = new Date();
         var roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
