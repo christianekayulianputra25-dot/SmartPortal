@@ -1607,7 +1607,7 @@
 
     window.tampilFormKKAdmin = function(show) { document.getElementById('admin-view-kk').style.display = show ? 'none' : 'block'; document.getElementById('admin-form-kk').style.display = show ? 'block' : 'none'; if(!show) { document.getElementById('form-kk-admin').reset(); document.getElementById('adm-kk-id').value = ''; document.getElementById('adm-container-anak').innerHTML=''; } };
     window.tambahKolomAnakAdmin = function() { let d = document.createElement('div'); d.innerHTML = `<input type="text" class="adm_anak" placeholder="Nama Lengkap Anak" style="margin-top:10px; width:100%; padding:14px 18px; border:2px solid #e2e8f0; border-radius:12px;">`; document.getElementById('adm-container-anak').appendChild(d); };
-    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); tampilFormKKAdmin(false); loadTabelKKAdmin();  Toast.fire({icon:'success', title:'Disimpan!'}); };
+    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); tampilFormKKAdmin(false); loadTabelKKAdmin(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success', title:'Disimpan!'}); };
     window.prosesImportExcelWarga = function(e) { let file = e.target.files[0]; if(!file) return; let reader = new FileReader(); reader.onload = function(evt) { let data = new Uint8Array(evt.target.result); let wb = XLSX.read(data, {type: 'array'}); let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1}); let db = JSON.parse(localStorage.getItem('db_warga')) || []; let added = 0; for(let i=1; i<rows.length; i++) { let r=rows[i]; if(r&&r[0]){ db.push({ id: Date.now()+Math.random(), nama: String(r[0]).trim(), kk: r[1]||'', nik: r[2]||'', alamat: r[3]||'', istri: '', anak: [] }); added++; } } localStorage.setItem('db_warga', JSON.stringify(db)); loadTabelKKAdmin();  Swal.fire('Selesai', `${added} KK terupload.`, 'success'); }; reader.readAsArrayBuffer(file); e.target.value = ''; };
     window.closeModalProfil = function() { document.getElementById('modal-profil').classList.remove('show'); };
     window.loadTabelKKAdmin = function() { 
@@ -1808,7 +1808,7 @@
     window.hapusMutasi = function(id) { let db = JSON.parse(localStorage.getItem('mutasi')) || []; localStorage.setItem('mutasi', JSON.stringify(db.filter(x => x.id !== id))); syncSemuaData(); };
 
     window.saveBeritaAdmin = function(e) { e.preventDefault(); let f = document.getElementById('b_gambar').files[0]; if(f) { let r = new FileReader(); r.onload = function(evt) { prosesSimpanBerita(evt.target.result); }; r.readAsDataURL(f); } else { prosesSimpanBerita(''); } };
-    window.prosesSimpanBerita = function(b64) { let db = JSON.parse(localStorage.getItem('db_berita')) || []; db.push({ id: Date.now(), kategori: document.getElementById('b_kategori').value, judul: document.getElementById('b_judul').value, isi: document.getElementById('b_isi').value, foto: b64, tgl: new Date().toLocaleDateString('id-ID') }); localStorage.setItem('db_berita', JSON.stringify(db)); document.getElementById('form-berita').reset(); syncSemuaData(); Swal.fire('Siap', 'Kabar disiarkan.', 'success'); };
+    window.prosesSimpanBerita = function(b64) { let db = JSON.parse(localStorage.getItem('db_berita')) || []; db.push({ id: Date.now(), kategori: document.getElementById('b_kategori').value, judul: document.getElementById('b_judul').value, isi: document.getElementById('b_isi').value, foto: b64, tgl: new Date().toLocaleDateString('id-ID') }); localStorage.setItem('db_berita', JSON.stringify(db)); document.getElementById('form-berita').reset(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Swal.fire('Siap', 'Kabar disiarkan.', 'success'); };
     window.loadBeritaAdmin = function() { let db = JSON.parse(localStorage.getItem('db_berita')) || []; let tb = document.getElementById('tbody-admin-berita'); if(tb) { tb.innerHTML = ''; db.forEach(b => { tb.innerHTML += `<tr><td><span class="news-badge">${b.kategori}</span></td><td>${b.tgl}</td><td><b>${b.judul}</b></td><td><button class="btn-table btn-tbl-del" onclick="hapusBerita(${b.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); } };
     // === 1. FUNGSI RENDER BERITA WARGA (RUNNING TEXT / MARQUEE) ===
 
@@ -2273,7 +2273,7 @@
     
 
     window.kirimAduanWarga = function(e) { e.preventDefault(); let f = document.getElementById('aduan-bukti').files[0]; if(f) { let r = new FileReader(); r.onload = function(evt) { prosesSimpanAduan(evt.target.result); }; r.readAsDataURL(f); } else { Swal.fire('Gagal', 'Wajib upload foto!', 'warning'); } };
-    window.prosesSimpanAduan = function(b64) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let d = new Date(); let tFormat = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`; db.push({ id: Date.now(), tglAsli: tFormat, tglTampil: d.toLocaleDateString('id-ID'), idPelapor: loggedInWarga.id, namaPelapor: loggedInWarga.nama, kategori: document.getElementById('aduan-kategori').value, judul: document.getElementById('aduan-judul').value, isi: document.getElementById('aduan-isi').value, foto: b64, status: 'Menunggu' }); localStorage.setItem('db_aduan', JSON.stringify(db)); document.getElementById('aduan-judul').value=''; document.getElementById('aduan-isi').value=''; syncSemuaData(); Swal.fire('Terkirim!', 'Aduan masuk ke meja RT.', 'success'); };
+    window.prosesSimpanAduan = function(b64) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let d = new Date(); let tFormat = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`; db.push({ id: Date.now(), tglAsli: tFormat, tglTampil: d.toLocaleDateString('id-ID'), idPelapor: loggedInWarga.id, namaPelapor: loggedInWarga.nama, kategori: document.getElementById('aduan-kategori').value, judul: document.getElementById('aduan-judul').value, isi: document.getElementById('aduan-isi').value, foto: b64, status: 'Menunggu' }); localStorage.setItem('db_aduan', JSON.stringify(db)); document.getElementById('aduan-judul').value=''; document.getElementById('aduan-isi').value=''; if (typeof syncSemuaData === 'function') syncSemuaData(true); Swal.fire('Terkirim!', 'Aduan masuk ke meja RT.', 'success'); };
     window.lihatBuktiAduan = function(id) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let a = db.find(x=>x.id===id); if(a && a.foto) Swal.fire({ imageUrl: a.foto, width: 600 }); };
     window.updateStatusAduan = function(id, val) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; let idx = db.findIndex(x=>x.id===id); if(idx!==-1) { db[idx].status=val; localStorage.setItem('db_aduan',JSON.stringify(db)); syncSemuaData(); Toast.fire({icon:'success',title:'Status Update!'}); } };
     window.hapusAduan = function(id) { let db = JSON.parse(localStorage.getItem('db_aduan')) || []; localStorage.setItem('db_aduan', JSON.stringify(db.filter(x=>x.id!==id))); syncSemuaData(); };
@@ -2283,7 +2283,7 @@
 
     // === 9. KEUANGAN (BENDAHARA & KOPERASI) ===
     window.simpanSaldoAwal = function() { localStorage.setItem('db_saldo_awal', document.getElementById('ben-saldo-awal-input').value); syncSemuaData(); Toast.fire({icon:'success',title:'Dikunci'}); };
-    window.simpanKas = function(e) { e.preventDefault(); let db = JSON.parse(localStorage.getItem('db_kas')) || []; db.push({ id: Date.now(), tgl: document.getElementById('ben-tgl').value, uraian: document.getElementById('ben-desc').value, tipe: document.getElementById('ben-tipe').value, nominal: parseInt(document.getElementById('ben-amt').value) }); localStorage.setItem('db_kas', JSON.stringify(db)); e.target.reset(); syncSemuaData(); Toast.fire({icon:'success',title:'Disimpan'}); };
+    window.simpanKas = function(e) { e.preventDefault(); let db = JSON.parse(localStorage.getItem('db_kas')) || []; db.push({ id: Date.now(), tgl: document.getElementById('ben-tgl').value, uraian: document.getElementById('ben-desc').value, tipe: document.getElementById('ben-tipe').value, nominal: parseInt(document.getElementById('ben-amt').value) }); localStorage.setItem('db_kas', JSON.stringify(db)); e.target.reset(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success',title:'Disimpan'}); };
     window.hitungOtomatisIuran = function() { let t = document.querySelectorAll('.cb-bulan:checked').length * 20000; if(document.getElementById('ben-iuran-amt')) document.getElementById('ben-iuran-amt').value = t; };
     window.simpanIuranKolektif = function(e) {
     if(e && e.preventDefault) e.preventDefault();
@@ -2640,7 +2640,7 @@
             nomIuran: parseInt(document.getElementById('set_nominal_iuran').value) || 20000,
             bungaKop: parseInt(document.getElementById('set_bunga_kop').value) || 10
         };
-        localStorage.setItem('db_settings', JSON.stringify(settings)); syncSemuaData(); Swal.fire('Berhasil', 'Parameter sistem diperbarui.', 'success');
+        localStorage.setItem('db_settings', JSON.stringify(settings)); if (typeof syncSemuaData === 'function') syncSemuaData(true); Swal.fire('Berhasil', 'Parameter sistem diperbarui.', 'success');
     };
     window.loadPengaturan = function() {
         let s = JSON.parse(localStorage.getItem('db_settings')) || {namaRT: "Bapak Kasimin", namaRW: "Bapak Mulyono", namaBen: "Bapak Parmin", nomIuran: 20000, bungaKop: 10};
@@ -3240,44 +3240,55 @@
       window.syncSemuaData = async function(isAuto = false) {
           let dot = document.getElementById('sync-dot');
           let txt = document.getElementById('sync-text');
+          let roots = [
+              'main-app', 'login-screen', 'content-area', 'dashboard-warga', 'dashboard-admin',
+              'form-warga', 'form-admin', 'form-kas', 'form-berita', 'form-surat', 'form-aduan',
+              'form-mutasi', 'form-arisan', 'form-notulen', 'form-pengaturan', 'modal-container'
+          ];
+          let loaded = false;
 
-          // Indikator: Sedang memuat
           if(dot) { dot.style.background = 'var(--accent-gold)'; dot.style.boxShadow = '0 0 10px var(--accent-gold)'; }
           if(txt) { txt.innerText = 'Memuat...'; txt.style.color = 'var(--accent-gold)'; }
 
-          // Refresh semua tampilan dari localStorage
-          if(typeof populateDropdownWarga === 'function') populateDropdownWarga();
-          if(typeof loadTabelKKAdmin === 'function') loadTabelKKAdmin();
-          if(typeof loadPengurus === 'function') loadPengurus();
-          if(typeof loadDaruratAdmin === 'function') loadDaruratAdmin();
-          if(typeof loadDaruratWarga === 'function') loadDaruratWarga();
-          if(typeof loadKasBendahara === 'function') loadKasBendahara();
-          if(typeof loadMatriksIuran === 'function') loadMatriksIuran();
-          if(typeof loadKoperasiData === 'function') loadKoperasiData();
-          if(typeof loadDashboardWarga === 'function') loadDashboardWarga();
-          if(typeof loadAduanWarga === 'function') loadAduanWarga();
-          if(typeof loadAduanAdmin === 'function') loadAduanAdmin();
-          if(typeof loadSuratAdmin === 'function') loadSuratAdmin();
-          if(typeof loadSuratWarga === 'function') loadSuratWarga();
-          if(typeof loadMutasi === 'function') loadMutasi();
-          if(typeof loadBeritaAdmin === 'function') loadBeritaAdmin();
-          if(typeof loadBeritaWarga === 'function') loadBeritaWarga();
-          if(typeof loadKegiatan === 'function') loadKegiatan();
-          if(typeof loadProfilPribadiWarga === 'function') loadProfilPribadiWarga();
-          if(typeof loadFormArisan === 'function') loadFormArisan();
-          if(typeof loadNotulenAdmin === 'function') loadNotulenAdmin();
-          if(typeof loadPengaturan === 'function') loadPengaturan();
-          if(typeof loadIuranPribadiWarga === 'function') loadIuranPribadiWarga();
-          if(typeof loadAnalisaUangMeja === 'function') loadAnalisaUangMeja();
-          if(typeof loadArsipBA === 'function') loadArsipBA();
+          if(typeof populateDropdownWarga === 'function') { populateDropdownWarga(); loaded = true; }
+          if(typeof loadTabelKKAdmin === 'function') { loadTabelKKAdmin(); loaded = true; }
+          if(typeof loadPengurus === 'function') { loadPengurus(); loaded = true; }
+          if(typeof loadDaruratAdmin === 'function') { loadDaruratAdmin(); loaded = true; }
+          if(typeof loadDaruratWarga === 'function') { loadDaruratWarga(); loaded = true; }
+          if(typeof loadKasBendahara === 'function') { loadKasBendahara(); loaded = true; }
+          if(typeof loadMatriksIuran === 'function') { loadMatriksIuran(); loaded = true; }
+          if(typeof loadKoperasiData === 'function') { loadKoperasiData(); loaded = true; }
+          if(typeof loadDashboardWarga === 'function') { loadDashboardWarga(); loaded = true; }
+          if(typeof loadAduanWarga === 'function') { loadAduanWarga(); loaded = true; }
+          if(typeof loadAduanAdmin === 'function') { loadAduanAdmin(); loaded = true; }
+          if(typeof loadSuratAdmin === 'function') { loadSuratAdmin(); loaded = true; }
+          if(typeof loadSuratWarga === 'function') { loadSuratWarga(); loaded = true; }
+          if(typeof loadMutasi === 'function') { loadMutasi(); loaded = true; }
+          if(typeof loadBeritaAdmin === 'function') { loadBeritaAdmin(); loaded = true; }
+          if(typeof loadBeritaWarga === 'function') { loadBeritaWarga(); loaded = true; }
+          if(typeof loadKegiatan === 'function') { loadKegiatan(); loaded = true; }
+          if(typeof loadProfilPribadiWarga === 'function') { loadProfilPribadiWarga(); loaded = true; }
+          if(typeof loadFormArisan === 'function') { loadFormArisan(); loaded = true; }
+          if(typeof loadNotulenAdmin === 'function') { loadNotulenAdmin(); loaded = true; }
+          if(typeof loadPengaturan === 'function') { loadPengaturan(); loaded = true; }
+          if(typeof loadIuranPribadiWarga === 'function') { loadIuranPribadiWarga(); loaded = true; }
+          if(typeof loadAnalisaUangMeja === 'function') { loadAnalisaUangMeja(); loaded = true; }
+          if(typeof loadArsipBA === 'function') { loadArsipBA(); loaded = true; }
 
-          // Indikator Hijau: Tersimpan di Lokal
+          roots.forEach(id => {
+              const el = document.getElementById(id);
+              if (el && el.offsetParent !== null) {
+                  el.dispatchEvent(new Event('refresh-data', { bubbles: true }));
+              }
+          });
+
           if(dot) { dot.style.background = 'var(--success)'; dot.style.boxShadow = '0 0 12px var(--success)'; }
-          if(txt) { txt.innerText = 'Tersimpan Lokal'; txt.style.color = 'var(--success)'; }
+          if(txt) { txt.innerText = loaded ? 'Tersimpan Lokal' : 'Siap'; txt.style.color = 'var(--success)'; }
 
           if(!isAuto && typeof Toast !== 'undefined') {
               Toast.fire({ icon: 'success', title: 'Data Diperbarui!' });
           }
+          return true;
       };
 
       // Auto-refresh setiap 5 menit
@@ -3312,6 +3323,7 @@
             noSurat: '-'
         });
         localStorage.setItem('db_req_surat_v2', JSON.stringify(db));
+        if (typeof syncSemuaData === 'function') syncSemuaData(true);
         
         // ANIMASI PROGRESS: Hilangkan form, munculkan progress
         document.getElementById('form-pengajuan-surat').style.display = 'none';
