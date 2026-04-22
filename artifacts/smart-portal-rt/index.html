@@ -1424,6 +1424,26 @@
     }) : { fire: function(o){ try { console.log('[Toast]', o && o.title); } catch(e){} } };
     window.Toast = Toast;
 
+    // Format Rupiah global (dipakai banyak loader: kas, iuran, koperasi, dll)
+    window.fmt = function(v) { return 'Rp ' + Number(v || 0).toLocaleString('id-ID'); };
+    var fmt = window.fmt;
+
+    // Penomoran surat undangan kegiatan untuk admin (counter `surat_counter`)
+    window.getNextSuratNumber = function() {
+        var count = parseInt(localStorage.getItem('surat_counter'));
+        if (isNaN(count) || count < 178) count = 178;
+        var d = new Date();
+        var roman = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+        return count + '/RT.005/RW.012/' + roman[d.getMonth()] + '/' + d.getFullYear();
+    };
+
+    // Stub aman untuk tombol "Batal Edit Darurat" (UI memakai dialog Swal, jadi cukup reset form)
+    window.cancelEditDarurat = function() {
+        var f = document.getElementById('form-darurat'); if (f) f.reset();
+        var c = document.getElementById('btn-cancel-edit-darurat'); if (c) c.style.display = 'none';
+        var b = document.getElementById('btn-submit-darurat'); if (b) b.innerHTML = '<i class="fa-solid fa-save"></i> Tambahkan ke Layar Warga';
+    };
+
     // Pencarian kontak darurat (dipakai input search-darurat di portal warga)
     window.filterKontakDarurat = function() {
         var q = (document.getElementById('search-darurat') || {value:''}).value.toLowerCase().trim();
