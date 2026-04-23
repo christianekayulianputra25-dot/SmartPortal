@@ -2464,7 +2464,7 @@ nav.nav-tabs.hidden-footer {
 .nav-tabs.hidden-footer,
 nav.admin-nav-tabs.hidden-footer,
 nav.nav-tabs.hidden-footer {
-  transform: translateY(calc(100% - 30px)) !important;
+  transform: translateY(100%) !important;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.18) !important;
 }
@@ -2605,7 +2605,7 @@ nav.nav-tabs.hidden-footer {
   body > .app-container .nav-tabs.hidden-footer,
   .app-container .admin-nav-tabs.hidden-footer,
   .app-container .nav-tabs.hidden-footer {
-    transform: translateY(calc(100% - 30px)) !important;
+    transform: translateY(100%) !important;
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
     overflow: visible !important;
   }
@@ -2616,6 +2616,84 @@ nav.nav-tabs.hidden-footer {
     transform: none !important;
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
   }
+}
+
+/* === Mobile-compact admin-nav-tabs (icon-only) so semua tab muat tanpa overflow === */
+@media (max-width: 768px) {
+  body > .app-container .admin-nav-tabs > button,
+  body > .app-container .nav-tabs > button,
+  .app-container .admin-nav-tabs > button,
+  .app-container .nav-tabs > button {
+    min-width: 0 !important;
+    padding: 6px 2px !important;
+    flex: 1 1 0 !important;
+  }
+  body > .app-container .admin-nav-tabs > button > span,
+  body > .app-container .nav-tabs > button > span,
+  .app-container .admin-nav-tabs > button > span,
+  .app-container .nav-tabs > button > span {
+    display: none !important;
+  }
+  body > .app-container .admin-nav-tabs > button > i,
+  body > .app-container .nav-tabs > button > i,
+  .app-container .admin-nav-tabs > button > i,
+  .app-container .nav-tabs > button > i {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+  }
+  body > .app-container .admin-nav-tabs,
+  body > .app-container .nav-tabs,
+  .app-container .admin-nav-tabs,
+  .app-container .nav-tabs {
+    overflow-x: visible !important;
+    padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px)) 4px !important;
+    justify-content: space-evenly !important;
+  }
+}
+
+/* === SweetAlert2 native-feel easing (slide-up + scale) === */
+@keyframes gtSwalSlideIn {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.96); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes gtSwalSlideOut {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(20px) scale(0.97); }
+}
+@keyframes gtSwalBackdropIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gtSwalBackdropOut { from { opacity: 1; } to { opacity: 0; } }
+.swal2-popup.swal2-show {
+  animation: gtSwalSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+.swal2-popup.swal2-hide {
+  animation: gtSwalSlideOut 0.22s cubic-bezier(0.4, 0, 1, 1) both !important;
+}
+.swal2-backdrop-show {
+  animation: gtSwalBackdropIn 0.25s ease both !important;
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
+}
+.swal2-backdrop-hide {
+  animation: gtSwalBackdropOut 0.2s ease both !important;
+}
+.swal2-popup .swal2-confirm,
+.swal2-popup .swal2-cancel,
+.swal2-popup .swal2-deny {
+  transition: transform 0.18s cubic-bezier(0.4,0,0.2,1), filter 0.18s ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.swal2-popup .swal2-confirm:active,
+.swal2-popup .swal2-cancel:active,
+.swal2-popup .swal2-deny:active {
+  transform: scale(0.96) !important;
+  filter: brightness(1.05);
+}
+@media (prefers-reduced-motion: reduce) {
+  .swal2-popup.swal2-show,
+  .swal2-popup.swal2-hide,
+  .swal2-backdrop-show,
+  .swal2-backdrop-hide { animation: none !important; }
 }
 
 /* === Haptic-style tap feedback for action buttons (semua portal) === */
