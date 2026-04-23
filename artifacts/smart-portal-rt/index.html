@@ -2595,6 +2595,145 @@ nav.nav-tabs.hidden-footer {
   }
 }
 
+
+/* ============================================================
+   ===== HOTFIX v10: polish suite (toasts, FAB, a11y, etc) =====
+   ============================================================ */
+
+/* A) Toast notifications */
+#gt-toast-stack {
+  position: fixed; top: max(16px, env(safe-area-inset-top, 0px)); right: 12px;
+  z-index: 99999; display: flex; flex-direction: column; gap: 10px;
+  max-width: min(360px, calc(100vw - 24px)); pointer-events: none;
+}
+.gt-toast {
+  pointer-events: auto;
+  background: var(--gt-surface, #fff);
+  color: var(--gt-text-1, #0f172a);
+  border: 1px solid var(--gt-border, #e2e8f0);
+  border-left: 4px solid var(--gt-primary-600, #1d4ed8);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15,23,42,0.18);
+  padding: 12px 14px 12px 14px;
+  display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center;
+  font-size: 0.88rem; line-height: 1.35;
+  animation: gtToastIn 0.28s cubic-bezier(.2,.9,.3,1.2) both;
+  transform-origin: top right;
+}
+.gt-toast.gt-out { animation: gtToastOut 0.22s ease-in both; }
+.gt-toast.gt-success { border-left-color: #10b981; }
+.gt-toast.gt-warn    { border-left-color: #f59e0b; }
+.gt-toast.gt-error   { border-left-color: #ef4444; }
+.gt-toast.gt-info    { border-left-color: #3b82f6; }
+.gt-toast .gt-t-ico  { font-size: 1.2rem; }
+.gt-toast.gt-success .gt-t-ico { color: #10b981; }
+.gt-toast.gt-warn .gt-t-ico    { color: #f59e0b; }
+.gt-toast.gt-error .gt-t-ico   { color: #ef4444; }
+.gt-toast.gt-info .gt-t-ico    { color: #3b82f6; }
+.gt-toast .gt-t-title { font-weight: 800; font-size: 0.85rem; margin-bottom: 2px; }
+.gt-toast .gt-t-msg   { color: var(--gt-text-2, #475569); }
+.gt-toast .gt-t-close {
+  background: transparent; border: 0; color: var(--gt-text-3, #94a3b8);
+  cursor: pointer; font-size: 1rem; padding: 4px 6px; border-radius: 6px;
+}
+.gt-toast .gt-t-close:hover { color: var(--gt-text-1, #0f172a); background: rgba(0,0,0,0.04); }
+@keyframes gtToastIn  { from { opacity: 0; transform: translateY(-8px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes gtToastOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px) scale(.96); } }
+
+/* B) Scroll-to-top FAB (mobile only) */
+@media (max-width: 768px) {
+  #gt-scroll-top {
+    position: fixed; right: 14px;
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--navy-dark, #001f5b); color: var(--gold-luxury, #f59e0b);
+    border: 2px solid var(--gold-luxury, #f59e0b);
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    z-index: 999; cursor: pointer; font-size: 1.05rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0; transform: translateY(8px);
+  }
+  #gt-scroll-top.visible { display: flex; opacity: 1; transform: translateY(0); }
+  #gt-scroll-top:active { transform: scale(0.92); }
+}
+
+/* C) Connection status pill */
+#gt-net-pill {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  top: max(10px, env(safe-area-inset-top, 0px));
+  background: #ef4444; color: #fff;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 800; letter-spacing: .02em;
+  box-shadow: 0 6px 18px rgba(239,68,68,0.35);
+  z-index: 100000; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#gt-net-pill.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+#gt-net-pill.online  { background: #10b981; box-shadow: 0 6px 18px rgba(16,185,129,0.35); }
+
+/* D) Skeleton shimmer for empty tbodies while data loads */
+@media (max-width: 768px) {
+  tbody.gt-loading td, tbody[data-loading="true"] td {
+    background: linear-gradient(90deg,
+      rgba(15,23,42,0.04) 0%, rgba(15,23,42,0.08) 40%,
+      rgba(15,23,42,0.04) 80%);
+    background-size: 200% 100%;
+    animation: gtShimmer 1.2s infinite linear;
+    color: transparent !important;
+    border-radius: 6px;
+  }
+}
+@keyframes gtShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* E) Accessibility — visible focus rings, but only for keyboard */
+:focus-visible {
+  outline: 3px solid rgba(245,158,11,0.55) !important;
+  outline-offset: 2px !important;
+  border-radius: 6px;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible) { outline: none; }
+
+/* F) Smooth scroll + reduced motion respect */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* G) Better print styles — A4 portrait clean output */
+@media print {
+  .admin-nav-tabs, .nav-tabs, .pull-tab-bca, .main-header,
+  #gt-toast-stack, #gt-scroll-top, #gt-net-pill,
+  .btn-action, .btn-submit, .btn-table,
+  .notif-bell, .gt-search-trigger, .gt-bottom-nav,
+  .form-input-section { display: none !important; }
+  .card, .gt-card { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+  .table-responsive { overflow: visible !important; border: none !important; }
+  .table-responsive table, .card > table { min-width: 0 !important; width: 100% !important; }
+  body { background: #fff !important; padding: 0 !important; }
+}
+
+/* H) Touch target minimums (a11y / WCAG 2.5.5) */
+@media (max-width: 768px) {
+  button, .btn-table, a.btn-action, [role="button"] {
+    min-height: 40px;
+  }
+}
+
+/* I) Tap highlight + selection color polish */
+* { -webkit-tap-highlight-color: rgba(245,158,11,0.15); }
+::selection { background: rgba(245,158,11,0.35); color: #0f172a; }
+
     </style>
     
         
@@ -4140,6 +4279,180 @@ nav.nav-tabs.hidden-footer {
             if (s > 60) clearInterval(ws);
         }, 250);
     })();
+    (function(){
+        // ---------- TOAST SYSTEM ----------
+        function ensureStack(){
+            var s = document.getElementById('gt-toast-stack');
+            if (s) return s;
+            s = document.createElement('div'); s.id = 'gt-toast-stack';
+            document.body.appendChild(s);
+            return s;
+        }
+        var ICONS = {
+            success: 'fa-circle-check', warn: 'fa-triangle-exclamation',
+            error: 'fa-circle-xmark', info: 'fa-circle-info'
+        };
+        function gtToast(opts){
+            opts = opts || {};
+            var type = (opts.type || 'info');
+            var stack = ensureStack();
+            var t = document.createElement('div');
+            t.className = 'gt-toast gt-' + type;
+            var icon = ICONS[type] || ICONS.info;
+            t.innerHTML =
+                '<i class="fa-solid ' + icon + ' gt-t-ico"></i>' +
+                '<div><div class="gt-t-title"></div><div class="gt-t-msg"></div></div>' +
+                '<button class="gt-t-close" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>';
+            t.querySelector('.gt-t-title').textContent = opts.title || 'Notifikasi';
+            t.querySelector('.gt-t-msg').textContent = opts.message || '';
+            function dismiss(){
+                if (t.classList.contains('gt-out')) return;
+                t.classList.add('gt-out');
+                setTimeout(function(){ t.remove(); }, 220);
+            }
+            t.querySelector('.gt-t-close').addEventListener('click', dismiss);
+            stack.appendChild(t);
+            var ttl = opts.ttl == null ? 5000 : opts.ttl;
+            if (ttl > 0) setTimeout(dismiss, ttl);
+            return t;
+        }
+        window.gtToast = gtToast;
+
+        // Watch localStorage for new aduan/surat across tabs (and detect
+        // local changes via a polling diff so it works in single-tab too).
+        function safeJSON(k, fb){ try { var v = JSON.parse(localStorage.getItem(k)||'null'); return v==null?fb:v; } catch(_){ return fb; } }
+        function len(k){ var a = safeJSON(k, []); return Array.isArray(a) ? a.length : 0; }
+
+        var lastCounts = { db_aduan: len('db_aduan'), riwayatSurat: len('riwayatSurat'), db_berita: len('db_berita') };
+        function diffWatch(){
+            try {
+                var cur = { db_aduan: len('db_aduan'), riwayatSurat: len('riwayatSurat'), db_berita: len('db_berita') };
+                if (cur.db_aduan > lastCounts.db_aduan)
+                    gtToast({ type:'warn', title:'Aduan Baru Masuk', message:'Ada laporan warga baru menunggu ditindaklanjuti.' });
+                if (cur.riwayatSurat > lastCounts.riwayatSurat)
+                    gtToast({ type:'info', title:'Pengajuan Surat Baru', message:'Pengajuan surat baru menunggu verifikasi.' });
+                if (cur.db_berita > lastCounts.db_berita)
+                    gtToast({ type:'success', title:'Pengumuman Baru', message:'Berita / pengumuman terbaru telah dipublikasikan.' });
+                lastCounts = cur;
+            } catch(_){}
+        }
+        setInterval(diffWatch, 3500);
+        window.addEventListener('storage', function(e){
+            if (!e.key) return;
+            if (['db_aduan','riwayatSurat','db_berita'].indexOf(e.key) >= 0) diffWatch();
+        });
+
+        // ---------- SCROLL-TO-TOP FAB ----------
+        function ensureScrollFab(){
+            if (document.getElementById('gt-scroll-top')) return;
+            var b = document.createElement('button');
+            b.id = 'gt-scroll-top'; b.type = 'button';
+            b.setAttribute('aria-label','Kembali ke atas');
+            b.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
+            b.addEventListener('click', function(){
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            document.body.appendChild(b);
+        }
+        function updateScrollFab(){
+            var b = document.getElementById('gt-scroll-top'); if (!b) return;
+            if ((window.scrollY || document.documentElement.scrollTop || 0) > 400)
+                b.classList.add('visible');
+            else b.classList.remove('visible');
+        }
+        ensureScrollFab();
+        window.addEventListener('scroll', updateScrollFab, { passive: true });
+
+        // ---------- CONNECTION STATUS PILL ----------
+        function ensureNetPill(){
+            if (document.getElementById('gt-net-pill')) return;
+            var p = document.createElement('div');
+            p.id = 'gt-net-pill'; p.textContent = 'Koneksi terputus';
+            document.body.appendChild(p);
+        }
+        ensureNetPill();
+        var netHideTimer = null;
+        function showNet(online){
+            var p = document.getElementById('gt-net-pill'); if (!p) return;
+            if (netHideTimer) { clearTimeout(netHideTimer); netHideTimer = null; }
+            if (online) {
+                p.textContent = 'Kembali online'; p.classList.add('online'); p.classList.add('visible');
+                netHideTimer = setTimeout(function(){ p.classList.remove('visible'); }, 2200);
+            } else {
+                p.textContent = 'Koneksi terputus'; p.classList.remove('online'); p.classList.add('visible');
+            }
+        }
+        window.addEventListener('online',  function(){ showNet(true);  });
+        window.addEventListener('offline', function(){ showNet(false); });
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) showNet(false);
+
+        // ---------- SKELETON LOADER FOR EMPTY TBODIES ----------
+        function decorateLoadingBodies(){
+            try {
+                document.querySelectorAll('table tbody').forEach(function(tb){
+                    // Heuristic: if the tbody has zero rows AND its table is in a
+                    // .table-responsive AND we've never seen rows before, mark it
+                    // loading. Stop marking after 4s to fall through to "empty state".
+                    if (tb.dataset.gtLoadInit === '1') return;
+                    if (tb.children.length === 0) {
+                        tb.dataset.gtLoadInit = '1';
+                        tb.classList.add('gt-loading');
+                        var thCount = (tb.parentElement && tb.parentElement.querySelectorAll('thead th').length) || 4;
+                        var rows = '';
+                        for (var r = 0; r < 3; r++) {
+                            rows += '<tr>';
+                            for (var c = 0; c < thCount; c++) rows += '<td>placeholder</td>';
+                            rows += '</tr>';
+                        }
+                        tb.innerHTML = rows;
+                        setTimeout(function(){
+                            tb.classList.remove('gt-loading');
+                            // If real code hasn't replaced it, remove our placeholders
+                            if (tb.querySelector('td') && tb.querySelector('td').textContent === 'placeholder') {
+                                tb.innerHTML = '';
+                            }
+                        }, 1400);
+                    }
+                });
+            } catch(_){}
+        }
+        // Run shortly after each tab change
+        ['openWargaTab','openBenTab','openKopTab','openAdminTab','tampilkanView'].forEach(function(fn){
+            var tries = 0;
+            var w = setInterval(function(){
+                tries++;
+                if (typeof window[fn] === 'function' && !window[fn].__gtSkeletonWrapped) {
+                    var orig = window[fn];
+                    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(decorateLoadingBodies, 30); return r; };
+                    window[fn].__gtSkeletonWrapped = true;
+                    clearInterval(w);
+                }
+                if (tries > 60) clearInterval(w);
+            }, 250);
+        });
+
+        // ---------- KEYBOARD SHORTCUTS POLISH ----------
+        // Esc closes any open modal that has a .modal-close or [data-close]
+        document.addEventListener('keydown', function(e){
+            if (e.key !== 'Escape') return;
+            var openModals = document.querySelectorAll('.modal-overlay, .gt-modal, [class*="modal"][style*="display: flex"], [class*="modal"][style*="display:flex"], [class*="modal"][style*="display: block"], [class*="modal"][style*="display:block"]');
+            openModals.forEach(function(m){
+                var btn = m.querySelector('.modal-close, [data-close], .btn-close, [onclick*="close"]');
+                if (btn) btn.click();
+            });
+        });
+
+        // Welcome toast once per session (non-intrusive)
+        try {
+            if (!sessionStorage.getItem('gt_welcomed')) {
+                setTimeout(function(){
+                    gtToast({ type:'success', title:'Portal Siap', message:'Semua sistem RT 005 berjalan normal.', ttl: 3500 });
+                    sessionStorage.setItem('gt_welcomed','1');
+                }, 1200);
+            }
+        } catch(_){}
+    })();
+
     (function(){
         // Undo the v7 "strip pull-tab" behavior: re-create the handle
         // on every nav we see, if it's missing.
