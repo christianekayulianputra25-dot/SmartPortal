@@ -12,15 +12,3 @@ id = "s1HSEcSfjicXiqenzKJHi"
 uri = "file://artifacts/smart-portal-rt/public/smart-portal-rt-source.zip"
 type = "unspecified"
 title = "Smart Portal RT 005 Tegalsari — Source Code (ZIP)"
-
-[[outputs]]
-id = "CWSI-zI86mSysCEQQIxrY"
-uri = "file://downloads/smart-portal-rt-v11-full.zip"
-type = "unspecified"
-title = "Smart Portal RT 005 — Source v11"
-
-[[outputs]]
-id = "w_HYNHu5G8W5wCJhjUsms"
-uri = "file://downloads/smart-portal-rt-v12-full.zip"
-type = "unspecified"
-title = "Smart Portal RT 005 — Source v12"
