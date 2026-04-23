@@ -2011,13 +2011,19 @@ table td b, table td small { word-break: break-word; overflow-wrap: anywhere; }
 /* ---- 1) Force the parent flex/grid to STACK on mobile so the side-bar's
    sibling content can take 100% width (it was being squeezed). */
 @media (max-width: 768px) {
-  #view-warga, #view-bendahara, #view-koperasi, #view-admin,
-  .tab-view, .app-container, .app-view {
-    display: flex !important;
-    flex-direction: column !important;
+  /* Constrain the visible portal view to the viewport without overriding
+     the JS-controlled display:none used to switch portals. */
+  #view-warga, #view-bendahara, #view-koperasi, #view-admin {
     width: 100% !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  /* Only the *active* tab content should occupy space; .tab-view itself
+     (and .app-view) keep their JS-driven display state. */
+  .admin-tab-content, .warga-tab-content, .ben-tab-content, .kop-tab-content {
+    width: 100% !important;
+    max-width: 100vw !important;
     box-sizing: border-box !important;
   }
 }
