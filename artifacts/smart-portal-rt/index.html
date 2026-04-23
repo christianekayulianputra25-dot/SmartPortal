@@ -2988,7 +2988,7 @@ html[data-theme="dark"] select option {
 <div id="login-screen">
     <div id="splash-view" onclick="bukaFormLogin()" style="cursor: pointer; text-align: center; width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="logo-wrap-3d-huge">
-            <img src="Lambang_Kota_Semarang.png" alt="Logo" class="logo-3d-fast" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/1a/Lambang_Kota_Semarang.png';">
+            <img src="/Lambang_Kota_Semarang.png" alt="Logo" class="logo-3d-fast" onerror="this.src='/Lambang_Kota_Semarang.png';">
         </div>
         <h1 class="sipada-title">SMART PORTAL RT 005</h1>
         <p class="sipada-subtitle">TEGALASARI</p>
@@ -3096,7 +3096,7 @@ html[data-theme="dark"] select option {
         <div id="warga-dashboard" class="warga-tab-content active">
             <div class="card-header-premium">
                 <div><h2>Selamat Datang, <br><span id="warga-welcome-name">Warga</span>!</h2><p>Pusat Transparansi dan Pelayanan Mandiri Warga RT 005 Tegalsari.</p></div>
-                <div class="logo-3d-container no-print"><img src="Lambang_Kota_Semarang.png" class="logo-3d" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/1/1a/Lambang_Kota_Semarang.png';"></div>
+                <div class="logo-3d-container no-print"><img src="/Lambang_Kota_Semarang.png" class="logo-3d" onerror="this.onerror=null; this.src='/Lambang_Kota_Semarang.png';"></div>
             </div>
             <div class="stats-grid">
                 <div class="stat-box">
@@ -3340,6 +3340,13 @@ html[data-theme="dark"] select option {
                     <h3><i class="fa-solid fa-table-cells"></i> Matriks Validasi Iuran</h3>
                     <button class="btn-action bg-gold" onclick="postingIuranKeKas()"><i class="fa-solid fa-share-nodes"></i> Eksekusi Posting ke Kas Utama</button>
                 </div>
+                <div style="padding: 0 5px 12px 5px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="position:relative; flex:1; min-width:220px;">
+                        <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#64748b; pointer-events:none;"></i>
+                        <input type="search" id="search-matriks-iuran" placeholder="Cari nama warga..." oninput="filterMatriksIuran(this.value)" style="width:100%; padding:10px 14px 10px 36px; border:1px solid #cbd5e1; border-radius:10px; font-size:0.95rem; background:var(--gt-surface, #ffffff); color:inherit;">
+                    </div>
+                    <span id="matriks-search-info" style="font-size:0.85rem; color:#64748b;"></span>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -3356,7 +3363,7 @@ html[data-theme="dark"] select option {
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
                 <h2 style="margin:0; color:var(--primary-dark); font-size:1.8rem;"><i class="fa-solid fa-chart-pie"></i> Analisa & Pemecahan Iuran</h2>
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;"><button type="button" class="btn-action bg-gold" onclick="cetakAnalisaIuran()" style="font-weight:800; padding:10px 16px;"><i class="fa-solid fa-file-pdf"></i> Ekspor PDF</button><div id="bulan-tagihan-info" style="font-weight:bold; color:white; background: var(--primary-blue); padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(14,165,233,0.3); font-size:1.1rem;">Bulan: Loading...</div></div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;"><button type="button" class="btn-action bg-gold" onclick="cetakAnalisaIuran()" style="font-weight:800; padding:10px 16px;"><i class="fa-solid fa-file-pdf"></i> Ekspor PDF</button><button type="button" class="btn-action" onclick="tampilRiwayatEkspor()" style="font-weight:700; padding:10px 16px;" title="Riwayat dokumen yang pernah dicetak/diekspor"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Ekspor</button><div id="bulan-tagihan-info" style="font-weight:bold; color:white; background: var(--primary-blue); padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(14,165,233,0.3); font-size:1.1rem;">Bulan: Loading...</div></div>
             </div>
 
             <div class="card" style="border-top: 4px solid var(--koperasi); padding: 15px 25px; margin-bottom: 25px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
@@ -3580,7 +3587,7 @@ html[data-theme="dark"] select option {
                             <div class="form-group"><label>NIK Kepala Keluarga *</label><input type="number" id="adm-kk-nik" required></div>
                             <div class="form-group"><label>Pekerjaan</label><input type="text" id="adm-kk-pekerjaan"></div>
                             <div class="form-group"><label>Nomor Telp / WA</label><input type="number" id="adm-kk-telp"></div>
-                            <div class="form-group"><label>Nama Istri</label><input type="text" id="adm-kk-istri"></div>
+                            <div class="form-group"><label>Nama Istri</label><input type="text" id="adm-kk-istri"></div><div class="form-group"><label>Status di Wilayah RT 005</label><label style="display:inline-flex; align-items:center; gap:10px; padding:10px 14px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:10px; cursor:pointer; font-weight:600; user-select:none;"><input type="checkbox" id="adm-kk-aktif" checked style="width:18px; height:18px; accent-color:#16a34a;"><span><i class="fa-solid fa-circle" style="color:#16a34a; font-size:0.8rem;"></i> Aktif tinggal di wilayah RT 005</span></label><small style="display:block; margin-top:6px; color:#64748b;">Hilangkan centang bila warga sudah pindah / tidak aktif tetapi datanya masih disimpan.</small></div>
                             <div class="form-group" style="grid-column: 1 / -1;"><label>Alamat Lengkap / Blok *</label><input type="text" id="adm-kk-alamat" placeholder="Contoh: Blok A No. 12" required></div>
                         </div>
                         <h4 style="margin-top:20px; border-bottom:1px solid #e2e8f0; padding-bottom:10px; color:var(--primary-dark);">Data Anak</h4>
@@ -3788,7 +3795,7 @@ html[data-theme="dark"] select option {
     </div> </div>
         <div id="hidden-pdf-container" style="display: none !important;">
     <div class="letter-paper" id="surat-warga-paper">
-        <div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" class="kop-logo" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kota_Semarang.png/600px-Lambang_Kota_Semarang.png'"><div class="kop-teks"><h2>KOTA SEMARANG</h2><h3>KECAMATAN CANDISARI</h3><h3>KELURAHAN TEGALSARI</h3><h3>RT. 005 / RW. 012</h3></div></div><div class="kop-garis"></div>
+        <div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" class="kop-logo" onerror="this.src='/Lambang_Kota_Semarang.png'"><div class="kop-teks"><h2>KOTA SEMARANG</h2><h3>KECAMATAN CANDISARI</h3><h3>KELURAHAN TEGALSARI</h3><h3>RT. 005 / RW. 012</h3></div></div><div class="kop-garis"></div>
         <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:1.05rem; color:#000;"><div style="width:55%;"><div>Nomor : <b id="pdf-no"></b></div><div>Lampiran : -</div><div style="font-weight:bold; text-decoration:underline; margin-top:5px;">Hal : Surat Pengantar</div></div><div style="text-align:right;"><div>Semarang, <span id="pdf-tgl"></span></div><div style="margin-top:10px;">Kepada Yth.<br><b>Kepala Kelurahan Tegalsari</b><br>di -<br>    <b style="text-transform:uppercase; text-decoration:underline;">Semarang</b></div></div></div>
         <p style="margin-bottom:15px; color:#000; font-size:1.05rem;">Bersama ini menerangkan bahwa :</p>
         <table class="tabel-isi-surat">
@@ -3809,7 +3816,7 @@ html[data-theme="dark"] select option {
 
 <div id="hidden-notulen-container" style="display: none;">
     <div class="letter-paper" id="notulen-paper">
-        <div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width: 70px; height: auto; filter: grayscale(100%);"><div style="flex: 1; text-align: center;"><h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; text-transform: uppercase; color: black;">PENGURUS RUKUN TETANGGA 005 RUKUN WARGA 012</h2><h3 style="margin: 2px 0; font-size: 1.1rem; font-weight: normal; text-transform: uppercase; color: black;">KELURAHAN TEGALSARI • KECAMATAN CANDISARI</h3><h3 style="margin: 2px 0; font-size: 1.1rem; font-weight: normal; text-transform: uppercase; color: black;">KOTA SEMARANG</h3></div></div>
+        <div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" style="width: 70px; height: auto; filter: grayscale(100%);"><div style="flex: 1; text-align: center;"><h2 style="margin: 0; font-size: 1.4rem; font-weight: bold; text-transform: uppercase; color: black;">PENGURUS RUKUN TETANGGA 005 RUKUN WARGA 012</h2><h3 style="margin: 2px 0; font-size: 1.1rem; font-weight: normal; text-transform: uppercase; color: black;">KELURAHAN TEGALSARI • KECAMATAN CANDISARI</h3><h3 style="margin: 2px 0; font-size: 1.1rem; font-weight: normal; text-transform: uppercase; color: black;">KOTA SEMARANG</h3></div></div>
         <div style="border-top: 3px solid black; border-bottom: 1px solid black; height: 1px; margin-bottom: 20px; padding-top: 2px;"></div>
         <h3 style="text-align:center; text-decoration:underline; font-weight:bold; color:black; margin-bottom: 25px;">NOTULENSI RAPAT</h3>
         <table style="width:100%; font-size:1.1rem; color:black; border:none; margin-bottom: 25px;"><tr><td style="width:150px; padding:3px 0; border:none; background:transparent;">Hari, Tanggal</td><td style="width:20px; border:none; background:transparent;">:</td><td style="border:none; background:transparent;"><b id="cetak_n_tgl"></b></td></tr><tr><td style="padding:3px 0; border:none; background:transparent;">Agenda Utama</td><td style="border:none; background:transparent;">:</td><td style="border:none; background:transparent;"><b id="cetak_n_judul"></b></td></tr></table>
@@ -4743,6 +4750,15 @@ html[data-theme="dark"] select option {
         } catch(e) { console.warn('img rewrite failed', e); }
         // Base href agar gambar/asset relatif (mis. Lambang_Kota_Semarang.png) tetap resolve dalam iframe
         var baseHref = (location.origin + location.pathname).replace(/[^\/]*$/, '');
+        // Riwayat ekspor: catat tanggal & nama dokumen setiap kali dicetak
+        try {
+            var __rwk = JSON.parse(localStorage.getItem('db_riwayat_ekspor')) || [];
+            __rwk.push({ id: Date.now(), ts: Date.now(), tgl: new Date().toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }), judul: String(title || 'Cetak Dokumen') });
+            if (__rwk.length > 500) __rwk = __rwk.slice(-500);
+            localStorage.setItem('db_riwayat_ekspor', JSON.stringify(__rwk));
+            localStorage.setItem('ts_riwayat_ekspor', new Date().toISOString());
+            if (typeof syncSemuaData === 'function') { try { syncSemuaData(true); } catch(e){} }
+        } catch(e) { console.warn('riwayat ekspor gagal disimpan', e); }
         doc.open();
         doc.write('<!DOCTYPE html><html lang="id" data-theme="light" style="color-scheme: light;"><head><meta charset="utf-8">' +
             '<base href="' + baseHref + '">' +
@@ -4791,7 +4807,7 @@ html[data-theme="dark"] select option {
         var saldo = totalSetor - totalTarik;
         var tgl = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
         var html = '<div class="letter-paper" style="padding:0;">'+
-            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
             '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">KOPERASI WARGA RT 005 / RW 012</h2>'+
             '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; SEMARANG</h3></div></div>'+
             '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">BERITA ACARA REKAP TABUNGAN ('+bulan+')</h3>'+
@@ -4832,7 +4848,7 @@ html[data-theme="dark"] select option {
         }).join('');
         var tgl = new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
         var html = '<div class="letter-paper" style="padding:0;">'+
-            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
             '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">KOPERASI WARGA RT 005 / RW 012</h2>'+
             '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; SEMARANG</h3></div></div>'+
             '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">BERITA ACARA REKAP PINJAMAN ('+bulan+')</h3>'+
@@ -5185,7 +5201,7 @@ html[data-theme="dark"] select option {
 
     window.tampilFormKKAdmin = function(show) { document.getElementById('admin-view-kk').style.display = show ? 'none' : 'block'; document.getElementById('admin-form-kk').style.display = show ? 'block' : 'none'; if(!show) { document.getElementById('form-kk-admin').reset(); document.getElementById('adm-kk-id').value = ''; document.getElementById('adm-container-anak').innerHTML=''; } };
     window.tambahKolomAnakAdmin = function() { let d = document.createElement('div'); d.innerHTML = `<input type="text" class="adm_anak" placeholder="Nama Lengkap Anak" style="margin-top:10px; width:100%; padding:14px 18px; border:2px solid #e2e8f0; border-radius:12px;">`; document.getElementById('adm-container-anak').appendChild(d); };
-    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); localStorage.setItem('ts_warga', new Date().toISOString()); tampilFormKKAdmin(false); loadTabelKKAdmin(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success', title:'Disimpan!'}); };
+    window.simpanKKAdmin = function() { let db = JSON.parse(localStorage.getItem('db_warga')) || []; let anak = []; document.querySelectorAll('.adm_anak').forEach(i => { if(i.value.trim() !== '') anak.push(i.value.trim()); }); let id = document.getElementById('adm-kk-id').value; let __aktifEl = document.getElementById('adm-kk-aktif'); let __aktif = __aktifEl ? !!__aktifEl.checked : true; let data = { nama: document.getElementById('adm-kk-nama').value, kk: document.getElementById('adm-kk-nokk').value, nik: document.getElementById('adm-kk-nik').value, pekerjaan: document.getElementById('adm-kk-pekerjaan').value, telp: document.getElementById('adm-kk-telp').value, istri: document.getElementById('adm-kk-istri').value, alamat: document.getElementById('adm-kk-alamat').value, anak: anak, aktif: __aktif }; if(id) { let idx = db.findIndex(x => String(x.id) === String(id)); if(idx !== -1) db[idx] = { id: parseInt(id), ...data }; } else { db.push({ id: Date.now(), ...data }); } localStorage.setItem('db_warga', JSON.stringify(db)); localStorage.setItem('ts_warga', new Date().toISOString()); tampilFormKKAdmin(false); loadTabelKKAdmin(); if (typeof syncSemuaData === 'function') syncSemuaData(true); Toast.fire({icon:'success', title:'Disimpan!'}); };
     window.prosesImportExcelWarga = function(e) { let file = e.target.files[0]; if(!file) return; let reader = new FileReader(); reader.onload = function(evt) { let data = new Uint8Array(evt.target.result); let wb = XLSX.read(data, {type: 'array'}); let rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1}); let db = JSON.parse(localStorage.getItem('db_warga')) || []; let added = 0; for(let i=1; i<rows.length; i++) { let r=rows[i]; if(r&&r[0]){ db.push({ id: Date.now()+Math.random(), nama: String(r[0]).trim(), kk: r[1]||'', nik: r[2]||'', alamat: r[3]||'', istri: '', anak: [] }); added++; } } localStorage.setItem('db_warga', JSON.stringify(db)); loadTabelKKAdmin();  Swal.fire('Selesai', `${added} KK terupload.`, 'success'); }; reader.readAsArrayBuffer(file); e.target.value = ''; };
     window.closeModalProfil = function() { document.getElementById('modal-profil').classList.remove('show'); };
     window.loadTabelKKAdmin = function() { 
@@ -5199,7 +5215,7 @@ html[data-theme="dark"] select option {
                 <td>${idx+1}</td>
                 <td>
                     <div style="min-width: 120px; white-space: normal; word-break: break-word; line-height: 1.4;">
-                        <b style="color:var(--primary-dark);">${w.nama}</b><br><small>NIK: ${w.nik||'-'}</small>
+                        <b style="color:var(--primary-dark);">${w.nama}</b> <span title="${w.aktif===false?'Tidak aktif di wilayah':'Aktif di wilayah RT 005'}" style="display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:0.7rem; font-weight:700; vertical-align:middle; ${w.aktif===false ? 'background:#fee2e2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#166534; border:1px solid #86efac;'}"><i class="fa-solid fa-circle" style="font-size:0.55rem;"></i> ${w.aktif===false?'Tidak Aktif':'Aktif'}</span><br><small>NIK: ${w.nik||'-'}</small>
                     </div>
                 </td>
                 <td>
@@ -5225,7 +5241,7 @@ html[data-theme="dark"] select option {
         let db = JSON.parse(localStorage.getItem('db_warga')) || []; 
         let w = db.find(x => String(x.id) === String(id)); 
         if(w) { 
-            document.getElementById('adm-kk-id').value = w.id; document.getElementById('adm-kk-nama').value = w.nama||''; document.getElementById('adm-kk-nokk').value = w.kk||''; document.getElementById('adm-kk-nik').value = w.nik||''; document.getElementById('adm-kk-pekerjaan').value = w.pekerjaan||''; document.getElementById('adm-kk-telp').value = w.telp||''; document.getElementById('adm-kk-istri').value = w.istri||''; document.getElementById('adm-kk-alamat').value = w.alamat||''; document.getElementById('adm-container-anak').innerHTML = ''; 
+            document.getElementById('adm-kk-id').value = w.id; document.getElementById('adm-kk-nama').value = w.nama||''; document.getElementById('adm-kk-nokk').value = w.kk||''; document.getElementById('adm-kk-nik').value = w.nik||''; document.getElementById('adm-kk-pekerjaan').value = w.pekerjaan||''; document.getElementById('adm-kk-telp').value = w.telp||''; document.getElementById('adm-kk-istri').value = w.istri||''; document.getElementById('adm-kk-alamat').value = w.alamat||''; document.getElementById('adm-container-anak').innerHTML = ''; if(document.getElementById('adm-kk-aktif')) document.getElementById('adm-kk-aktif').checked = (w.aktif !== false); 
             if(w.anak) { w.anak.forEach(a => { let d = document.createElement('div'); d.innerHTML = `<input type="text" class="adm_anak" value="${a}" style="margin-top:10px; width:100%; padding:14px 18px; border:2px solid #e2e8f0; border-radius:12px;">`; document.getElementById('adm-container-anak').appendChild(d); }); } 
             tampilFormKKAdmin(true); window.scrollTo({top: 0}); 
         } 
@@ -5259,7 +5275,7 @@ html[data-theme="dark"] select option {
             title: 'Detail Keluarga',
             html: `
                 <div style="text-align: left; font-size: 0.9rem;">
-                    <p><strong>Kepala Keluarga:</strong> ${warga.nama}</p>
+                    <div style="margin-bottom:12px; padding:10px 14px; border-radius:10px; display:inline-flex; align-items:center; gap:10px; font-weight:700; ${warga.aktif===false ? 'background:#fee2e2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#166534; border:1px solid #86efac;'}"><span style="display:inline-block; width:12px; height:12px; border-radius:50%; ${warga.aktif===false ? 'background:#dc2626;' : 'background:#16a34a;'}"></span>${warga.aktif===false ? 'TIDAK AKTIF di Wilayah RT 005 (Data tetap tersimpan)' : 'AKTIF tinggal di Wilayah RT 005'}</div><br><p><strong>Kepala Keluarga:</strong> ${warga.nama}</p>
                     <p><strong>No. KK:</strong> ${warga.kk || '-'}</p>
                     <p><strong>NIK:</strong> ${warga.nik || '-'}</p>
                     <p><strong>Pekerjaan:</strong> ${warga.pekerjaan || '-'}</p>
@@ -5710,7 +5726,7 @@ html[data-theme="dark"] select option {
         let htmlCetak = `
         <div style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; background: white; color: black; font-family: 'Times New Roman', Times, serif; line-height: 1.5; margin: 0 auto; position:relative;">
             <div style="display: flex; align-items: center; border-bottom: 4px double black; padding-bottom: 10px; margin-bottom: 20px;">
-                <img src="Lambang_Kota_Semarang.png" style="width: 80px; height: auto; filter: grayscale(100%); margin-right:20px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kota_Semarang.png/600px-Lambang_Kota_Semarang.png'">
+                <img src="/Lambang_Kota_Semarang.png" style="width: 80px; height: auto; filter: grayscale(100%); margin-right:20px;" onerror="this.src='/Lambang_Kota_Semarang.png'">
                 <div style="flex: 1; text-align: center;">
                     <h2 style="margin: 0; font-size: 24px; font-weight: bold;">KOTA SEMARANG</h2>
                     <h3 style="margin: 2px 0; font-size: 20px; font-weight:normal;">KECAMATAN CANDISARI</h3>
@@ -5872,7 +5888,7 @@ html[data-theme="dark"] select option {
             '<td style="border:1px solid #000;"><b>'+(a.judul||'-')+'</b><br><small>'+(a.isi||'')+'</small></td>'+
             '<td style="border:1px solid #000; text-align:center;">'+(a.status||'-')+'</td></tr>').join('');
         let html = '<div class="letter-paper" style="padding:0;">'+
-            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
             '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.3rem; font-weight:bold; text-transform:uppercase;">PENGURUS RT 005 / RW 012</h2>'+
             '<h3 style="margin:2px 0; font-size:1rem; font-weight:normal;">KELURAHAN TEGALSARI &bull; CANDISARI &bull; SEMARANG</h3></div></div>'+
             '<hr style="border:0; border-top:3px solid black;"><h3 style="text-align:center; text-decoration:underline;">REKAPITULASI ADUAN WARGA ('+fb+')</h3>'+
@@ -5980,6 +5996,49 @@ html[data-theme="dark"] select option {
     // === MESIN HIDE & SEEK DAFTAR PENAGIHAN ===
 
     // === MESIN ANALISA & PENAGIHAN REAL-TIME (DIBEDAH 3 POS) ===
+    window.tampilRiwayatEkspor = function() {
+        var rw = JSON.parse(localStorage.getItem('db_riwayat_ekspor')) || [];
+        rw.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+        var rows = rw.length ? rw.map(function(r,i){
+            return '<tr>' +
+                '<td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center;">' + (i+1) + '</td>' +
+                '<td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; white-space:nowrap;">' + (r.tgl || '-') + '</td>' +
+                '<td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; word-break:break-word;">' + (r.judul || '-') + '</td>' +
+                '<td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center;"><button class="btn-action" style="padding:4px 8px; font-size:0.75rem;" onclick="hapusRiwayatEkspor(' + r.id + ')" title="Hapus entri"><i class="fa-solid fa-trash"></i></button></td>' +
+            '</tr>';
+        }).join('') : '<tr><td colspan="4" style="padding:20px; text-align:center; color:#64748b;"><i class="fa-solid fa-folder-open"></i> Belum ada dokumen yang diekspor.</td></tr>';
+        var html = '<div style="max-height:55vh; overflow:auto; text-align:left; border:1px solid #cbd5e1; border-radius:8px;">' +
+            '<table style="width:100%; border-collapse:collapse; font-size:0.9rem;">' +
+            '<thead><tr style="background:#f1f5f9; position:sticky; top:0;"><th style="padding:8px;">No</th><th style="padding:8px; text-align:left;">Tanggal</th><th style="padding:8px; text-align:left;">Nama Dokumen</th><th style="padding:8px; width:60px;">Aksi</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody></table></div>' +
+            '<div style="margin-top:10px; font-size:0.8rem; color:#64748b;">Total: <b>' + rw.length + '</b> ekspor tercatat</div>';
+        Swal.fire({
+            title: '<i class="fa-solid fa-clock-rotate-left"></i> Riwayat Ekspor Dokumen',
+            html: html, width: 720,
+            showCancelButton: true, cancelButtonText: 'Tutup',
+            confirmButtonText: '<i class="fa-solid fa-broom"></i> Bersihkan Semua',
+            confirmButtonColor: '#ef4444',
+        }).then(function(res){
+            if (res.isConfirmed) {
+                Swal.fire({ title:'Hapus seluruh riwayat?', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444' }).then(function(r){
+                    if (r.isConfirmed) {
+                        localStorage.setItem('db_riwayat_ekspor', '[]');
+                        localStorage.setItem('ts_riwayat_ekspor', new Date().toISOString());
+                        if (typeof syncSemuaData === 'function') { try { syncSemuaData(true); } catch(e){} }
+                        Toast.fire({ icon:'success', title:'Riwayat dibersihkan' });
+                    }
+                });
+            }
+        });
+    };
+    window.hapusRiwayatEkspor = function(id) {
+        var rw = JSON.parse(localStorage.getItem('db_riwayat_ekspor')) || [];
+        rw = rw.filter(function(x){ return String(x.id) !== String(id); });
+        localStorage.setItem('db_riwayat_ekspor', JSON.stringify(rw));
+        localStorage.setItem('ts_riwayat_ekspor', new Date().toISOString());
+        if (typeof syncSemuaData === 'function') { try { syncSemuaData(true); } catch(e){} }
+        window.tampilRiwayatEkspor();
+    };
     window.cetakAnalisaIuran = function() {
         try {
             var dbIuran = JSON.parse(localStorage.getItem('db_iuran')) || [];
@@ -6007,7 +6066,7 @@ html[data-theme="dark"] select option {
             var tgl = new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
             var html = '' +
                 '<div class="kop-surat-resmi" style="display:flex; align-items:center; gap:15px; border-bottom:3px double #000; padding-bottom:10px; margin-bottom:15px;">' +
-                  '<img src="Lambang_Kota_Semarang.png" alt="Logo Semarang" style="width:80px; height:auto;">' +
+                  '<img src="/Lambang_Kota_Semarang.png" alt="Logo Semarang" style="width:80px; height:auto;">' +
                   '<div style="text-align:center; flex:1;">' +
                     '<div style="font-size:13pt; font-weight:bold;">PENGURUS RT 005 / RW 012</div>' +
                     '<div style="font-size:12pt; font-weight:bold;">KELURAHAN TEGALSARI - KOTA SEMARANG</div>' +
@@ -6358,7 +6417,7 @@ html[data-theme="dark"] select option {
         // Bangun konten kop surat agar preview cetak benar-benar muncul
         let isiHTML = (n.isi||'').replace(/\n/g, '<br>');
         let html = '<div class="letter-paper" style="padding:0;">'+
-            '<div class="kop-surat-resmi"><img src="Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
+            '<div class="kop-surat-resmi"><img src="/Lambang_Kota_Semarang.png" style="width:70px; filter:grayscale(100%);">'+
             '<div style="flex:1; text-align:center;"><h2 style="margin:0; font-size:1.4rem; font-weight:bold; text-transform:uppercase;">PENGURUS RUKUN TETANGGA 005 RUKUN WARGA 012</h2>'+
             '<h3 style="margin:2px 0; font-size:1.1rem; font-weight:normal; text-transform:uppercase;">KELURAHAN TEGALSARI &bull; KECAMATAN CANDISARI &bull; KOTA SEMARANG</h3></div></div>'+
             '<div style="border-top:3px solid black; border-bottom:1px solid black; height:1px; margin-bottom:20px;"></div>'+
@@ -6602,7 +6661,7 @@ html[data-theme="dark"] select option {
         return `
         <div class="letter-paper" style="padding: 20px 30px; color: black; font-family: 'Times New Roman', Times, serif; background: white; margin: 0 auto;">
             <div style="display:flex; align-items:center; border-bottom: 3px solid black; padding-bottom: 15px; margin-bottom: 20px;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Lambang_Kota_Semarang.png/400px-Lambang_Kota_Semarang.png" style="width: 75px; height: auto; margin-right: 20px;" alt="Logo Semarang">
+                <img src="/Lambang_Kota_Semarang.png" style="width: 75px; height: auto; margin-right: 20px;" alt="Logo Semarang">
                 <div style="flex:1; text-align:center;">
                     <h2 style="margin:0; font-size:1.4rem; text-transform:uppercase; letter-spacing:1px; color:black;">PENGURUS RT 005 / RW 012</h2>
                     <h3 style="margin:5px 0; font-size:1.1rem; font-weight:normal; color:black;">KELURAHAN TEGALSARI - KOTA SEMARANG</h3>
@@ -6701,6 +6760,24 @@ html[data-theme="dark"] select option {
     if(bLoaders[t]) bLoaders[t]();
 };
     // === FITUR POP-UP KARTU DIGITAL WARGA (UPGRADE DESAIN & ANTI-MACET) ===
+    window.filterMatriksIuran = function(q) {
+        try {
+            q = String(q || '').trim().toLowerCase();
+            var tb = document.getElementById('tbody-global-iuran');
+            if (!tb) return;
+            var rows = tb.querySelectorAll('tr');
+            var shown = 0;
+            rows.forEach(function(tr){
+                var td = tr.querySelector('td');
+                var nama = td ? td.innerText.toLowerCase() : '';
+                var match = !q || nama.indexOf(q) !== -1;
+                tr.style.display = match ? '' : 'none';
+                if (match) shown++;
+            });
+            var info = document.getElementById('matriks-search-info');
+            if (info) info.innerText = q ? (shown + ' warga cocok dengan "' + q + '"') : '';
+        } catch(e) { console.warn('filterMatriksIuran error', e); }
+    };
     window.lihatKartuWarga = function(idWarga) {
         try {
             let dbIuran = JSON.parse(localStorage.getItem('db_iuran')) || [];
@@ -6765,7 +6842,7 @@ html[data-theme="dark"] select option {
             
             // Luncurkan Pop-Up Kartu
             Swal.fire({ 
-                title: `<div style="border-bottom:2px solid #0ea5e9; padding-bottom:10px; display:inline-block;"><i class="fa-solid fa-id-card" style="color:#0ea5e9;"></i> Kartu Digital</div><br><span style="font-size:1.2rem; font-weight:900;">${warga.nama}</span>`, 
+                title: `<div style="border-bottom:2px solid #0ea5e9; padding-bottom:10px; display:inline-block;"><i class="fa-solid fa-id-card" style="color:#0ea5e9;"></i> Kartu Digital</div><br><span style="font-size:1.2rem; font-weight:900;">${warga.nama}</span><br><span style="display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px; border-radius:999px; font-size:0.75rem; font-weight:700; ${warga.aktif===false ? 'background:#fee2e2; color:#991b1b; border:1px solid #fecaca;' : 'background:#dcfce7; color:#166534; border:1px solid #86efac;'}"><span style="width:8px; height:8px; border-radius:50%; ${warga.aktif===false ? 'background:#dc2626;' : 'background:#16a34a;'}"></span>${warga.aktif===false ? 'Tidak Aktif di Wilayah' : 'Aktif di Wilayah'}</span>`, 
                 html: htmlContent, 
                 width: 500, 
                 confirmButtonColor: '#0ea5e9', 
@@ -7207,7 +7284,7 @@ window.cetakPDFSurat = function(id, isSalinan) {
         ${watermarkHTML}
         
         <div style="display: flex; align-items: center; border-bottom: 4px double black; padding-bottom: 8px; margin-bottom: 15px; z-index:2; position:relative;">
-            <img src="Lambang_Kota_Semarang.png" style="width: 75px; height: auto; filter: grayscale(100%); margin-right:20px;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kota_Semarang.png/600px-Lambang_Kota_Semarang.png'">
+            <img src="/Lambang_Kota_Semarang.png" style="width: 75px; height: auto; filter: grayscale(100%); margin-right:20px;" onerror="this.src='/Lambang_Kota_Semarang.png'">
             <div style="flex: 1; text-align: center;">
                 <h2 style="margin: 0; font-size: 22px; font-weight: bold; letter-spacing: 1px;">PEMERINTAH KOTA SEMARANG</h2>
                 <h3 style="margin: 1px 0; font-size: 19px; font-weight:normal;">KECAMATAN CANDISARI</h3>
@@ -7848,6 +7925,22 @@ function updateSemuaWaktu() {
         Toast.fire({ icon:'info', title:'WhatsApp ke sekretaris dibuka' });
       };
     })();
+</script>
+
+<script>
+// === Hook: re-apply Matriks search filter setiap loadMatriksIuran selesai ===
+(function(){
+  if (window.__matriksFilterHooked) return; window.__matriksFilterHooked = true;
+  var tryWrap = function(){
+    if (typeof window.loadMatriksIuran !== 'function') { setTimeout(tryWrap, 400); return; }
+    if (window.loadMatriksIuran.__wrapped) return;
+    var orig = window.loadMatriksIuran;
+    var wrapped = function(){ var r = orig.apply(this, arguments); try { var q = (document.getElementById('search-matriks-iuran')||{}).value; if (q && typeof window.filterMatriksIuran==='function') window.filterMatriksIuran(q); } catch(e){} return r; };
+    wrapped.__wrapped = true;
+    window.loadMatriksIuran = wrapped;
+  };
+  tryWrap();
+})();
 </script>
 </body>
 </html>
