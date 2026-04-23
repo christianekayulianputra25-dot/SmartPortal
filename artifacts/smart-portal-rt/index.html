@@ -1993,6 +1993,225 @@ table td b, table td small { word-break: break-word; overflow-wrap: anywhere; }
   font-variant-numeric: tabular-nums;
 }
 
+
+/* ============================================================
+   ===== HOTFIX v6: mobile layout repair (full portal) =====
+   Legacy mobile CSS turns .admin-nav-tabs into a fixed
+   bottom grid nav (BCA-style). v4/v5 broke it by forcing
+   sticky+horizontal. Restore + harmonize below.
+   ============================================================ */
+
+/* ---- 0) Remove conflicting Phase-2 bottom nav we injected.
+   The legacy bottom nav already handles every role consistently. */
+#gt-bottom-nav, .gt-bottom-nav { display: none !important; }
+@media (max-width: 768px) {
+  body { padding-bottom: 0 !important; }
+}
+
+/* ---- 1) Force the parent flex/grid to STACK on mobile so the side-bar's
+   sibling content can take 100% width (it was being squeezed). */
+@media (max-width: 768px) {
+  #view-warga, #view-bendahara, #view-koperasi, #view-admin,
+  .tab-view, .app-container, .app-view {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ---- 2) Re-assert the legacy bottom-fixed nav, with adaptive columns. */
+@media (max-width: 768px) {
+  .admin-nav-tabs, .nav-tabs {
+    /* Hard reset of any v4/v5 override */
+    position: fixed !important;
+    left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    display: grid !important;
+    /* auto-fit so 2 tabs => 2 cols, 4 tabs => 4 cols, 6+ => scrollable single row */
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)) !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(70px, 1fr) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px !important;
+    padding: 8px 8px calc(10px + var(--gt-safe-bottom, 0px)) 8px !important;
+    background: var(--navy-dark, #001f5b) !important;
+    border-top: 3px solid var(--gold-luxury, #f59e0b) !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.30) !important;
+    z-index: 1000 !important;
+    flex-wrap: nowrap !important;
+  }
+  /* Hide-on-toggle behaviour from legacy code */
+  .admin-nav-tabs.hidden-footer, .nav-tabs.hidden-footer {
+    transform: translateY(100%) !important;
+  }
+
+  .admin-nav-tabs > button, .nav-tabs > button,
+  .admin-tab-btn, .nav-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 6px 4px !important;
+    margin: 0 !important;
+    min-height: 56px !important;
+    border-radius: 10px !important;
+    color: #cbd5e1 !important;
+    white-space: nowrap !important;
+  }
+  .admin-tab-btn i, .nav-btn i {
+    margin: 0 0 4px 0 !important;
+    font-size: 1.15rem !important;
+    color: #cbd5e1 !important;
+  }
+  .admin-tab-btn span, .nav-btn span {
+    display: block !important;
+    font-size: 0.62rem !important;
+    line-height: 1.1 !important;
+    color: #cbd5e1 !important;
+    font-weight: 700 !important;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .admin-tab-btn.active, .nav-btn.active {
+    background: rgba(245,158,11,0.12) !important;
+  }
+  .admin-tab-btn.active i, .admin-tab-btn.active span,
+  .nav-btn.active i, .nav-btn.active span {
+    color: var(--gold-luxury, #f59e0b) !important;
+    text-shadow: 0 0 8px rgba(245,158,11,0.35) !important;
+  }
+  /* Active indicator pill */
+  .admin-tab-btn.active::before, .nav-btn.active::before {
+    content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 3px; border-radius: 2px;
+    background: var(--gold-luxury, #f59e0b);
+  }
+  .admin-tab-btn, .nav-btn { position: relative; }
+
+  /* Body needs space so the bottom nav doesn't cover content */
+  body { padding-bottom: calc(76px + var(--gt-safe-bottom, 0px)) !important; }
+  /* Tab content takes 100% width and clears bottom nav */
+  .admin-tab-content, .warga-tab-content, .ben-tab-content, .kop-tab-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    padding: 14px 14px 100px 14px !important;
+    overflow-x: hidden !important;
+  }
+  .admin-tab-content.active, .warga-tab-content.active,
+  .ben-tab-content.active, .kop-tab-content.active {
+    display: block !important;
+  }
+}
+
+/* ---- 3) Inside-card buttons (Refresh/Import/Tambah) — wrap properly ---- */
+@media (max-width: 768px) {
+  .card .btn-action, .form-input-section .btn-action,
+  .card .btn-submit, .form-input-section .btn-submit {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    font-size: 0.82rem !important;
+    padding: 10px 12px !important;
+    white-space: normal;
+  }
+  /* Action button rows (the dotted dev panel + KK action row) */
+  .card > div[style*="display:flex"], .card > div[style*="display: flex"],
+  .form-input-section > div[style*="display:flex"], .form-input-section > div[style*="display: flex"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .card { padding: 16px !important; border-radius: 14px !important; }
+}
+@media (max-width: 414px) {
+  .card .btn-action, .form-input-section .btn-action {
+    flex: 1 1 100%;
+  }
+}
+
+/* ---- 4) KK list items / data cards — fluid full width ---- */
+@media (max-width: 768px) {
+  /* Numbered/badge KK card containers commonly use inline 'border:1px solid #e2e8f0' style */
+  [style*="border-radius:12px"][style*="padding"], 
+  [style*="border-radius: 12px"][style*="padding"] {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ---- 5) Header row spacing on tablet/phone ---- */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 10px 14px !important;
+    padding-top: calc(10px + var(--gt-safe-top, 0px)) !important;
+    gap: 10px !important;
+  }
+  /* Search row sits BELOW the user/actions row */
+  .gt-search-wrap {
+    order: 99 !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .main-header > div:first-child { flex: 1 1 auto !important; min-width: 0 !important; }
+  .main-header > div:last-child  { flex: 0 0 auto !important; flex-wrap: nowrap !important; gap: 8px !important; }
+  .user-text-header { max-width: calc(100vw - 220px); }
+}
+
+/* ---- 6) Notif panel docks correctly under bell on mobile ---- */
+@media (max-width: 768px) {
+  .gt-notif-panel {
+    position: fixed !important;
+    top: auto !important;
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    bottom: calc(80px + var(--gt-safe-bottom, 0px)) !important;
+    max-height: 70vh !important;
+  }
+  .gt-notif-body { max-height: calc(70vh - 100px) !important; }
+}
+
+/* ---- 7) Stat boxes / form rows / images stay inside the viewport ---- */
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-box { padding: 14px !important; min-height: 120px !important; }
+  .stat-box h2 { font-size: 1.4rem !important; }
+  .stat-box .bg-icon { font-size: 1.8rem !important; opacity: 0.10; }
+  .form-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 360px) {
+  .stats-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ---- 8) Scrolling marquee containers shouldn't push width ---- */
+.scrolling-wrapper, .berita-marquee-container { max-width: 100% !important; overflow: hidden !important; }
+
+/* ---- 9) Modal positioning safety ---- */
+@media (max-width: 480px) {
+  .gt-warga-modal { padding: 12px !important; align-items: flex-end !important; }
+  .gt-warga-modal-content { max-width: 100% !important; border-radius: 18px 18px 0 0 !important; max-height: 88vh !important; }
+}
+
+/* ---- 10) Dev panel and toast layering ---- */
+@media (max-width: 768px) {
+  .swal2-toast { max-width: calc(100vw - 24px) !important; }
+}
+
     </style>
     
         
