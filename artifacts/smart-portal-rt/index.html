@@ -2350,6 +2350,85 @@ nav.nav-tabs.hidden-footer {
   body { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; }
 }
 
+
+/* ============================================================
+   ===== HOTFIX v8: responsive tables + nav badges          =====
+   ============================================================ */
+
+/* 1) Table responsiveness on small screens. Tables keep a sane minimum
+      width so columns are readable; their wrapper scrolls horizontally. */
+@media (max-width: 768px) {
+  .table-responsive,
+  .card .table-responsive,
+  .gt-card .table-responsive {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+    /* subtle hint that the table is swipable */
+    background:
+      linear-gradient(90deg, var(--gt-bg-1, #fff) 30%, rgba(255,255,255,0)) left center / 24px 100% no-repeat,
+      linear-gradient(90deg, rgba(255,255,255,0), var(--gt-bg-1, #fff) 70%) right center / 24px 100% no-repeat,
+      linear-gradient(90deg, rgba(15,23,42,0.06), rgba(15,23,42,0)) left center / 12px 100% no-repeat,
+      linear-gradient(90deg, rgba(15,23,42,0), rgba(15,23,42,0.06)) right center / 12px 100% no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+  .table-responsive > table,
+  .table-responsive table {
+    min-width: 640px !important;   /* enough room for 4-5 columns */
+    width: max-content !important;
+    table-layout: auto !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+  .table-responsive th,
+  .table-responsive td {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;
+    vertical-align: middle !important;
+  }
+  /* The "Data Warga" / address-style cells often contain long text:
+     allow them to wrap so the row doesn't become absurdly wide. */
+  .table-responsive td.wrap,
+  .table-responsive td[data-wrap],
+  .table-responsive .col-wrap {
+    white-space: normal !important;
+    min-width: 160px !important;
+    max-width: 220px !important;
+  }
+}
+
+/* 2) Bottom nav badges (counts of pending items). JS sets data-gt-badge.
+      Pure CSS draws the red pill so the markup never changes. */
+@media (max-width: 768px) {
+  .admin-tab-btn[data-gt-badge]:not([data-gt-badge="0"]):not([data-gt-badge=""]) {
+    position: relative !important;
+  }
+  .admin-tab-btn[data-gt-badge]:not([data-gt-badge="0"]):not([data-gt-badge=""])::after {
+    content: attr(data-gt-badge);
+    position: absolute;
+    top: 2px;
+    right: 14%;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--navy-dark, #001f5b);
+    z-index: 2;
+    pointer-events: none;
+  }
+}
+
     </style>
     
         
@@ -3895,6 +3974,69 @@ nav.nav-tabs.hidden-footer {
             if (s > 60) clearInterval(ws);
         }, 250);
     })();
+    (function(){
+        function num(v){ v = parseInt(v,10); return isFinite(v) && v>0 ? v : 0; }
+        function safeJSON(k, fb){ try { var v = JSON.parse(localStorage.getItem(k)||'null'); return v==null?fb:v; } catch(_){ return fb; } }
+
+        function countSuratPending(){
+            var arr = safeJSON('riwayatSurat', null) || safeJSON('dataSurat', []) || [];
+            if (!Array.isArray(arr)) return 0;
+            return arr.filter(function(s){
+                var st = String(s && (s.status || s.Status) || '').toLowerCase();
+                return st.indexOf('menunggu') === 0 || st === 'pending' || st === 'baru' || st === 'antri' || st === 'belum diproses';
+            }).length;
+        }
+        function countAduanPending(){
+            var arr = safeJSON('db_aduan', []);
+            if (!Array.isArray(arr)) return 0;
+            return arr.filter(function(a){
+                var st = String(a && (a.status || a.Status) || '').toLowerCase();
+                return st === '' || st === 'menunggu' || st === 'baru' || st === 'belum ditanggapi' || st === 'pending';
+            }).length;
+        }
+
+        function setBadge(selector, n){
+            try {
+                document.querySelectorAll(selector).forEach(function(btn){
+                    btn.setAttribute('data-gt-badge', String(num(n)));
+                });
+            } catch(_){}
+        }
+
+        function refreshBadges(){
+            var nSurat = countSuratPending();
+            var nAduan = countAduanPending();
+            // Admin role
+            setBadge('.admin-tab-btn[onclick*="\'surat\'"], .admin-tab-btn[onclick*="loadSuratAdmin"]', nSurat);
+            setBadge('.admin-tab-btn[onclick*="admin-aduan"]', nAduan);
+            // Warga role: show their own pending submissions
+            setBadge('.admin-tab-btn[onclick*="warga-surat"]', nSurat);
+            setBadge('.admin-tab-btn[onclick*="warga-aduan"]', nAduan);
+        }
+
+        refreshBadges();
+        document.addEventListener('DOMContentLoaded', refreshBadges);
+        // Re-check periodically and after typical state-change moments
+        setInterval(refreshBadges, 4000);
+        ['openAdminTab','openWargaTab','syncSemuaData','simpanSurat','tambahAduan','updateStatusSurat','updateStatusAduan'].forEach(function(fn){
+            var tries = 0;
+            var w = setInterval(function(){
+                tries++;
+                if (typeof window[fn] === 'function' && !window[fn].__gtBadgeWrapped) {
+                    var orig = window[fn];
+                    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(refreshBadges, 100); return r; };
+                    window[fn].__gtBadgeWrapped = true;
+                    clearInterval(w);
+                }
+                if (tries > 60) clearInterval(w);
+            }, 250);
+        });
+        // Storage events (e.g. from another tab) too
+        window.addEventListener('storage', function(e){
+            if (!e.key || e.key === 'db_aduan' || e.key === 'riwayatSurat' || e.key === 'dataSurat') refreshBadges();
+        });
+    })();
+
     (function(){
         function unhideNav(){
             try {
