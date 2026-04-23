@@ -2225,7 +2225,7 @@ table td b, table td small { word-break: break-word; overflow-wrap: anywhere; }
 
 /* 1) Kill the legacy "pull-tab" hide/show toggle. UX dictates the nav
       must always be visible on mobile so users can navigate. */
-.pull-tab-bca { display: none !important; }
+/* v7 pull-tab disable removed in v11 */
 
 /* 2) Force the nav out of the "hidden-footer" state at all times.
       (Selector is more specific than the legacy .hidden-footer rule.) */
@@ -2721,6 +2721,76 @@ html { scroll-behavior: smooth; }
 /* I) Tap highlight + selection color polish */
 * { -webkit-tap-highlight-color: rgba(245,158,11,0.15); }
 ::selection { background: rgba(245,158,11,0.35); color: #0f172a; }
+
+
+/* ============================================================
+   ===== HOTFIX v11: bullet-proof pull-tab + tables ===========
+   ============================================================ */
+
+/* Pull-tab: redundant declaration to be absolutely sure it shows */
+.pull-tab-bca,
+.admin-nav-tabs .pull-tab-bca,
+.nav-tabs .pull-tab-bca,
+nav .pull-tab-bca {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  top: -30px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 64px !important;
+  height: 30px !important;
+  background: var(--navy-dark, #001f5b) !important;
+  border: 3px solid var(--gold-luxury, #f59e0b) !important;
+  border-bottom: none !important;
+  border-radius: 18px 18px 0 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--gold-luxury, #f59e0b) !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  z-index: 1001 !important;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.25) !important;
+  pointer-events: auto !important;
+}
+
+/* Tables: deeper enforcement on ALL contexts */
+@media (max-width: 768px) {
+  /* Any descendant table inside any card-like wrapper */
+  .card table,
+  .gt-card table,
+  .tab-view table,
+  .admin-tab-content table,
+  .warga-tab-content table,
+  .ben-tab-content table,
+  .kop-tab-content table {
+    min-width: 700px !important;
+    width: max-content !important;
+    table-layout: auto !important;
+  }
+  /* Force their immediate parent to be a horizontal scroller */
+  .card:has(table:not(.tabel-isi-surat)),
+  .gt-card:has(table:not(.tabel-isi-surat)) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  /* Cells stay one-line by default */
+  .card table th, .card table td,
+  .gt-card table th, .gt-card table td,
+  .tab-view table th, .tab-view table td {
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;
+  }
+  /* Print/letterhead exemptions remain */
+  .tabel-isi-surat,
+  .tabel-isi-surat *,
+  table[style*="margin-top:40px"] {
+    min-width: 0 !important;
+    width: auto !important;
+  }
+}
 
     </style>
     
@@ -4387,15 +4457,7 @@ html { scroll-behavior: smooth; }
             });
         });
 
-        // Welcome toast once per session (non-intrusive)
-        try {
-            if (!sessionStorage.getItem('gt_welcomed')) {
-                setTimeout(function(){
-                    gtToast({ type:'success', title:'Portal Siap', message:'Semua sistem RT 005 berjalan normal.', ttl: 3500 });
-                    sessionStorage.setItem('gt_welcomed','1');
-                }, 1200);
-            }
-        } catch(_){}
+        /* Welcome toast removed v11 — legacy "Data Diperbarui!" already shows */
     })();
 
     (function(){
@@ -7223,6 +7285,108 @@ function updateSemuaWaktu() {
         clean();
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', clean);
         [200, 600, 1500].forEach(function(t){ setTimeout(clean, t); });
+    })();
+</script>
+<script>
+    (function(){
+        // ---- Pull-tab guard via MutationObserver ----
+        function buildPullTab(footer){
+            if (!footer || footer.querySelector('.pull-tab-bca')) return;
+            var pull = document.createElement('div');
+            pull.className = 'pull-tab-bca';
+            pull.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+            pull.addEventListener('click', function(){
+                footer.classList.toggle('hidden-footer');
+                var icon = pull.querySelector('i');
+                if (footer.classList.contains('hidden-footer')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+            footer.appendChild(pull);
+        }
+        function scanForNavs(){
+            try {
+                document.querySelectorAll('.admin-nav-tabs, .nav-tabs').forEach(buildPullTab);
+            } catch(_){}
+        }
+        scanForNavs();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanForNavs);
+        // Catch any DOM mutation that adds a nav (e.g. portal switch)
+        try {
+            var mo = new MutationObserver(function(muts){
+                for (var i = 0; i < muts.length; i++) {
+                    var m = muts[i];
+                    if (m.addedNodes && m.addedNodes.length) {
+                        for (var j = 0; j < m.addedNodes.length; j++) {
+                            var n = m.addedNodes[j];
+                            if (n.nodeType !== 1) continue;
+                            if (n.matches && (n.matches('.admin-nav-tabs') || n.matches('.nav-tabs'))) buildPullTab(n);
+                            else if (n.querySelectorAll) n.querySelectorAll('.admin-nav-tabs, .nav-tabs').forEach(buildPullTab);
+                        }
+                    }
+                    // If someone removed our pull-tab, re-add it
+                    if (m.removedNodes && m.removedNodes.length) {
+                        for (var k = 0; k < m.removedNodes.length; k++) {
+                            var r = m.removedNodes[k];
+                            if (r.nodeType !== 1) continue;
+                            if (r.classList && r.classList.contains('pull-tab-bca')) {
+                                if (m.target && (m.target.classList.contains('admin-nav-tabs') || m.target.classList.contains('nav-tabs'))) {
+                                    buildPullTab(m.target);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+        } catch(_){}
+
+        // ---- Table guard: ensure every table inside cards is wrapped/scrollable ----
+        function decorateTable(tbl){
+            try {
+                if (!tbl || tbl.dataset.gtDeco === '1') return;
+                if (tbl.classList && tbl.classList.contains('tabel-isi-surat')) return; // print/letterhead
+                if (tbl.closest && tbl.closest('#hidden-pdf-container, #print-ba-container')) return;
+                tbl.dataset.gtDeco = '1';
+                // If there is no .table-responsive ancestor, wrap or mark its parent
+                var resp = tbl.closest('.table-responsive');
+                if (!resp) {
+                    var parent = tbl.parentElement;
+                    if (parent && !parent.classList.contains('table-responsive')) {
+                        // Mark parent as scroll context (safer than rewrapping)
+                        parent.style.overflowX = 'auto';
+                        parent.style.webkitOverflowScrolling = 'touch';
+                    }
+                }
+            } catch(_){}
+        }
+        function scanTables(root){
+            try {
+                (root || document).querySelectorAll('table').forEach(decorateTable);
+            } catch(_){}
+        }
+        scanTables();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanTables);
+        try {
+            var moT = new MutationObserver(function(muts){
+                for (var i = 0; i < muts.length; i++) {
+                    var m = muts[i];
+                    if (m.addedNodes && m.addedNodes.length) {
+                        for (var j = 0; j < m.addedNodes.length; j++) {
+                            var n = m.addedNodes[j];
+                            if (n.nodeType !== 1) continue;
+                            if (n.tagName === 'TABLE') decorateTable(n);
+                            else if (n.querySelectorAll) scanTables(n);
+                        }
+                    }
+                }
+            });
+            moT.observe(document.body, { childList: true, subtree: true });
+        } catch(_){}
     })();
 </script>
 </body>
