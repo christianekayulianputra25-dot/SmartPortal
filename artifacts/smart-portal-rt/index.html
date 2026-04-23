@@ -2869,6 +2869,21 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
 /* === end smoothing === */
 
 
+/* ===== FIX #5: Tombol "Keluar" — jangan terpotong di desktop ===== */
+.main-header .btn-logout {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  min-width: auto !important;
+  width: auto !important;
+  padding: 10px 16px !important;
+  line-height: 1 !important;
+}
+.main-header .btn-logout span { white-space: nowrap !important; overflow: visible !important; }
+@media (min-width: 481px) {
+  .main-header .btn-logout span.hide-on-mobile,
+  .main-header .btn-logout span { display: inline !important; }
+}
+
 /* ===== FIX #1: Select2 dropdown — soften colors in dark mode ===== */
 html[data-theme="dark"] .select2-container--default .select2-selection--single,
 html[data-theme="dark"] .select2-container--default .select2-selection--multiple {
@@ -3341,7 +3356,7 @@ html[data-theme="dark"] select option {
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:15px;">
                 <h2 style="margin:0; color:var(--primary-dark); font-size:1.8rem;"><i class="fa-solid fa-chart-pie"></i> Analisa & Pemecahan Iuran</h2>
-                <div id="bulan-tagihan-info" style="font-weight:bold; color:white; background: var(--primary-blue); padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(14,165,233,0.3); font-size:1.1rem;">Bulan: Loading...</div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;"><button type="button" class="btn-action bg-gold" onclick="cetakAnalisaIuran()" style="font-weight:800; padding:10px 16px;"><i class="fa-solid fa-file-pdf"></i> Ekspor PDF</button><div id="bulan-tagihan-info" style="font-weight:bold; color:white; background: var(--primary-blue); padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(14,165,233,0.3); font-size:1.1rem;">Bulan: Loading...</div></div>
             </div>
 
             <div class="card" style="border-top: 4px solid var(--koperasi); padding: 15px 25px; margin-bottom: 25px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
@@ -4721,6 +4736,11 @@ html[data-theme="dark"] select option {
         iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none';
         document.body.appendChild(iframe);
         var doc = iframe.contentWindow.document;
+        // Pastikan path gambar/asset relatif (mis. Lambang_Kota_Semarang.png) di-rewrite ke URL absolut
+        var __baseAbs = (location.origin + location.pathname).replace(/[^\/]*$/, '');
+        try {
+            htmlBody = String(htmlBody||'').replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])(?!https?:|data:|\/\/|\/)([^"']+)(["'])/gi, function(_, p1, p2, p3){ return p1 + __baseAbs + p2 + p3; });
+        } catch(e) { console.warn('img rewrite failed', e); }
         // Base href agar gambar/asset relatif (mis. Lambang_Kota_Semarang.png) tetap resolve dalam iframe
         var baseHref = (location.origin + location.pathname).replace(/[^\/]*$/, '');
         doc.open();
@@ -5960,6 +5980,85 @@ html[data-theme="dark"] select option {
     // === MESIN HIDE & SEEK DAFTAR PENAGIHAN ===
 
     // === MESIN ANALISA & PENAGIHAN REAL-TIME (DIBEDAH 3 POS) ===
+    window.cetakAnalisaIuran = function() {
+        try {
+            var dbIuran = JSON.parse(localStorage.getItem('db_iuran')) || [];
+            var dbWarga = JSON.parse(localStorage.getItem('db_warga')) || [];
+            var validWarga = dbWarga.filter(function(w){ return w && w.nama && String(w.nama).trim() !== ''; });
+            var bulanSkg = new Intl.DateTimeFormat('id-ID', { month: 'long' }).format(new Date());
+            var tahunSkg = new Date().getFullYear();
+            var jmlBayar = dbIuran.length;
+            var totalWarga = validWarga.length;
+            var mejaTerkumpul = jmlBayar * 5000, targetMeja = 250000, mejaKurang = Math.max(0, targetMeja - mejaTerkumpul);
+            var bangunTerkumpul = jmlBayar * 10000, bangunTarget = totalWarga * 10000, bangunKurang = Math.max(0, bangunTarget - bangunTerkumpul);
+            var agustusTerkumpul = jmlBayar * 5000, agustusTarget = totalWarga * 5000, agustusKurang = Math.max(0, agustusTarget - agustusTerkumpul);
+            var rowsHtml = '';
+            var sorted = validWarga.slice().sort(function(a,b){ return String(a.nama).localeCompare(String(b.nama)); });
+            sorted.forEach(function(w, i){
+                var bayar = dbIuran.find(function(it){ return String(it.idWarga) === String(w.id) && it.bulan === bulanSkg; });
+                rowsHtml += '<tr>' +
+                    '<td style="text-align:center; border:1px solid #333; padding:5px;">' + (i+1) + '</td>' +
+                    '<td style="border:1px solid #333; padding:5px;">' + w.nama + '</td>' +
+                    '<td style="text-align:right; border:1px solid #333; padding:5px;">' + (bayar ? fmt(bayar.nominal) : 'Rp 0') + '</td>' +
+                    '<td style="text-align:center; border:1px solid #333; padding:5px;">' + (bayar ? 'LUNAS' : 'BELUM') + '</td>' +
+                '</tr>';
+            });
+            if (!rowsHtml) rowsHtml = '<tr><td colspan="4" style="text-align:center; border:1px solid #333; padding:8px;"><i>Belum ada data warga.</i></td></tr>';
+            var tgl = new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+            var html = '' +
+                '<div class="kop-surat-resmi" style="display:flex; align-items:center; gap:15px; border-bottom:3px double #000; padding-bottom:10px; margin-bottom:15px;">' +
+                  '<img src="Lambang_Kota_Semarang.png" alt="Logo Semarang" style="width:80px; height:auto;">' +
+                  '<div style="text-align:center; flex:1;">' +
+                    '<div style="font-size:13pt; font-weight:bold;">PENGURUS RT 005 / RW 012</div>' +
+                    '<div style="font-size:12pt; font-weight:bold;">KELURAHAN TEGALSARI - KOTA SEMARANG</div>' +
+                    '<div style="font-style:italic; font-size:10pt;">Sekretariat: Jl. Tegalsari Raya, Kota Semarang, Jawa Tengah</div>' +
+                  '</div>' +
+                '</div>' +
+                '<h3 style="text-align:center; margin:10px 0 4px 0;">RINGKASAN ANALISA & PEMECAHAN IURAN</h3>' +
+                '<p style="text-align:center; margin:0 0 15px 0;">Periode: <b>' + bulanSkg + ' ' + tahunSkg + '</b> &mdash; Dicetak: ' + tgl + '</p>' +
+                '<table style="width:100%; border-collapse:collapse; margin-bottom:15px;">' +
+                  '<thead><tr style="background:#f0f0f0;">' +
+                    '<th style="border:1px solid #333; padding:6px;">Pos Iuran</th>' +
+                    '<th style="border:1px solid #333; padding:6px;">Terkumpul</th>' +
+                    '<th style="border:1px solid #333; padding:6px;">Target</th>' +
+                    '<th style="border:1px solid #333; padding:6px;">Kekurangan</th>' +
+                  '</tr></thead><tbody>' +
+                    '<tr><td style="border:1px solid #333; padding:6px;">Pos Uang Meja</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(mejaTerkumpul) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(targetMeja) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + (mejaKurang>0?fmt(mejaKurang):'LUNAS') + '</td></tr>' +
+                    '<tr><td style="border:1px solid #333; padding:6px;">Pembangunan</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(bangunTerkumpul) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(bangunTarget) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + (bangunKurang>0?fmt(bangunKurang):'LUNAS') + '</td></tr>' +
+                    '<tr><td style="border:1px solid #333; padding:6px;">17 Agustus</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(agustusTerkumpul) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + fmt(agustusTarget) + '</td>' +
+                        '<td style="border:1px solid #333; padding:6px; text-align:right;">' + (agustusKurang>0?fmt(agustusKurang):'LUNAS') + '</td></tr>' +
+                    '<tr style="background:#fff7e6; font-weight:bold;"><td style="border:1px solid #333; padding:6px;">TOTAL SETORAN MASUK</td>' +
+                        '<td colspan="3" style="border:1px solid #333; padding:6px; text-align:right;">' + jmlBayar + ' setoran &times; Rp 20.000 = ' + fmt(jmlBayar*20000) + '</td></tr>' +
+                  '</tbody></table>' +
+                '<h4 style="margin:15px 0 6px 0;">Daftar Penagihan Bulan Berjalan (' + bulanSkg + ')</h4>' +
+                '<table style="width:100%; border-collapse:collapse; font-size:10pt;">' +
+                  '<thead><tr style="background:#f0f0f0;">' +
+                    '<th style="border:1px solid #333; padding:5px; width:40px;">No</th>' +
+                    '<th style="border:1px solid #333; padding:5px; text-align:left;">Nama Warga</th>' +
+                    '<th style="border:1px solid #333; padding:5px; width:130px;">Nominal</th>' +
+                    '<th style="border:1px solid #333; padding:5px; width:90px;">Status</th>' +
+                  '</tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+                '<div style="display:flex; justify-content:flex-end; margin-top:35px;">' +
+                  '<div style="text-align:center;">' +
+                    '<div>Semarang, ' + tgl + '</div>' +
+                    '<div style="margin-bottom:55px;">Bendahara RT 005 / RW 012</div>' +
+                    '<div style="border-top:1px solid #000; padding-top:4px; min-width:180px;"><b>(.................................)</b></div>' +
+                  '</div>' +
+                '</div>';
+            window.printViaIframe(html, 'Ringkasan Analisa Iuran - ' + bulanSkg + ' ' + tahunSkg);
+        } catch(err) {
+            console.error(err);
+            Swal.fire('Gagal', 'Tidak dapat menyiapkan dokumen: ' + err.message, 'error');
+        }
+    };
     window.loadAnalisaUangMeja = function() {
         let dbIuran = JSON.parse(localStorage.getItem('db_iuran')) || [];
         let dbWarga = JSON.parse(localStorage.getItem('db_warga')) || [];
