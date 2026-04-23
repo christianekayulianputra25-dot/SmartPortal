@@ -3498,6 +3498,49 @@ nav.nav-tabs.hidden-footer {
     };
     var esc = window.escapeHtml;
 
+    // ===== Guest (Tamu) access guard =====
+    // Mode tamu hanya boleh buka 3 tab: Beranda, Struktur Pengurus, Kontak Darurat.
+    // Tab lain dicegat dengan notifikasi; restriksi sidebar sudah dilakukan di BukaPortal.
+    window.GUEST_ALLOWED_TABS = ['warga-dashboard', 'warga-struktur', 'warga-darurat'];
+    window.isGuestUser = function(){
+        return !!(window.loggedInWarga && window.loggedInWarga.isGuest);
+    };
+    window.guestBlockNotice = function(){
+        try {
+            if (window.Swal && Swal.fire) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Akses Terbatas',
+                    text: 'Tidak dapat akses, silahkan hubungi developer.',
+                    confirmButtonText: 'Mengerti'
+                });
+            } else {
+                alert('Tidak dapat akses, silahkan hubungi developer.');
+            }
+        } catch(e) {
+            try { alert('Tidak dapat akses, silahkan hubungi developer.'); } catch(_){}
+        }
+    };
+    (function installGuestGuard(){
+        var attempts = 0;
+        var iv = setInterval(function(){
+            attempts++;
+            if (typeof window.openWargaTab === 'function' && !window.openWargaTab.__gtGuestWrapped) {
+                var orig = window.openWargaTab;
+                window.openWargaTab = function(tabId){
+                    if (window.isGuestUser() && window.GUEST_ALLOWED_TABS.indexOf(tabId) === -1) {
+                        window.guestBlockNotice();
+                        return;
+                    }
+                    return orig.apply(this, arguments);
+                };
+                window.openWargaTab.__gtGuestWrapped = true;
+                clearInterval(iv);
+            }
+            if (attempts > 80) clearInterval(iv);
+        }, 200);
+    })();
+
     // Tampilkan panel pengujian developer hanya di host dev (localhost / *.replit.dev)
     (function(){
         try {
@@ -4046,6 +4089,12 @@ nav.nav-tabs.hidden-footer {
             { id:'warga-keuangan',  icon:'fa-sack-dollar',           label:'Iuran' },
             { id:'warga-profil',    icon:'fa-id-badge',              label:'Profil' }
         ];
+        // Bottom-nav khusus mode Tamu: hanya 3 menu yang diizinkan
+        var WARGA_NAV_GUEST = [
+            { id:'warga-dashboard', icon:'fa-house',         label:'Beranda' },
+            { id:'warga-struktur',  icon:'fa-sitemap',       label:'Pengurus' },
+            { id:'warga-darurat',   icon:'fa-truck-medical', label:'Darurat' }
+        ];
         var BENDAHARA_NAV = [
             { id:'ben-input',     icon:'fa-cash-register', label:'Input' },
             { id:'ben-laporan',   icon:'fa-book',          label:'Laporan' },
@@ -4093,7 +4142,8 @@ nav.nav-tabs.hidden-footer {
             }
             var role = activeView();
             if (!role) return;
-            var items = role === 'warga' ? WARGA_NAV : role === 'bendahara' ? BENDAHARA_NAV : null;
+            var __isG = !!(window.loggedInWarga && window.loggedInWarga.isGuest);
+            var items = role === 'warga' ? (__isG ? WARGA_NAV_GUEST : WARGA_NAV) : role === 'bendahara' ? BENDAHARA_NAV : null;
             if (!items) {
                 // Hide nav for views without a defined map (admin/koperasi keep their horizontal strip)
                 var ex = document.getElementById('gt-bottom-nav'); if (ex) ex.remove();
