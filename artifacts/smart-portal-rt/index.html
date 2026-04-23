@@ -2869,6 +2869,24 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
 /* === end smoothing === */
 
 
+/* ===== FIX #6: Header tabel — soften kontras di dark mode ===== */
+html[data-theme="dark"] table thead th,
+html[data-theme="dark"] .table-responsive thead th,
+html[data-theme="dark"] table th {
+  background: var(--gt-surface-2) !important;
+  color: var(--gt-text-2) !important;
+  border-bottom: 1px solid var(--gt-border) !important;
+}
+html[data-theme="dark"] table tbody td {
+  border-bottom: 1px solid var(--gt-border) !important;
+  color: var(--gt-text-2);
+}
+html[data-theme="dark"] table tbody tr:hover td {
+  background: rgba(96,165,250,0.06) !important;
+}
+/* Kecualikan iframe cetak dari override (sudah dipaksa light) */
+html[data-theme="dark"] iframe { color-scheme: light; }
+
 /* ===== FIX #5: Tombol "Keluar" — jangan terpotong di desktop ===== */
 .main-header .btn-logout {
   flex-shrink: 0 !important;
@@ -3502,8 +3520,10 @@ html[data-theme="dark"] select option {
                     <div class="form-group" style="display:flex; align-items:center;"><div id="rt-checking-result" style="width:100%; padding:15px; border-radius:8px; border:1px dashed var(--border-light); font-size:0.9rem;">Pilih nama warga untuk mengecek kelayakan otomatis.</div></div>
                     <div id="form-pinjaman-container" style="grid-column: 1 / -1; display:none;">
                         <div class="form-grid">
-                            <div class="form-group"><label>Plafon Pinjaman</label><input type="number" id="p-amt" onkeyup="updatePreviewPinjaman()" required></div>
+                            <div class="form-group"><label>Plafon Pinjaman (Rp)</label><input type="number" id="p-amt" min="50000" step="10000" onkeyup="updatePreviewPinjaman()" required></div>
+                            <div class="form-group"><label>Tenor / Jumlah Periode Angsuran</label><select id="p-tenor" onchange="updatePreviewPinjaman()" required><option value="3" selected>3 periode</option><option value="6">6 periode</option><option value="12">12 periode</option></select></div>
                             <div class="form-group"><label>Total Kewajiban + Bunga (10%)</label><input type="text" id="p-total" readonly style="color:var(--danger); font-weight:bold;"></div>
+                            <div class="form-group"><label>Angsuran per Periode</label><input type="text" id="p-angsuran" readonly style="color:#0c4a6e; font-weight:bold;"></div>
                             <button type="submit" class="btn-submit bg-red" style="grid-column: 1 / -1;"><i class="fa-solid fa-check"></i> Setujui & Cairkan</button>
                         </div>
                     </div>
@@ -3517,7 +3537,14 @@ html[data-theme="dark"] select option {
                         <button class="btn-action bg-gold" onclick="cetakRekapPinjaman()"><i class="fa-solid fa-print"></i> Cetak BA Pinjaman</button>
                     </div>
                 </div>
-                <div class="table-responsive"><table><thead><tr><th>ID</th><th>Nama Peminjam</th><th>Plafon Awal</th><th>Bunga (10%)</th><th>Sisa Hutang</th><th>Aksi Fleksibel</th></tr></thead><tbody id="tbody-koperasi-pinjaman"></tbody></table></div>
+                <div class="table-responsive"><table><thead><tr><th>ID</th><th>Nama Peminjam</th><th>Plafon Awal</th><th>Tenor</th><th>Sudah Dibayar</th><th>Sisa Hutang</th><th>Aksi</th></tr></thead><tbody id="tbody-koperasi-pinjaman"></tbody></table></div>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--success);">
+                <div class="card-title-header">
+                    <h3><i class="fa-solid fa-circle-check"></i> Daftar Pinjaman Lunas</h3>
+                    <span style="font-size:0.85rem; color:#64748b;">Pinjaman yang sudah selesai dilunasi</span>
+                </div>
+                <div class="table-responsive"><table><thead><tr><th>Tgl Lunas</th><th>Nama Peminjam</th><th>Plafon Awal</th><th>Total Dikembalikan</th><th>Tenor</th><th>Aksi</th></tr></thead><tbody id="tbody-koperasi-pinjaman-lunas"></tbody></table></div>
             </div>
         </div>
 
@@ -5985,13 +6012,254 @@ html[data-theme="dark"] select option {
 };
     window.loadKasBendahara = function() { let dbKas = JSON.parse(localStorage.getItem('db_kas')) || []; let sAwal = parseInt(localStorage.getItem('db_saldo_awal')) || 0; if(document.getElementById('ben-display-saldo-awal')) document.getElementById('ben-display-saldo-awal').innerText = fmt(sAwal); let sAkhir = sAwal; let tb = document.getElementById('tbody-laporan-kas'); if(tb) { tb.innerHTML=''; dbKas.sort((a,b)=>new Date(a.tgl)-new Date(b.tgl)).forEach(k => { if(k.tipe==='masuk') sAkhir+=k.nominal; else sAkhir-=k.nominal; tb.innerHTML+=`<tr><td>${k.tgl}</td><td><b>${k.uraian}</b></td><td>${k.tipe}</td><td>${fmt(k.nominal)} <small>(Saldo: ${fmt(sAkhir)})</small></td><td><button class="btn-table btn-tbl-del" onclick="hapusKas(${k.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); } if(document.getElementById('warga-saldo-kas')) document.getElementById('warga-saldo-kas').innerText=fmt(sAkhir); if(document.getElementById('ben-saldo-kas-input')) document.getElementById('ben-saldo-kas-input').innerText=fmt(sAkhir); };
     window.hapusKas = function(id) { let db = JSON.parse(localStorage.getItem('db_kas')) || []; localStorage.setItem('db_kas', JSON.stringify(db.filter(x=>x.id!==id))); syncSemuaData(); };
-    window.simpanKopTabungan = function(e) { e.preventDefault(); let s=document.getElementById('k_simpan_warga'); if(!s.value) return; let db=JSON.parse(localStorage.getItem('db_kop_simpan'))||[]; db.push({id:Date.now(), idWarga:s.value, namaWarga:s.options[s.selectedIndex].text, jenis:document.getElementById('k_simpan_jenis').value, nominal:parseInt(document.getElementById('k_simpan_amt').value), tgl:new Date().toLocaleDateString('id-ID')}); localStorage.setItem('db_kop_simpan',JSON.stringify(db)); e.target.reset(); if(typeof jQuery !== 'undefined') $(s).val('').trigger('change'); syncSemuaData(); Toast.fire({icon:'success',title:'Catat Tabungan Berhasil'}); };
+    window.simpanKopTabungan = function(e) { e.preventDefault(); let s=document.getElementById('k_simpan_warga'); if(!s.value) return; let amt = parseInt(document.getElementById('k_simpan_amt').value)||0; if(amt<=0) return Swal.fire('Nominal kosong','Mohon isi nominal tabungan.','warning'); let db=JSON.parse(localStorage.getItem('db_kop_simpan'))||[]; db.push({id:Date.now(), idWarga:s.value, namaWarga:s.options[s.selectedIndex].text, jenis:document.getElementById('k_simpan_jenis').value, nominal:amt, tgl:new Date().toLocaleDateString('id-ID'), tglIso: new Date().toISOString()}); localStorage.setItem('db_kop_simpan',JSON.stringify(db)); localStorage.setItem('ts_kop_simpan', new Date().toISOString()); e.target.reset(); if(typeof jQuery !== 'undefined') $(s).val('').trigger('change'); if(typeof syncSemuaData==='function') syncSemuaData(true); if(typeof loadKoperasiData==='function') loadKoperasiData(); Toast.fire({icon:'success',title:'Catat Tabungan Berhasil'}); };
     window.runRTChecking = function() { let w = document.getElementById('k_pinjam_warga').value; let db = JSON.parse(localStorage.getItem('db_kop_pinjam'))||[]; let a = db.find(x=>String(x.idWarga)===String(w)&&x.status!=='Lunas'); document.getElementById('rt-checking-result').innerHTML = a ? `<span style="color:red">Ditolak: Masih ada hutang Rp ${fmt(a.sisa)}</span>` : `<span style="color:green">Layak Diproses</span>`; document.getElementById('form-pinjaman-container').style.display = a?'none':'block'; };
-    window.updatePreviewPinjaman = function() { let a = parseInt(document.getElementById('p-amt').value)||0; document.getElementById('p-total').value = fmt(a + (a*0.1)); };
-    window.ajukanPinjamanPintar = function(e) { e.preventDefault(); let s=document.getElementById('k_pinjam_warga'); let amt=parseInt(document.getElementById('p-amt').value); let tot=amt+(amt*0.1); let db=JSON.parse(localStorage.getItem('db_kop_pinjam'))||[]; db.push({id:Date.now(), idWarga:s.value, namaWarga:s.options[s.selectedIndex].text, plafon:amt, bunga:10, sisa:tot, status:'Aktif', tgl:new Date().toLocaleDateString('id-ID')}); localStorage.setItem('db_kop_pinjam',JSON.stringify(db)); e.target.reset(); if(typeof jQuery !== 'undefined') $(s).val('').trigger('change'); document.getElementById('form-pinjaman-container').style.display='none'; syncSemuaData(); Swal.fire('Sukses','Cair','success'); };
-    window.loadKoperasiData = function() { let dbS=JSON.parse(localStorage.getItem('db_kop_simpan'))||[]; let dbP=JSON.parse(localStorage.getItem('db_kop_pinjam'))||[]; let ts=document.getElementById('tbody-koperasi-simpanan'); if(ts){ ts.innerHTML=''; dbS.forEach(s=>{ ts.innerHTML+=`<tr><td>${s.tgl}</td><td><b>${s.namaWarga}</b></td><td>${s.jenis}</td><td>${fmt(s.nominal)}</td><td><button class="btn-table btn-tbl-del" onclick="hapusKopSimpan(${s.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); } let tp=document.getElementById('tbody-koperasi-pinjaman'); if(tp){ tp.innerHTML=''; dbP.filter(x=>x.status!=='Lunas').forEach(p=>{ tp.innerHTML+=`<tr><td>${p.id}</td><td><b>${p.namaWarga}</b></td><td>${fmt(p.plafon)}</td><td>10%</td><td><b>${fmt(p.sisa)}</b></td><td><button class="btn-action bg-green" onclick="bayarCicilan(${p.id})">Bayar</button></td></tr>`; }); } };
-    window.hapusKopSimpan = function(id) { let db = JSON.parse(localStorage.getItem('db_kop_simpan')) || []; localStorage.setItem('db_kop_simpan', JSON.stringify(db.filter(x=>x.id!==id))); syncSemuaData(); };
-    window.bayarCicilan = function(id) { Swal.fire({title:'Bayar (Rp)', input:'number', showCancelButton:true}).then(r=>{ if(r.value){ let dbP=JSON.parse(localStorage.getItem('db_kop_pinjam'))||[]; let idx=dbP.findIndex(x=>x.id===id); if(idx!==-1){ dbP[idx].sisa -= r.value; if(dbP[idx].sisa<=0) dbP[idx].status='Lunas'; localStorage.setItem('db_kop_pinjam',JSON.stringify(dbP)); syncSemuaData(); Swal.fire('Sukses','Dibayar','success'); } } }); };
+    window.updatePreviewPinjaman = function() {
+        let a = parseInt(document.getElementById('p-amt').value)||0;
+        let t = parseInt((document.getElementById('p-tenor')||{}).value) || 3;
+        let tot = a + Math.round(a*0.1);
+        let ang = t > 0 ? Math.ceil(tot / t) : tot;
+        document.getElementById('p-total').value = fmt(tot);
+        let elA = document.getElementById('p-angsuran'); if (elA) elA.value = fmt(ang) + ' / periode (x ' + t + ')';
+    };
+    window.ajukanPinjamanPintar = function(e) {
+        e.preventDefault();
+        let sel = document.getElementById('k_pinjam_warga');
+        let amt = parseInt(document.getElementById('p-amt').value) || 0;
+        let tenor = parseInt((document.getElementById('p-tenor')||{}).value) || 3;
+        if (amt <= 0) return Swal.fire('Plafon Tidak Valid','Mohon isi nominal pinjaman dengan benar.','warning');
+        if (!sel.value) return Swal.fire('Peminjam Kosong','Pilih nama warga calon peminjam.','warning');
+        let bunga = Math.round(amt * 0.1);
+        let total = amt + bunga;
+        let angsuran = Math.ceil(total / tenor);
+        let db = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        let now = new Date();
+        db.push({
+            id: Date.now(),
+            idWarga: sel.value,
+            namaWarga: sel.options[sel.selectedIndex].text,
+            plafon: amt,
+            bunga: 10,
+            bungaNominal: bunga,
+            totalKewajiban: total,
+            tenor: tenor,
+            angsuran: angsuran,
+            cicilanKe: 0,
+            sisa: total,
+            riwayatBayar: [],
+            status: 'Aktif',
+            tgl: now.toLocaleDateString('id-ID'),
+            tglPengajuan: now.toISOString()
+        });
+        localStorage.setItem('db_kop_pinjam', JSON.stringify(db));
+        localStorage.setItem('ts_kop_pinjam', new Date().toISOString());
+        e.target.reset();
+        if (typeof jQuery !== 'undefined') $(sel).val('').trigger('change');
+        document.getElementById('form-pinjaman-container').style.display='none';
+        if (typeof syncSemuaData === 'function') syncSemuaData(true);
+        if (typeof loadKoperasiData === 'function') loadKoperasiData();
+        Swal.fire({
+            icon:'success', title:'Pinjaman Disetujui & Cair',
+            html: '<div style="text-align:left;">'+
+                '<p>Plafon: <b>'+ fmt(amt) +'</b></p>'+
+                '<p>Bunga (10%): <b>'+ fmt(bunga) +'</b></p>'+
+                '<p>Total Kewajiban: <b>'+ fmt(total) +'</b></p>'+
+                '<p>Tenor: <b>'+ tenor +' periode</b></p>'+
+                '<p>Angsuran/Periode: <b>'+ fmt(angsuran) +'</b></p>'+
+                '</div>'
+        });
+    };
+    window.loadKoperasiData = function() {
+        let dbS = JSON.parse(localStorage.getItem('db_kop_simpan')) || [];
+        let dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+
+        // Tabel Tabungan (admin)
+        let ts = document.getElementById('tbody-koperasi-simpanan');
+        if (ts) {
+            ts.innerHTML = '';
+            if (dbS.length === 0) ts.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">Belum ada transaksi tabungan.</td></tr>';
+            dbS.slice().sort((a,b)=>(b.id||0)-(a.id||0)).forEach(function(rec){
+                ts.innerHTML += '<tr><td>'+ rec.tgl +'</td><td><b>'+ rec.namaWarga +'</b></td><td>'+ rec.jenis +'</td><td>'+ fmt(rec.nominal) +'</td><td><button class="btn-table btn-tbl-del" onclick="hapusKopSimpan('+ rec.id +')"><i class="fa-solid fa-trash"></i></button></td></tr>';
+            });
+        }
+
+        // Tabel Pinjaman Aktif (admin)
+        let tp = document.getElementById('tbody-koperasi-pinjaman');
+        if (tp) {
+            tp.innerHTML = '';
+            let aktif = dbP.filter(function(x){ return x.status !== 'Lunas'; });
+            if (aktif.length === 0) tp.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b;">Tidak ada pinjaman aktif.</td></tr>';
+            aktif.forEach(function(p){
+                let tenor = p.tenor || 3;
+                let totK = p.totalKewajiban || ((p.plafon||0) + Math.round((p.plafon||0)*0.1));
+                let dibayar = totK - (p.sisa || 0);
+                let cicil = (p.cicilanKe || (Array.isArray(p.riwayatBayar)?p.riwayatBayar.length:0));
+                tp.innerHTML += '<tr>'+
+                    '<td>'+ p.id +'</td>'+
+                    '<td><b>'+ p.namaWarga +'</b><br><small style="color:#64748b;">Periode '+ Math.min(cicil, tenor) +'/'+ tenor +'</small></td>'+
+                    '<td>'+ fmt(p.plafon||0) +'</td>'+
+                    '<td style="text-align:center;">'+ tenor +'x</td>'+
+                    '<td style="color:#16a34a;"><b>'+ fmt(dibayar) +'</b></td>'+
+                    '<td style="color:#dc2626;"><b>'+ fmt(p.sisa||0) +'</b></td>'+
+                    '<td><button class="btn-action bg-green" onclick="bayarCicilan('+ p.id +')"><i class="fa-solid fa-hand-holding-dollar"></i> Bayar</button></td>'+
+                '</tr>';
+            });
+        }
+
+        // Tabel Pinjaman Lunas (admin)
+        let tl = document.getElementById('tbody-koperasi-pinjaman-lunas');
+        if (tl) {
+            tl.innerHTML = '';
+            let lunas = dbP.filter(function(x){ return x.status === 'Lunas'; }).sort(function(a,b){ return (new Date(b.tglLunasIso||0)) - (new Date(a.tglLunasIso||0)); });
+            if (lunas.length === 0) tl.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">Belum ada pinjaman yang lunas.</td></tr>';
+            lunas.forEach(function(p){
+                let totK = p.totalKewajiban || ((p.plafon||0) + Math.round((p.plafon||0)*0.1));
+                tl.innerHTML += '<tr>'+
+                    '<td>'+ (p.tglLunas || '-') +'</td>'+
+                    '<td><b>'+ p.namaWarga +'</b></td>'+
+                    '<td>'+ fmt(p.plafon||0) +'</td>'+
+                    '<td><b>'+ fmt(totK) +'</b></td>'+
+                    '<td style="text-align:center;">'+ (p.tenor||3) +'x</td>'+
+                    '<td><button class="btn-table btn-tbl-view" onclick="lihatRiwayatPinjaman('+ p.id +')" title="Lihat detail riwayat angsuran"><i class="fa-solid fa-eye"></i></button></td>'+
+                '</tr>';
+            });
+        }
+
+        // === Sisi Warga (jika sedang login & melihat tab koperasi-nya) ===
+        try {
+            let wargaId = localStorage.getItem('loggedInWarga');
+            if (wargaId) {
+                let myPinj = dbP.filter(function(x){ return String(x.idWarga) === String(wargaId); });
+                let myTab = dbS.filter(function(x){ return String(x.idWarga) === String(wargaId); });
+                let totalTabungan = myTab.reduce(function(a,r){ return a + (r.nominal||0); }, 0);
+                let sisaPinj = myPinj.filter(function(x){ return x.status !== 'Lunas'; }).reduce(function(a,r){ return a + (r.sisa||0); }, 0);
+                let shu = Math.round(totalTabungan * 0.05);
+                let elT = document.getElementById('w_kop_tabungan'); if (elT) elT.innerText = fmt(totalTabungan);
+                let elP = document.getElementById('w_kop_pinjaman'); if (elP) elP.innerText = fmt(sisaPinj);
+                let elS = document.getElementById('w_kop_shu');      if (elS) elS.innerText = fmt(shu);
+
+                let tbC = document.getElementById('tbody-w-cicilan');
+                if (tbC) {
+                    tbC.innerHTML = '';
+                    let allCicil = [];
+                    myPinj.forEach(function(p){ (p.riwayatBayar||[]).forEach(function(r){ allCicil.push({ pid: p.id, periode: r.periode, tenor: p.tenor||3, tgl: r.tgl, nominal: r.nominal, tglIso: r.tglIso }); }); });
+                    allCicil.sort(function(a,b){ return new Date(b.tglIso||0) - new Date(a.tglIso||0); });
+                    if (allCicil.length === 0) tbC.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Belum ada angsuran tercatat.</td></tr>';
+                    allCicil.forEach(function(r){
+                        tbC.innerHTML += '<tr><td>'+ r.periode +' / '+ r.tenor +'</td><td>'+ r.tgl +'</td><td>#'+ r.pid +'</td><td><b>'+ fmt(r.nominal) +'</b></td></tr>';
+                    });
+                }
+
+                let tbL = document.getElementById('tbody-w-pinjaman-lunas');
+                if (tbL) {
+                    tbL.innerHTML = '';
+                    let myLunas = myPinj.filter(function(x){ return x.status === 'Lunas'; }).sort(function(a,b){ return new Date(b.tglLunasIso||0) - new Date(a.tglLunasIso||0); });
+                    if (myLunas.length === 0) tbL.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">Belum ada pinjaman lunas.</td></tr>';
+                    myLunas.forEach(function(p){
+                        let totK = p.totalKewajiban || ((p.plafon||0) + Math.round((p.plafon||0)*0.1));
+                        tbL.innerHTML += '<tr><td>'+ (p.tglLunas||'-') +'</td><td>#'+ p.id +'</td><td>'+ fmt(p.plafon||0) +'</td><td><b>'+ fmt(totK) +'</b></td><td><span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:999px; font-weight:700; font-size:0.8rem;"><i class="fa-solid fa-check-double"></i> LUNAS</span></td></tr>';
+                    });
+                }
+            }
+        } catch(e){ console.warn('warga koperasi render error', e); }
+    };
+
+    // Lihat riwayat angsuran satu pinjaman (untuk pinjaman lunas)
+    window.lihatRiwayatPinjaman = function(id) {
+        let dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        let p = dbP.find(function(x){ return String(x.id) === String(id); });
+        if (!p) return;
+        let rb = Array.isArray(p.riwayatBayar) ? p.riwayatBayar : [];
+        let totK = p.totalKewajiban || ((p.plafon||0) + Math.round((p.plafon||0)*0.1));
+        let html = '<div style="text-align:left;">'+
+            '<p><b>Peminjam:</b> '+ p.namaWarga +'</p>'+
+            '<p><b>Plafon:</b> '+ fmt(p.plafon||0) +' &nbsp; <b>Total Kewajiban:</b> '+ fmt(totK) +' &nbsp; <b>Tenor:</b> '+ (p.tenor||3) +'x</p>'+
+            '<table style="width:100%; border-collapse:collapse; font-size:0.9rem; margin-top:8px;">'+
+                '<thead><tr style="background:#f1f5f9;"><th style="padding:6px;">Periode</th><th style="padding:6px; text-align:left;">Tanggal</th><th style="padding:6px; text-align:right;">Nominal</th></tr></thead>'+
+                '<tbody>'+ (rb.length ? rb.map(function(r){ return '<tr><td style="padding:6px; border-bottom:1px solid #e2e8f0; text-align:center;">'+ r.periode +'</td><td style="padding:6px; border-bottom:1px solid #e2e8f0;">'+ (r.tgl||'-') +'</td><td style="padding:6px; border-bottom:1px solid #e2e8f0; text-align:right;"><b>'+ fmt(r.nominal||0) +'</b></td></tr>'; }).join('') : '<tr><td colspan="3" style="text-align:center; padding:10px; color:#64748b;">Tidak ada riwayat.</td></tr>') +'</tbody>'+
+            '</table>'+
+            (p.status==='Lunas' ? '<p style="margin-top:10px;"><b>Tanggal Lunas:</b> '+ (p.tglLunas||'-') +'</p>' : '')+
+        '</div>';
+        Swal.fire({ title:'<i class="fa-solid fa-receipt"></i> Riwayat Angsuran #'+ p.id, html: html, width: 600, confirmButtonText:'Tutup' });
+    };
+    window.hapusKopSimpan = function(id) { let db = JSON.parse(localStorage.getItem('db_kop_simpan')) || []; localStorage.setItem('db_kop_simpan', JSON.stringify(db.filter(x=>x.id!==id))); localStorage.setItem('ts_kop_simpan', new Date().toISOString()); if(typeof syncSemuaData==='function') syncSemuaData(true); if(typeof loadKoperasiData==='function') loadKoperasiData(); };
+    window.bayarCicilan = function(id) {
+        let dbP = JSON.parse(localStorage.getItem('db_kop_pinjam')) || [];
+        let idx = dbP.findIndex(x => String(x.id) === String(id));
+        if (idx === -1) return Swal.fire('Error','Pinjaman tidak ditemukan.','error');
+        let p = dbP[idx];
+        // Migrasi data lama yang belum punya schema baru
+        if (typeof p.tenor !== 'number' || p.tenor <= 0) p.tenor = 3;
+        if (typeof p.totalKewajiban !== 'number') p.totalKewajiban = (p.plafon || 0) + Math.round((p.plafon||0)*0.1);
+        if (typeof p.angsuran !== 'number') p.angsuran = Math.ceil(p.totalKewajiban / p.tenor);
+        if (!Array.isArray(p.riwayatBayar)) p.riwayatBayar = [];
+        if (typeof p.cicilanKe !== 'number') p.cicilanKe = p.riwayatBayar.length;
+        if (typeof p.sisa !== 'number') p.sisa = p.totalKewajiban - p.riwayatBayar.reduce((a,r)=>a+(r.nominal||0),0);
+
+        let periodeBerikut = Math.min(p.cicilanKe + 1, p.tenor);
+        let angsuranWajib = Math.min(p.angsuran, p.sisa);
+
+        let riwayatHtml = p.riwayatBayar.length ? p.riwayatBayar.map(function(r){
+            return '<tr><td style="padding:4px 8px; border-bottom:1px solid #e2e8f0; text-align:center;">'+ r.periode +'</td>'+
+                   '<td style="padding:4px 8px; border-bottom:1px solid #e2e8f0;">'+ (r.tgl||'-') +'</td>'+
+                   '<td style="padding:4px 8px; border-bottom:1px solid #e2e8f0; text-align:right;"><b>'+ fmt(r.nominal||0) +'</b></td></tr>';
+        }).join('') : '<tr><td colspan="3" style="padding:10px; text-align:center; color:#64748b;"><i>Belum ada angsuran tercatat.</i></td></tr>';
+
+        let body = '<div style="text-align:left; font-size:0.92rem;">'+
+            '<div style="background:#f8fafc; padding:12px 14px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:12px;">'+
+                '<div><b>Peminjam:</b> '+ p.namaWarga +'</div>'+
+                '<div><b>Plafon:</b> '+ fmt(p.plafon||0) +' &nbsp;<b>Total Kewajiban:</b> '+ fmt(p.totalKewajiban) +'</div>'+
+                '<div><b>Tenor:</b> '+ p.tenor +' periode &nbsp;<b>Angsuran/periode:</b> '+ fmt(p.angsuran) +'</div>'+
+                '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #cbd5e1;"><b>Sisa Hutang:</b> <span style="color:#dc2626; font-weight:800;">'+ fmt(p.sisa) +'</span></div>'+
+                '<div><b>Status:</b> Akan dibayar <b>periode ke-'+ periodeBerikut +' dari '+ p.tenor +'</b></div>'+
+            '</div>'+
+            '<div style="margin-bottom:8px;"><b>Riwayat Angsuran</b></div>'+
+            '<div style="max-height:160px; overflow:auto; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:12px;">'+
+                '<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">'+
+                '<thead><tr style="background:#f1f5f9;"><th style="padding:6px;">Periode</th><th style="padding:6px; text-align:left;">Tanggal</th><th style="padding:6px; text-align:right;">Nominal</th></tr></thead>'+
+                '<tbody>'+ riwayatHtml +'</tbody></table>'+
+            '</div>'+
+            '<label style="display:block; font-weight:700; margin-bottom:6px;">Nominal Bayar (Rp)</label>'+
+            '<input id="bayar-amt-input" type="number" min="1" max="'+ p.sisa +'" value="'+ angsuranWajib +'" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem;">'+
+            '<small style="color:#64748b;">Default = angsuran wajib periode ini ('+ fmt(angsuranWajib) +'). Boleh dilebihkan.</small>'+
+        '</div>';
+
+        Swal.fire({
+            title: '<i class="fa-solid fa-hand-holding-dollar"></i> Bayar Angsuran',
+            html: body, width: 560, focusConfirm: false,
+            showCancelButton: true, cancelButtonText: 'Batal',
+            confirmButtonText: '<i class="fa-solid fa-check"></i> Bayar Sekarang',
+            confirmButtonColor: '#16a34a',
+            preConfirm: function(){
+                let v = parseInt(document.getElementById('bayar-amt-input').value)||0;
+                if (v <= 0) { Swal.showValidationMessage('Nominal harus lebih dari 0'); return false; }
+                if (v > p.sisa) { Swal.showValidationMessage('Maksimum '+ fmt(p.sisa)); return false; }
+                return v;
+            }
+        }).then(function(res){
+            if (!res.isConfirmed) return;
+            let bayar = res.value;
+            let now = new Date();
+            p.cicilanKe = (p.cicilanKe || 0) + 1;
+            p.riwayatBayar.push({ periode: p.cicilanKe, tgl: now.toLocaleDateString('id-ID'), tglIso: now.toISOString(), nominal: bayar });
+            p.sisa = Math.max(0, p.sisa - bayar);
+            if (p.sisa <= 0) {
+                p.status = 'Lunas';
+                p.tglLunas = now.toLocaleDateString('id-ID');
+                p.tglLunasIso = now.toISOString();
+            }
+            dbP[idx] = p;
+            localStorage.setItem('db_kop_pinjam', JSON.stringify(dbP));
+            localStorage.setItem('ts_kop_pinjam', new Date().toISOString());
+            if (typeof syncSemuaData === 'function') syncSemuaData(true);
+            if (typeof loadKoperasiData === 'function') loadKoperasiData();
+            if (p.status === 'Lunas') {
+                Swal.fire({ icon:'success', title:'Pinjaman LUNAS', html:'<b>'+ p.namaWarga +'</b> telah melunasi pinjaman.<br>Total dibayar: <b>'+ fmt(p.totalKewajiban) +'</b><br>Pinjaman dipindahkan ke <b>Daftar Lunas</b>.' });
+            } else {
+                Toast.fire({ icon:'success', title:'Bayar '+ fmt(bayar) +' tersimpan (sisa '+ fmt(p.sisa) +')' });
+            }
+        });
+    };
     // === 1. MESIN MATRIKS & TOTAL KARTU BENDAHARA (DENGAN RINCIAN) ===
     // === MESIN HIDE & SEEK DAFTAR PENAGIHAN ===
 
