@@ -3162,8 +3162,10 @@ nav.nav-tabs.hidden-footer {
                     
                     <div style="margin: 20px 0; padding: 15px; background: rgba(245, 158, 11, 0.1); border: 1px dashed var(--gold-luxury); border-radius: 12px; text-align: center;">
             <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 10px;"><i class="fa-solid fa-flask"></i> Panel Pengujian Developer</p>
+            <div id="gt-dev-test-panel" style="display:none;">
             <button type="button" onclick="suntikDataTest()" style="background: #10b981; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; box-shadow: 0 4px 10px rgba(16,185,129,0.3);"><i class="fa-solid fa-syringe"></i> Suntik 50 Data Test</button>
             <button type="button" onclick="bersihkanDataTest()" style="background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; box-shadow: 0 4px 10px rgba(239,68,68,0.3);"><i class="fa-solid fa-broom"></i> Sapu Bersih Data Test</button>
+            </div>
         </div>
             <div id="admin-view-kk">
                 <div class="card form-input-section" style="border-top: 4px solid var(--primary-blue);">
@@ -3495,6 +3497,22 @@ nav.nav-tabs.hidden-footer {
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     };
     var esc = window.escapeHtml;
+
+    // Tampilkan panel pengujian developer hanya di host dev (localhost / *.replit.dev)
+    (function(){
+        try {
+            var h = location.hostname || '';
+            var isDev = h === 'localhost' || h === '127.0.0.1' || /\.replit\.dev$/i.test(h) || /\.repl\.co$/i.test(h);
+            if (!isDev) return;
+            var apply = function(){
+                var p = document.getElementById('gt-dev-test-panel');
+                if (p) p.style.display = '';
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', apply);
+            } else { apply(); }
+        } catch(e) {}
+    })();
 
     // ===== THEME (light/dark) bootstrap — injected by audit overhaul =====
     (function(){
@@ -4976,7 +4994,7 @@ nav.nav-tabs.hidden-footer {
             let htmlBerita = `<div class="berita-marquee-container"><div class="berita-marquee-content">`;
             
             // Urutkan dari berita terbaru
-            db.reverse().forEach(b => {
+            db.slice().reverse().forEach(b => {
                 // Potong teks jika terlalu panjang untuk tampilan depan
                 let isiSingkat = b.isi.length > 90 ? b.isi.substring(0, 90) + '...' : b.isi;
                 let img = b.foto ? `<img src="${b.foto}" style="width:100%; height:140px; object-fit:cover; border-radius:8px; margin-bottom:12px; border: 1px solid #e2e8f0;">` : '';
@@ -5209,7 +5227,7 @@ nav.nav-tabs.hidden-footer {
             }
 
             let htmlAgenda = `<div class="agenda-marquee-container"><div class="agenda-marquee-content">`;
-            db.reverse().forEach(k => {
+            db.slice().reverse().forEach(k => {
                 htmlAgenda += `
                 <div class="agenda-item" onclick="bukaDetailAgenda(${k.id})" style="cursor:pointer; border-left: 4px solid var(--accent-gold); background: white;">
                     <div class="agenda-icon" style="background:#fef3c7; color:var(--accent-gold);"><i class="fa-solid fa-calendar-check"></i></div>
@@ -5819,7 +5837,7 @@ nav.nav-tabs.hidden-footer {
         }
         
         // Memunculkan data dari yang paling baru (reverse)
-        db.reverse().forEach(n => { 
+        db.slice().reverse().forEach(n => { 
             tb.innerHTML += `<tr>
                 <td>${n.tgl}</td>
                 <td><b style="color:var(--primary-dark); font-size:1.05rem;">${n.judul}</b></td>
@@ -6623,7 +6641,7 @@ nav.nav-tabs.hidden-footer {
         if(tb) {
             tb.innerHTML='';
             if(db.length === 0) { tb.innerHTML='<tr><td colspan="5" style="text-align:center;">Belum ada antrean surat.</td></tr>'; return; }
-            db.reverse().forEach(s => {
+            db.slice().reverse().forEach(s => {
                 let badge = s.status === 'Selesai' ? 'badge-selesai' : 'badge-menunggu';
                 let btnAction = '';
                 if(s.status !== 'Selesai') {

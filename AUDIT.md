@@ -84,9 +84,29 @@ So there is **no live frontend↔backend integration to break**. "Sync logic" in
 
 ## 4. Fixes applied in this pass
 
+### Pass 1 (2026-04-22)
 * `artifacts/smart-portal-rt/index.html` — inserted `safeGet`, `safeSet`, `escapeHtml` (alias `esc`) helpers into the global script block (lines 1432–1458) so they are available to every existing handler. Behavior unchanged for current code; new and migrated code becomes safe-by-default.
 * Added `parseInt(..., 10)` radix at the primary surat-counter read site to remove the most-trafficked footgun.
 * No features removed. No DOM, UI, or feature files were touched.
+
+### Pass 2 (2026-04-23)
+* **L4 fixed in 4 sites** — all `db.reverse().forEach(...)` calls in `index.html` (berita marquee, agenda marquee, notulen list, and surat list — lines 4979, 5212, 5822, 6626) replaced with `db.slice().reverse().forEach(...)`. Eliminates source-array mutation; behavior identical because each call freshly parsed the array, but intent is now explicit and future refactors are safe.
+* **R3 implemented** — developer-only test buttons (`suntikDataTest`, `bersihkanDataTest`) wrapped in `<div id="gt-dev-test-panel" style="display:none;">`. A small IIFE in the helpers block reveals the panel only when `location.hostname` is `localhost`, `127.0.0.1`, `*.replit.dev`, or `*.repl.co`. In production deployments the buttons are completely hidden, preventing accidental data wipes by admins.
+* **API server hardening (A2, A3, A4)** in `artifacts/api-server/src/app.ts`:
+  - `cors()` now reads `CORS_ALLOWED_ORIGINS` (comma-separated allowlist). In dev (no env var, `NODE_ENV !== 'production'`) any origin is allowed; in production with no allowlist, cross-origin requests are blocked.
+  - `express.json()` and `express.urlencoded()` capped at `256kb` to prevent oversized-body DoS.
+  - Added a global error handler that logs via `req.log` and returns `{error}` JSON instead of leaking the default Express HTML stack page. In production, 5xx errors are masked as `"Internal Server Error"`.
+  - Added a `/api` catch-all that returns `{error:"Not Found"}` JSON for unknown routes.
+  - `app.disable('x-powered-by')` to remove framework fingerprinting.
+* Verified: full `pnpm run typecheck:libs` + per-package typecheck passes. Smart-portal-rt vite dev server boots cleanly on port 25803 and serves `200 OK`.
+
+### Still recommended (deferred — high-risk or large surface)
+The following items from §2 and §3 remain unaddressed in this pass because they either rewrite user-facing flows, would break stored credentials, or require manual per-call review:
+* SE2 — hash warga passwords in `data_warga_mandiri` (breaks all existing logins; needs migration script and "ganti password" prompt at first login after upgrade).
+* SE3 — mechanical XSS escaping migration of ~100+ `${userValue}` interpolation sites. The `esc()` helper is in place; safe to do incrementally.
+* SE6 — SRI hashes / vendoring CDN libs (one-time mechanical work, low risk but tedious).
+* L2 — atomic counter for `surat_counter` across tabs (BroadcastChannel or storage event).
+* R1, R2, R4, R5, R6 — modular split, vendor libs, backup/restore button, service worker, eslint. All net additions, none required for correctness.
 
 ---
 
