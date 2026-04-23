@@ -2867,6 +2867,101 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
   transform: rotate(180deg);
 }
 /* === end smoothing === */
+
+
+/* ===== FIX #1: Select2 dropdown — soften colors in dark mode ===== */
+html[data-theme="dark"] .select2-container--default .select2-selection--single,
+html[data-theme="dark"] .select2-container--default .select2-selection--multiple {
+  background: var(--gt-surface-2) !important;
+  border: 1px solid var(--gt-border) !important;
+  color: var(--gt-text-2) !important;
+}
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered,
+html[data-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+  color: var(--gt-text-2) !important;
+}
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__placeholder {
+  color: var(--gt-text-3) !important;
+}
+html[data-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__arrow b {
+  border-color: var(--gt-text-3) transparent transparent transparent !important;
+}
+html[data-theme="dark"] .select2-dropdown {
+  background: var(--gt-surface-2) !important;
+  border: 1px solid var(--gt-border) !important;
+  color: var(--gt-text-2) !important;
+  box-shadow: var(--gt-shadow-md) !important;
+}
+html[data-theme="dark"] .select2-search--dropdown .select2-search__field {
+  background: var(--gt-surface) !important;
+  color: var(--gt-text-2) !important;
+  border: 1px solid var(--gt-border) !important;
+}
+html[data-theme="dark"] .select2-results__option {
+  color: var(--gt-text-2) !important;
+  background: transparent !important;
+}
+html[data-theme="dark"] .select2-results__option--highlighted,
+html[data-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected],
+html[data-theme="dark"] .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+  background: rgba(96,165,250,0.18) !important;
+  color: #e2e8f0 !important;
+}
+html[data-theme="dark"] .select2-container--default .select2-results__option[aria-selected=true],
+html[data-theme="dark"] .select2-container--default .select2-results__option--selected {
+  background: rgba(96,165,250,0.10) !important;
+  color: var(--gt-text) !important;
+}
+html[data-theme="dark"] select {
+  background: var(--gt-surface-2) !important;
+  color: var(--gt-text-2) !important;
+  border: 1px solid var(--gt-border) !important;
+}
+html[data-theme="dark"] select option {
+  background: var(--gt-surface-2) !important;
+  color: var(--gt-text-2) !important;
+}
+
+/* ===== FIX #3: Matrix Iuran — rapikan font & kolom di desktop ===== */
+#ben-matriks .table-responsive table {
+  table-layout: fixed;
+  font-size: 0.85rem;
+}
+#ben-matriks .table-responsive thead th {
+  font-size: 0.72rem !important;
+  letter-spacing: 0.02em;
+  padding: 8px 4px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+#ben-matriks .table-responsive thead th:first-child { text-align: left; padding-left: 12px !important; }
+#ben-matriks .table-responsive tbody td {
+  padding: 8px 4px !important;
+  font-size: 0.88rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+#ben-matriks .table-responsive tbody td:first-child {
+  text-align: left;
+  padding-left: 12px !important;
+  white-space: normal;
+  word-break: break-word;
+}
+#ben-matriks .table-responsive tbody td b { font-weight: 700; font-size: 0.92rem; }
+@media (min-width: 1024px) {
+  #ben-matriks .table-responsive table { width: 100%; min-width: 100%; }
+  #ben-matriks .table-responsive thead th:nth-child(1) { width: 18%; }
+  #ben-matriks .table-responsive thead th:nth-child(n+2):nth-child(-n+13) { width: 4.5%; }
+  #ben-matriks .table-responsive thead th:nth-child(14) { width: 11%; text-align: right; padding-right: 10px !important; }
+  #ben-matriks .table-responsive thead th:nth-child(15) { width: 7%; }
+  #ben-matriks .table-responsive tbody td:nth-child(n+2):nth-child(-n+13) { text-align: center; }
+  #ben-matriks .table-responsive tbody td:nth-child(14) { text-align: right; padding-right: 10px !important; }
+  #ben-matriks .table-responsive tbody td:nth-child(15) { text-align: center; }
+  #ben-matriks .table-responsive tbody td:nth-child(15) .btn-action {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+  }
+}
 </style>
     
         
@@ -4626,17 +4721,25 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
         iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none';
         document.body.appendChild(iframe);
         var doc = iframe.contentWindow.document;
+        // Base href agar gambar/asset relatif (mis. Lambang_Kota_Semarang.png) tetap resolve dalam iframe
+        var baseHref = (location.origin + location.pathname).replace(/[^\/]*$/, '');
         doc.open();
-        doc.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + (title||'Cetak Dokumen') + '</title>' +
+        doc.write('<!DOCTYPE html><html lang="id" data-theme="light" style="color-scheme: light;"><head><meta charset="utf-8">' +
+            '<base href="' + baseHref + '">' +
+            '<meta name="color-scheme" content="light">' +
+            '<title>' + (title||'Cetak Dokumen') + '</title>' +
             '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">' +
             '<style>' +
+            ':root { color-scheme: light; }' +
+            'html, body { background:white !important; color:black !important; }' +
             '@page { size: A4; margin: 15mm; }' +
             'body { margin:0; padding:0; background:white; color:black; font-family: "Times New Roman", Times, serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
             '.letter-paper { background:white !important; color:black !important; padding:0 !important; box-shadow:none !important; }' +
             'table { border-collapse: collapse; width:100%; }' +
             'th, td { padding:6px 8px; }' +
             '.kop-surat-resmi { display:flex; align-items:center; gap:15px; margin-bottom:10px; }' +
-            '@media print { body { -webkit-print-color-adjust: exact !important; } }' +
+            '.kop-surat-resmi img { max-width: 80px; height: auto; }' +
+            '@media print { html, body { background:white !important; color:black !important; -webkit-print-color-adjust: exact !important; } }' +
             '</style></head><body>' + htmlBody + '</body></html>');
         doc.close();
         Swal.fire({ title:'Menyiapkan Dokumen...', text:'Mohon tunggu, preview cetak akan terbuka.', timer: 900, showConfirmButton:false, didOpen:function(){ Swal.showLoading(); } }).then(function(){
@@ -5865,8 +5968,9 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
         let bulanSkg = new Intl.DateTimeFormat('id-ID', { month: 'long' }).format(new Date());
         if(document.getElementById('bulan-tagihan-info')) document.getElementById('bulan-tagihan-info').innerText = "Periode: " + bulanSkg;
 
-        let bayarBulanIni = dbIuran.filter(x => x.bulan === bulanSkg);
-        let jmlBayar = bayarBulanIni.length;
+        let bayarBulanIni = dbIuran;
+        // Hitung total bulan-orang setoran (mis. 1 warga bayar 2 bulan = 2 setoran).
+        let jmlBayar = dbIuran.length;
         let totalWarga = validWarga.length;
 
         let st = JSON.parse(localStorage.getItem('status_setor_' + bulanSkg)) || { meja:0, bangun:0, agustus:0 };
@@ -5879,7 +5983,7 @@ html[data-theme="dark"] .swal2-popup.swal2-toast .swal2-title { color: #f1f5f9 !
         // 1. UANG MEJA
         let mejaTerkumpul = jmlBayar * 5000; let targetMeja = 250000; let mejaKurang = targetMeja - mejaTerkumpul;
         if(document.getElementById('tagih-meja-terkumpul')) document.getElementById('tagih-meja-terkumpul').innerText = fmt(mejaTerkumpul);
-        if(document.getElementById('tagih-meja-peserta')) document.getElementById('tagih-meja-peserta').innerText = `${jmlBayar} Orang`;
+        if(document.getElementById('tagih-meja-peserta')) document.getElementById('tagih-meja-peserta').innerText = `${jmlBayar} Setoran`;
         if(document.getElementById('tagih-meja-kurang')) {
             document.getElementById('tagih-meja-kurang').innerText = mejaKurang > 0 ? fmt(mejaKurang) : "LUNAS";
             document.getElementById('btn-nalangi').style.display = (mejaKurang > 0 && mejaTerkumpul > 0) ? 'inline-flex' : 'none';
