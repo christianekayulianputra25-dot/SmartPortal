@@ -2598,6 +2598,55 @@ nav.nav-tabs.hidden-footer {
 
     
 /* === Hide & Seek smoothing (added) === */
+/* Bump specificity so the .hidden-footer transform actually wins over
+   the v7 mobile block (body > .app-container .admin-nav-tabs ...). */
+@media (max-width: 768px) {
+  body > .app-container .admin-nav-tabs.hidden-footer,
+  body > .app-container .nav-tabs.hidden-footer,
+  .app-container .admin-nav-tabs.hidden-footer,
+  .app-container .nav-tabs.hidden-footer {
+    transform: translateY(calc(100% - 30px)) !important;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
+    overflow: visible !important;
+  }
+  body > .app-container .admin-nav-tabs:not(.hidden-footer),
+  body > .app-container .nav-tabs:not(.hidden-footer),
+  .app-container .admin-nav-tabs:not(.hidden-footer),
+  .app-container .nav-tabs:not(.hidden-footer) {
+    transform: none !important;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
+  }
+}
+
+/* === Haptic-style tap feedback for tab buttons (semua portal) === */
+.admin-tab-btn, .nav-btn, .gt-bn-item, .gt-service-card {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.18s ease,
+              background 0.18s ease,
+              color 0.18s ease,
+              border-color 0.18s ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-tab-btn:active, .nav-btn:active, .gt-bn-item:active {
+  transform: scale(0.94) !important;
+  filter: brightness(1.05);
+}
+.gt-service-card:active {
+  transform: scale(0.97) !important;
+  filter: brightness(1.03);
+}
+@media (hover: hover) {
+  .admin-tab-btn:hover, .nav-btn:hover, .gt-bn-item:hover {
+    transform: translateY(-1px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-tab-btn, .nav-btn, .gt-bn-item, .gt-service-card,
+  .admin-nav-tabs, .nav-tabs { transition: none !important; }
+  .admin-tab-btn:active, .nav-btn:active, .gt-bn-item:active,
+  .gt-service-card:active { transform: none !important; }
+}
+
 .admin-nav-tabs .pull-tab-bca,
 .nav-tabs .pull-tab-bca {
   transition: background 0.3s ease, color 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
