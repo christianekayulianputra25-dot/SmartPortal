@@ -2278,7 +2278,7 @@ nav.nav-tabs.hidden-footer {
     box-sizing: border-box !important;
     z-index: 1000 !important;
     transform: none !important;
-    transition: transform 0.3s ease !important;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
   }
 
   /* Each nav button takes equal share of remaining space */
@@ -2465,7 +2465,8 @@ nav.nav-tabs.hidden-footer {
 nav.admin-nav-tabs.hidden-footer,
 nav.nav-tabs.hidden-footer {
   transform: translateY(calc(100% - 30px)) !important;
-  transition: transform 0.3s ease !important;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease !important;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.18) !important;
 }
 .admin-nav-tabs.hidden-footer .pull-tab-bca,
 .nav-tabs.hidden-footer  .pull-tab-bca {
@@ -2595,7 +2596,27 @@ nav.nav-tabs.hidden-footer {
   }
 }
 
-    </style>
+    
+/* === Hide & Seek smoothing (added) === */
+.admin-nav-tabs .pull-tab-bca,
+.nav-tabs .pull-tab-bca {
+  transition: background 0.3s ease, color 0.3s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-nav-tabs .pull-tab-bca:hover,
+.nav-tabs .pull-tab-bca:hover {
+  background: var(--gold-luxury, #f59e0b) !important;
+  color: var(--navy-dark, #001f5b) !important;
+}
+.admin-nav-tabs .pull-tab-bca i,
+.nav-tabs .pull-tab-bca i {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.admin-nav-tabs.hidden-footer .pull-tab-bca i,
+.nav-tabs.hidden-footer  .pull-tab-bca i {
+  transform: rotate(180deg);
+}
+/* === end smoothing === */
+</style>
     
         
     
@@ -4321,33 +4342,10 @@ nav.nav-tabs.hidden-footer {
         });
     })();
 
-    (function(){
-        function unhideNav(){
-            try {
-                document.querySelectorAll('.admin-nav-tabs.hidden-footer, .nav-tabs.hidden-footer')
-                    .forEach(function(el){ el.classList.remove('hidden-footer'); });
-                document.querySelectorAll('.pull-tab-bca').forEach(function(el){ el.remove(); });
-            } catch(_){}
-        }
-        unhideNav();
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', unhideNav);
-        // Run a few extra times after legacy code might re-add the pull tab
-        [400, 900, 1600, 3000].forEach(function(t){ setTimeout(unhideNav, t); });
-        // Also run on every tab/portal change
-        ['openWargaTab','openBenTab','openKopTab','openAdminTab','tampilkanView','syncSemuaData'].forEach(function(fn){
-            var tries = 0;
-            var w = setInterval(function(){
-                tries++;
-                if (typeof window[fn] === 'function' && !window[fn].__gtUnhideWrapped) {
-                    var orig = window[fn];
-                    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(unhideNav, 80); return r; };
-                    window[fn].__gtUnhideWrapped = true;
-                    clearInterval(w);
-                }
-                if (tries > 60) clearInterval(w);
-            }, 250);
-        });
-    })();
+    /* Hide & Seek pull-tab dipulihkan — IIFE "unhideNav" yang dulu
+       menghapus pull-tab di setiap tab change sengaja dinonaktifkan.
+       Smoothing transisi via CSS HOTFIX v9 + blok Hide & Seek smoothing. */
+    (function(){ /* legacy kill-switch dimatikan total */ })();
 
 
 
