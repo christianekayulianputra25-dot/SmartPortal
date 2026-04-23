@@ -2792,6 +2792,50 @@ nav .pull-tab-bca {
   }
 }
 
+
+/* ============================================================
+   ===== HOTFIX v12: bulletproof pull-tab + table (inline) =====
+   ============================================================ */
+
+/* Pull-tab is now a STANDALONE fixed element so the nav state
+   doesn't affect its visibility. It sits above the nav center. */
+#gt-pull-tab {
+  position: fixed !important;
+  left: 50% !important;
+  bottom: 78px !important;          /* sits above nav */
+  transform: translateX(-50%) !important;
+  width: 64px !important;
+  height: 30px !important;
+  background: var(--navy-dark, #001f5b) !important;
+  border: 3px solid var(--gold-luxury, #f59e0b) !important;
+  border-bottom: none !important;
+  border-radius: 18px 18px 0 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--gold-luxury, #f59e0b) !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  z-index: 1002 !important;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.3) !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: rgba(245,158,11,0.3) !important;
+}
+#gt-pull-tab.gt-collapsed {
+  bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* Hide the legacy in-nav pull-tab to avoid double handles */
+.admin-nav-tabs > .pull-tab-bca,
+.nav-tabs > .pull-tab-bca {
+  display: none !important;
+}
+
+/* Only show the standalone pull-tab on mobile */
+@media (min-width: 769px) {
+  #gt-pull-tab { display: none !important; }
+}
+
     </style>
     
         
@@ -7386,6 +7430,149 @@ function updateSemuaWaktu() {
                 }
             });
             moT.observe(document.body, { childList: true, subtree: true });
+        } catch(_){}
+    })();
+</script>
+<script>
+    (function(){
+        if (window.__gtV12Loaded) return; window.__gtV12Loaded = true;
+
+        // ============== STANDALONE PULL-TAB ==============
+        var pullTab = null;
+        var collapsed = false;
+
+        function getNavs(){
+            return document.querySelectorAll('.admin-nav-tabs, .nav-tabs');
+        }
+        function applyNavState(){
+            getNavs().forEach(function(nav){
+                if (collapsed) {
+                    nav.style.setProperty('display', 'none', 'important');
+                } else {
+                    nav.style.removeProperty('display');
+                }
+            });
+            if (pullTab) {
+                if (collapsed) {
+                    pullTab.classList.add('gt-collapsed');
+                    pullTab.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
+                } else {
+                    pullTab.classList.remove('gt-collapsed');
+                    pullTab.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+                }
+            }
+        }
+        function ensurePullTab(){
+            if (pullTab && document.body.contains(pullTab)) return;
+            pullTab = document.createElement('div');
+            pullTab.id = 'gt-pull-tab';
+            pullTab.setAttribute('role','button');
+            pullTab.setAttribute('aria-label','Sembunyikan / Tampilkan menu');
+            pullTab.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+            pullTab.addEventListener('click', function(e){
+                e.preventDefault(); e.stopPropagation();
+                collapsed = !collapsed;
+                applyNavState();
+            });
+            document.body.appendChild(pullTab);
+        }
+        // Hide standalone pull-tab if no nav exists yet (splash/login)
+        function syncPullTabVisibility(){
+            ensurePullTab();
+            if (!pullTab) return;
+            var hasNav = getNavs().length > 0;
+            pullTab.style.visibility = hasNav ? 'visible' : 'hidden';
+            if (hasNav) applyNavState();
+        }
+        syncPullTabVisibility();
+        if (document.readyState === 'loading')
+            document.addEventListener('DOMContentLoaded', syncPullTabVisibility);
+        // Re-check periodically (covers post-login nav appearance)
+        setInterval(syncPullTabVisibility, 1500);
+
+        // Strip any legacy in-nav pull-tab on the fly
+        function stripLegacy(){
+            try {
+                document.querySelectorAll('.admin-nav-tabs > .pull-tab-bca, .nav-tabs > .pull-tab-bca')
+                    .forEach(function(el){ el.remove(); });
+            } catch(_){}
+        }
+        stripLegacy();
+        setInterval(stripLegacy, 2000);
+
+        // ============== BULLETPROOF TABLE FIX ==============
+        function fixTable(tbl){
+            try {
+                if (!tbl || !tbl.parentElement) return;
+                if (tbl.classList && tbl.classList.contains('tabel-isi-surat')) return;
+                if (tbl.closest('#hidden-pdf-container, #print-ba-container')) return;
+                if (tbl.dataset.gtFixed === '1' && tbl.parentElement.dataset.gtScroll === '1') return;
+
+                // Force the table to its content width with a sane minimum
+                tbl.style.setProperty('min-width', '700px', 'important');
+                tbl.style.setProperty('width', 'max-content', 'important');
+                tbl.style.setProperty('max-width', 'none', 'important');
+                tbl.style.setProperty('table-layout', 'auto', 'important');
+                tbl.dataset.gtFixed = '1';
+
+                // Force every cell to one line
+                tbl.querySelectorAll('th, td').forEach(function(c){
+                    c.style.setProperty('white-space', 'nowrap', 'important');
+                });
+
+                // Make the nearest viable ancestor scroll horizontally
+                var parent = tbl.parentElement;
+                // Walk up to find a sensible scroll container (skip <thead><tbody><tr>)
+                while (parent && /^(THEAD|TBODY|TR|TFOOT)$/.test(parent.tagName)) {
+                    parent = parent.parentElement;
+                }
+                if (parent && parent !== document.body) {
+                    parent.style.setProperty('overflow-x', 'auto', 'important');
+                    parent.style.setProperty('overflow-y', 'hidden', 'important');
+                    parent.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+                    parent.style.setProperty('max-width', '100%', 'important');
+                    parent.dataset.gtScroll = '1';
+                }
+            } catch(_){}
+        }
+        function fixAllTables(root){
+            try {
+                (root || document).querySelectorAll('table').forEach(fixTable);
+            } catch(_){}
+        }
+        fixAllTables();
+        if (document.readyState === 'loading')
+            document.addEventListener('DOMContentLoaded', fixAllTables);
+        // Periodic re-scan covers tables freshly populated by syncSemuaData
+        setInterval(fixAllTables, 2000);
+
+        // ============== MutationObserver: catch dynamic content ==============
+        try {
+            var mo = new MutationObserver(function(muts){
+                var needsTableScan = false;
+                var needsPullSync = false;
+                for (var i = 0; i < muts.length; i++) {
+                    var m = muts[i];
+                    // New nodes
+                    if (m.addedNodes) {
+                        for (var j = 0; j < m.addedNodes.length; j++) {
+                            var n = m.addedNodes[j];
+                            if (n.nodeType !== 1) continue;
+                            if (n.tagName === 'TABLE') fixTable(n);
+                            else if (n.querySelectorAll) {
+                                if (n.querySelector('table')) needsTableScan = true;
+                                if (n.matches && (n.matches('.admin-nav-tabs') || n.matches('.nav-tabs') || n.querySelector('.admin-nav-tabs, .nav-tabs')))
+                                    needsPullSync = true;
+                            }
+                        }
+                    }
+                    // tbody innerHTML replacements (data refresh): re-scan
+                    if (m.target && m.target.tagName === 'TBODY') needsTableScan = true;
+                }
+                if (needsTableScan) fixAllTables();
+                if (needsPullSync) syncPullTabVisibility();
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
         } catch(_){}
     })();
 </script>
