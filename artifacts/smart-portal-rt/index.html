@@ -2429,6 +2429,172 @@ nav.nav-tabs.hidden-footer {
   }
 }
 
+
+/* ============================================================
+   ===== HOTFIX v9: restore pull-tab toggle + deep table fix =====
+   ============================================================ */
+
+/* === A) RESTORE legacy "pull-tab" hide/show toggle ============ */
+/* Override v7 that disabled the tab. Selectors are more specific. */
+.admin-nav-tabs .pull-tab-bca,
+.nav-tabs .pull-tab-bca {
+  display: flex !important;
+  position: absolute !important;
+  top: -30px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 64px !important;
+  height: 30px !important;
+  background: var(--navy-dark, #001f5b) !important;
+  border: 3px solid var(--gold-luxury, #f59e0b) !important;
+  border-bottom: none !important;
+  border-radius: 18px 18px 0 0 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--gold-luxury, #f59e0b) !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  z-index: 1001 !important;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.25) !important;
+}
+/* When the user collapses the bar, slide the whole bar down. The
+   pull-tab is positioned at top:-30px so it sticks up above the screen
+   bottom edge as a 30px handle the user can tap to bring it back. */
+.admin-nav-tabs.hidden-footer,
+.nav-tabs.hidden-footer,
+nav.admin-nav-tabs.hidden-footer,
+nav.nav-tabs.hidden-footer {
+  transform: translateY(calc(100% - 30px)) !important;
+  transition: transform 0.3s ease !important;
+}
+.admin-nav-tabs.hidden-footer .pull-tab-bca,
+.nav-tabs.hidden-footer  .pull-tab-bca {
+  /* Keep the handle visible and centered when collapsed */
+  pointer-events: auto !important;
+}
+/* Container needs visible overflow so the handle pokes above */
+@media (max-width: 768px) {
+  body > .app-container .admin-nav-tabs,
+  body > .app-container .nav-tabs,
+  .app-container .admin-nav-tabs,
+  .app-container .nav-tabs,
+  .admin-nav-tabs,
+  .nav-tabs {
+    overflow: visible !important;     /* <<< let pull-tab show above */
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+  /* Inner button row gets its own scroll if there are many tabs */
+  .admin-nav-tabs > button,
+  .nav-tabs > button { flex-shrink: 0 !important; }
+}
+
+/* === B) DEEP TABLE FIX across every portal ====================== */
+
+/* B1) Reduce excessive padding inside tab content on mobile so cards
+       (and the tables inside them) actually have room to breathe. */
+@media (max-width: 768px) {
+  .admin-tab-content,
+  .warga-tab-content,
+  .ben-tab-content,
+  .kop-tab-content {
+    padding: 14px 10px !important;     /* was 40px */
+    overflow-x: visible !important;    /* don't clip child scrollers */
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  .card,
+  .gt-card {
+    padding: 16px 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+}
+
+/* B2) Make EVERY table responsive on mobile, not just those wrapped
+       in .table-responsive. We promote a bare table to a horizontal-
+       scroll context using its parent's display change is unsafe, so
+       instead we force the table itself to its intrinsic content width
+       and let the nearest ancestor (.card / .gt-card) scroll. */
+@media (max-width: 768px) {
+  /* Tables that already have a scroll wrapper -- ensure it works. */
+  .table-responsive,
+  .card .table-responsive,
+  .gt-card .table-responsive {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--gt-border, #e2e8f0) !important;
+    background: var(--gt-surface, #fff) !important;
+    margin: 0 0 12px 0 !important;
+  }
+  .table-responsive > table,
+  .table-responsive table {
+    min-width: 700px !important;
+    width: max-content !important;
+    margin: 0 !important;
+  }
+
+  /* Bare tables (no .table-responsive wrapper) inside cards. We can't
+     wrap them via CSS, but we can give the table itself a min-width
+     and let the .card scroll horizontally as a last resort. */
+  .card > table,
+  .gt-card > table {
+    min-width: 640px !important;
+    width: max-content !important;
+    display: table !important;
+  }
+  .card:has(> table:not(.tabel-isi-surat)),
+  .gt-card:has(> table:not(.tabel-isi-surat)) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Cell sizing: keep most cells one-line, but allow long descriptive
+     columns to wrap so rows don't grow absurdly wide. */
+  .table-responsive th,
+  .table-responsive td,
+  .card > table th,
+  .card > table td {
+    white-space: nowrap !important;
+    padding: 10px 12px !important;
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+    vertical-align: middle !important;
+  }
+  /* Common long-text columns (auto-detect by attribute or class hints) */
+  .table-responsive td.wrap,
+  .table-responsive td[data-wrap],
+  .table-responsive .col-wrap,
+  .table-responsive td:has(> .gt-fld-value),
+  .table-responsive td:has(> .alamat),
+  .table-responsive td:has(> .keluhan) {
+    white-space: normal !important;
+    min-width: 180px !important;
+    max-width: 240px !important;
+    word-break: break-word !important;
+  }
+}
+
+/* B3) Exclusions: print/letterhead tables must NEVER get min-width
+       overrides because they are designed for A4 paper. */
+@media (max-width: 768px) {
+  .tabel-isi-surat,
+  .tabel-isi-surat *,
+  table[style*="margin-top:40px"] {
+    min-width: 0 !important;
+    width: auto !important;
+    display: revert !important;
+  }
+}
+
     </style>
     
         
@@ -3974,6 +4140,56 @@ nav.nav-tabs.hidden-footer {
             if (s > 60) clearInterval(ws);
         }, 250);
     })();
+    (function(){
+        // Undo the v7 "strip pull-tab" behavior: re-create the handle
+        // on every nav we see, if it's missing.
+        function ensurePullTab(){
+            try {
+                document.querySelectorAll('.admin-nav-tabs, .nav-tabs').forEach(function(footer){
+                    if (footer.querySelector('.pull-tab-bca')) return;
+                    var pull = document.createElement('div');
+                    pull.className = 'pull-tab-bca';
+                    pull.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+                    pull.addEventListener('click', function(){
+                        footer.classList.toggle('hidden-footer');
+                        var icon = pull.querySelector('i');
+                        if (footer.classList.contains('hidden-footer')) {
+                            icon.classList.remove('fa-chevron-down');
+                            icon.classList.add('fa-chevron-up');
+                        } else {
+                            icon.classList.remove('fa-chevron-up');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                    });
+                    footer.appendChild(pull);
+                });
+            } catch(_){}
+        }
+        // First-load only: make sure the bar isn't stuck hidden from a
+        // prior session.
+        try {
+            document.querySelectorAll('.admin-nav-tabs.hidden-footer, .nav-tabs.hidden-footer')
+                .forEach(function(el){ el.classList.remove('hidden-footer'); });
+        } catch(_){}
+
+        ensurePullTab();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensurePullTab);
+        [400, 900, 1600, 3000].forEach(function(t){ setTimeout(ensurePullTab, t); });
+        ['openWargaTab','openBenTab','openKopTab','openAdminTab','tampilkanView','syncSemuaData'].forEach(function(fn){
+            var tries = 0;
+            var w = setInterval(function(){
+                tries++;
+                if (typeof window[fn] === 'function' && !window[fn].__gtPullWrapped) {
+                    var orig = window[fn];
+                    window[fn] = function(){ var r = orig.apply(this, arguments); setTimeout(ensurePullTab, 80); return r; };
+                    window[fn].__gtPullWrapped = true;
+                    clearInterval(w);
+                }
+                if (tries > 60) clearInterval(w);
+            }, 250);
+        });
+    })();
+
     (function(){
         function num(v){ v = parseInt(v,10); return isFinite(v) && v>0 ? v : 0; }
         function safeJSON(k, fb){ try { var v = JSON.parse(localStorage.getItem(k)||'null'); return v==null?fb:v; } catch(_){ return fb; } }
