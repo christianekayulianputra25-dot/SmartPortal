@@ -2618,6 +2618,54 @@ nav.nav-tabs.hidden-footer {
   }
 }
 
+/* === Haptic-style tap feedback for action buttons (semua portal) === */
+.btn-action, .btn-submit, .btn-ultra, .btn-logout, .btn-header-icon, .btn-toggle-sidebar {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.18s ease,
+              filter 0.18s ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-action::after, .btn-submit::after, .btn-ultra::after,
+.btn-logout::after, .btn-header-icon::after, .btn-toggle-sidebar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 60%);
+  opacity: 0;
+  transform: scale(0.4);
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.btn-action:active, .btn-submit:active, .btn-ultra:active,
+.btn-logout:active, .btn-header-icon:active, .btn-toggle-sidebar:active {
+  transform: scale(0.96) !important;
+  filter: brightness(1.05);
+}
+.btn-action:active::after, .btn-submit:active::after, .btn-ultra:active::after,
+.btn-logout:active::after, .btn-header-icon:active::after, .btn-toggle-sidebar:active::after {
+  opacity: 1;
+  transform: scale(1.4);
+  transition: opacity 0s, transform 0s;
+}
+@media (hover: hover) {
+  .btn-action:hover, .btn-submit:hover, .btn-ultra:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-action, .btn-submit, .btn-ultra, .btn-logout,
+  .btn-header-icon, .btn-toggle-sidebar { transition: none !important; }
+  .btn-action:active, .btn-submit:active, .btn-ultra:active,
+  .btn-logout:active, .btn-header-icon:active,
+  .btn-toggle-sidebar:active { transform: none !important; }
+  .btn-action::after, .btn-submit::after, .btn-ultra::after,
+  .btn-logout::after, .btn-header-icon::after,
+  .btn-toggle-sidebar::after { display: none !important; }
+}
 /* === Haptic-style tap feedback for tab buttons (semua portal) === */
 .admin-tab-btn, .nav-btn, .gt-bn-item, .gt-service-card {
   transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
