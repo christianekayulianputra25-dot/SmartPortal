@@ -58,8 +58,10 @@ app.use(
   }),
 );
 
-app.use(express.json({ limit: "256kb" }));
-app.use(express.urlencoded({ extended: true, limit: "256kb" }));
+// Limit dinaikkan ke 12 MB untuk mendukung upload PDF (mis. SK Struktur Pengurus)
+// yang disimpan sebagai base64 di key store.
+app.use(express.json({ limit: "12mb" }));
+app.use(express.urlencoded({ extended: true, limit: "12mb" }));
 
 app.use("/api", router);
 

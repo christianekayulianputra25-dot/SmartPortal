@@ -3038,7 +3038,10 @@ html[data-theme="dark"] select option {
                         <span style="font-size: 0.7rem; color: #475569;">AES 256-bit Encrypted</span>
                         <a href="#" onclick="lupaPassword()" style="color:var(--gold-luxury); font-size:0.75rem; text-decoration:none; font-weight:600;">Lupa Sandi?</a>
                     </div>
-                    <button type="submit" class="btn-ultra"><i class="fa-solid fa-fingerprint"></i> Buka Portal</button>
+                    <button type="submit" class="btn-ultra"><i class="fa-solid fa-key"></i> Buka Portal</button>
+                    <button type="button" id="btn-login-biometrik" class="btn-ultra" onclick="loginBiometrik()" style="display:none; margin-top:10px; background:linear-gradient(135deg,#10b981,#047857); align-items:center; justify-content:center; gap:10px;">
+                        <i class="fa-solid fa-fingerprint"></i> Login Biometrik (Sidik Jari / Face ID)
+                    </button>
                 </form>
 
                 <div style="margin-top: 25px; text-align: center;">
@@ -3056,6 +3059,7 @@ html[data-theme="dark"] select option {
             <p style="font-size: 0.65rem; color: #475569; margin: 0; text-transform: uppercase;">Dikembangkan Oleh:</p>
             <h4 style="margin: 2px 0; font-size: 1rem; color: #ffffff;">INDO DUTA TECH</h4>
             <a href="https://wa.me/6282213002006" target="_blank" style="display:inline-block; padding:6px 15px; background:var(--success); color:white; border-radius:8px; font-size:0.75rem; text-decoration:none; font-weight:bold; opacity: 0.8;"><i class="fa-brands fa-whatsapp"></i> Chat Developer</a>
+            <p style="font-size:0.7rem; color:#64748b; margin:10px 0 0;"><i class="fa-solid fa-globe"></i> <a href="https://smartportal005.replit.app" target="_blank" style="color:var(--gold-luxury); text-decoration:none; font-weight:600;">smartportal005.replit.app</a></p>
         </div>
     </div>
 </div>
@@ -3190,6 +3194,22 @@ html[data-theme="dark"] select option {
             <div class="card" style="margin-top: 30px; border-left: 5px solid var(--accent-gold); background: #f8fafc;">
                 <h4 style="margin-top:0; color:var(--primary-dark); font-size:1.1rem;"><i class="fa-solid fa-circle-info"></i> Keterangan Kepengurusan</h4>
                 <p id="teks-deskripsi-struktur" style="line-height:1.6; color:var(--text-dark); margin-bottom:0;">Belum ada deskripsi SK yang dicantumkan.</p>
+            </div>
+            <div class="card" id="warga-pengurus-pdf-card" style="margin-top: 20px; border-top: 4px solid var(--primary-blue); display:none;">
+                <div class="card-title-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <h3><i class="fa-solid fa-file-pdf"></i> Dokumen Resmi Struktur (PDF)</h3>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <a id="warga-pengurus-pdf-download" class="btn-action bg-blue" href="#" download style="text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh PDF</a>
+                        <button class="btn-action bg-gold" onclick="bukaPdfFullscreen('warga-pengurus-pdf-frame')"><i class="fa-solid fa-expand"></i> Layar Penuh</button>
+                    </div>
+                </div>
+                <div id="warga-pengurus-pdf-meta" style="font-size:0.85rem; color:#64748b; margin-bottom:10px;"></div>
+                <div style="width:100%; height:680px; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden; background:#f8fafc;">
+                    <iframe id="warga-pengurus-pdf-frame" title="Dokumen Struktur Pengurus" style="width:100%; height:100%; border:0;"></iframe>
+                </div>
+                <div id="warga-pengurus-pdf-fallback" style="display:none; padding:14px; margin-top:10px; background:#fef3c7; color:#92400e; border-radius:8px; font-size:0.9rem;">
+                    <i class="fa-solid fa-circle-exclamation"></i> Browser Anda tidak mendukung pratinjau PDF inline. Silakan klik <b>Unduh PDF</b> di atas.
+                </div>
             </div>
         </div>
 
@@ -3816,6 +3836,22 @@ html[data-theme="dark"] select option {
                 <button class="btn-submit bg-blue" style="width: auto; margin-top: 10px;" onclick="simpanDeskripsiPengurus()"><i class="fa-solid fa-save"></i> Simpan Deskripsi</button>
             </div>
 
+            <div class="card form-input-section" style="border-top: 4px solid var(--primary-blue);">
+                <div class="card-title-header">
+                    <h3><i class="fa-solid fa-file-pdf"></i> Upload Dokumen SK / Struktur (PDF)</h3>
+                    <span style="font-size:0.85rem; color:#64748b;">Dokumen yang diupload akan tampil di portal warga (PDF Viewer)</span>
+                </div>
+                <div class="form-group">
+                    <label>Pilih file PDF (maks 5 MB)</label>
+                    <input type="file" id="pengurus-pdf-input" accept="application/pdf,.pdf" style="background: rgba(255,255,255,0.5); padding: 10px;">
+                </div>
+                <div id="pengurus-pdf-info" style="margin:10px 0; padding:12px; border-radius:8px; background:#f1f5f9; color:#475569; font-size:0.9rem;">Belum ada dokumen ter-upload.</div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-submit bg-blue" style="width:auto; margin-top:0;" onclick="uploadPengurusPdf()"><i class="fa-solid fa-upload"></i> Upload Dokumen</button>
+                    <button class="btn-action bg-gold" onclick="lihatPengurusPdf()" id="btn-view-pengurus-pdf" style="display:none;"><i class="fa-solid fa-eye"></i> Pratinjau</button>
+                    <button class="btn-action bg-red" onclick="hapusPengurusPdf()" id="btn-del-pengurus-pdf" style="display:none;"><i class="fa-solid fa-trash"></i> Hapus</button>
+                </div>
+            </div>
             <div class="card"><div class="card-title-header"><h3><i class="fa-solid fa-list-check"></i> Riwayat Daftar Pengurus</h3></div><div class="table-responsive"><table><thead><tr><th>No</th><th>Foto</th><th>Jabatan (Kategori)</th><th>Nama Lengkap</th><th>Aksi Data</th></tr></thead><tbody id="tbody-struktur-admin"></tbody></table></div></div>
         </div>
 
@@ -4764,51 +4800,117 @@ html[data-theme="dark"] select option {
     };
 
     // ===== HELPER CETAK VIA IFRAME (preview muncul untuk Notulen, BA Kas, Rekap, dll) =====
-    window.printViaIframe = function(htmlBody, title) {
-        var iframe = document.createElement('iframe');
-        iframe.style.position = 'absolute'; iframe.style.left = '-9999px';
-        iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none';
-        document.body.appendChild(iframe);
-        var doc = iframe.contentWindow.document;
-        // Pastikan path gambar/asset relatif (mis. Lambang_Kota_Semarang.png) di-rewrite ke URL absolut
-        var __baseAbs = (location.origin + location.pathname).replace(/[^\/]*$/, '');
+    // ============================================================
+    // PDF DOWNLOAD HELPER (mengganti seluruh "Cetak" → Download PDF)
+    // - Render HTML ke offscreen container, capture pakai html2canvas,
+    //   bagi ke multi halaman A4 dengan jsPDF, langsung trigger download.
+    // - Selalu mencatat ke db_riwayat_ekspor agar fitur Riwayat Ekspor utuh.
+    // ============================================================
+    window.downloadPdfFromHtml = async function(htmlBody, title){
+        var safeTitle = String(title||'Dokumen').trim() || 'Dokumen';
+        var fileName = safeTitle.replace(/[\\\/:*?"<>|]+/g,'_').replace(/\s+/g,'_').slice(0,140) + '.pdf';
+        // Catat riwayat ekspor (selalu, bahkan jika user batal — supaya konsisten dgn perilaku lama)
         try {
-            htmlBody = String(htmlBody||'').replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])(?!https?:|data:|\/\/|\/)([^"']+)(["'])/gi, function(_, p1, p2, p3){ return p1 + __baseAbs + p2 + p3; });
-        } catch(e) { console.warn('img rewrite failed', e); }
-        // Base href agar gambar/asset relatif (mis. Lambang_Kota_Semarang.png) tetap resolve dalam iframe
-        var baseHref = (location.origin + location.pathname).replace(/[^\/]*$/, '');
-        // Riwayat ekspor: catat tanggal & nama dokumen setiap kali dicetak
-        try {
-            var __rwk = JSON.parse(localStorage.getItem('db_riwayat_ekspor')) || [];
-            __rwk.push({ id: Date.now(), ts: Date.now(), tgl: new Date().toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }), judul: String(title || 'Cetak Dokumen') });
-            if (__rwk.length > 500) __rwk = __rwk.slice(-500);
-            localStorage.setItem('db_riwayat_ekspor', JSON.stringify(__rwk));
+            var rwk = JSON.parse(localStorage.getItem('db_riwayat_ekspor')) || [];
+            rwk.push({
+                id: Date.now(), ts: Date.now(),
+                tgl: new Date().toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+                judul: safeTitle, format: 'PDF (download)'
+            });
+            if (rwk.length > 500) rwk = rwk.slice(-500);
+            localStorage.setItem('db_riwayat_ekspor', JSON.stringify(rwk));
             localStorage.setItem('ts_riwayat_ekspor', new Date().toISOString());
-            if (typeof syncSemuaData === 'function') { try { syncSemuaData(true); } catch(e){} }
-        } catch(e) { console.warn('riwayat ekspor gagal disimpan', e); }
-        doc.open();
-        doc.write('<!DOCTYPE html><html lang="id" data-theme="light" style="color-scheme: light;"><head><meta charset="utf-8">' +
-            '<base href="' + baseHref + '">' +
-            '<meta name="color-scheme" content="light">' +
-            '<title>' + (title||'Cetak Dokumen') + '</title>' +
-            '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">' +
-            '<style>' +
-            ':root { color-scheme: light; }' +
-            'html, body { background:white !important; color:black !important; }' +
-            '@page { size: A4; margin: 15mm; }' +
-            'body { margin:0; padding:0; background:white; color:black; font-family: "Times New Roman", Times, serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
-            '.letter-paper { background:white !important; color:black !important; padding:0 !important; box-shadow:none !important; }' +
-            'table { border-collapse: collapse; width:100%; }' +
-            'th, td { padding:6px 8px; }' +
-            '.kop-surat-resmi { display:flex; align-items:center; gap:15px; margin-bottom:10px; }' +
-            '.kop-surat-resmi img { max-width: 80px; height: auto; }' +
-            '@media print { html, body { background:white !important; color:black !important; -webkit-print-color-adjust: exact !important; } }' +
-            '</style></head><body>' + htmlBody + '</body></html>');
-        doc.close();
-        Swal.fire({ title:'Menyiapkan Dokumen...', text:'Mohon tunggu, preview cetak akan terbuka.', timer: 900, showConfirmButton:false, didOpen:function(){ Swal.showLoading(); } }).then(function(){
-            try { iframe.contentWindow.focus(); iframe.contentWindow.print(); } catch(e){ console.error(e); }
-            setTimeout(function(){ try { document.body.removeChild(iframe); } catch(e){} }, 3000);
+            if (typeof syncSemuaData === 'function') { try { syncSemuaData(true); } catch(_){} }
+        } catch(e){ console.warn('riwayat ekspor gagal disimpan', e); }
+
+        // Rewrite path img/asset relatif → absolute (Lambang_Kota_Semarang.png dll)
+        var baseAbs = (location.origin + location.pathname).replace(/[^\/]*$/, '');
+        try {
+            htmlBody = String(htmlBody||'').replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])(?!https?:|data:|\/\/|\/)([^"']+)(["'])/gi, function(_, p1, p2, p3){ return p1 + baseAbs + p2 + p3; });
+        } catch(_){}
+
+        // Buat container offscreen lebar 794px (≈ A4 96dpi)
+        var holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed; left:-10000px; top:0; width:794px; padding:0; background:white; color:black; font-family:"Times New Roman",Times,serif; z-index:-1;';
+        holder.innerHTML = '<div class="gt-pdf-page" style="background:white; color:black; padding:0;">' + htmlBody + '</div>';
+        document.body.appendChild(holder);
+
+        // Loading SwAlert
+        Swal.fire({
+            title:'Menyiapkan PDF...',
+            html:'Sedang merender <b>'+ safeTitle.replace(/</g,'&lt;') +'</b><br><small>Mohon tunggu, dokumen akan otomatis ter-download.</small>',
+            allowOutsideClick:false, didOpen: function(){ Swal.showLoading(); }
         });
+
+        try {
+            // Tunggu render & gambar termuat
+            await new Promise(function(r){ setTimeout(r, 80); });
+            var imgs = holder.querySelectorAll('img');
+            await Promise.all(Array.prototype.map.call(imgs, function(img){
+                if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                return new Promise(function(res){
+                    var done = false; var t = setTimeout(function(){ if(!done){ done=true; res(); } }, 2500);
+                    img.addEventListener('load', function(){ if(!done){ done=true; clearTimeout(t); res(); } });
+                    img.addEventListener('error', function(){ if(!done){ done=true; clearTimeout(t); res(); } });
+                });
+            }));
+
+            if (typeof html2canvas !== 'function') throw new Error('html2canvas belum termuat');
+            var canvas = await html2canvas(holder, {
+                scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, allowTaint: true
+            });
+
+            // Ambil jsPDF dari berbagai exposure
+            var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+            if (!jsPDFCtor) throw new Error('jsPDF belum termuat');
+            var pdf = new jsPDFCtor({ orientation:'p', unit:'mm', format:'a4' });
+
+            var pdfW = pdf.internal.pageSize.getWidth();   // 210
+            var pdfH = pdf.internal.pageSize.getHeight();  // 297
+            var imgW = pdfW;
+            var imgH = canvas.height * (pdfW / canvas.width);
+
+            var imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+            if (imgH <= pdfH + 0.5) {
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+            } else {
+                // Multi-halaman: clone bagian per bagian
+                var pageHeightCanvas = Math.floor(canvas.width * (pdfH / pdfW));
+                var ctx; var sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvas.width;
+                var totalY = 0; var pageNum = 0;
+                while (totalY < canvas.height) {
+                    var sliceH = Math.min(pageHeightCanvas, canvas.height - totalY);
+                    sliceCanvas.height = sliceH;
+                    ctx = sliceCanvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, sliceCanvas.width, sliceH);
+                    ctx.drawImage(canvas, 0, totalY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+                    var sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+                    var sliceImgH = sliceH * (pdfW / canvas.width);
+                    if (pageNum > 0) pdf.addPage();
+                    pdf.addImage(sliceData, 'JPEG', 0, 0, imgW, sliceImgH);
+                    pageNum++; totalY += sliceH;
+                }
+            }
+            pdf.save(fileName);
+            Swal.close();
+            try { Toast.fire({ icon:'success', title:'PDF tersimpan: '+ fileName }); } catch(_){}
+        } catch(err) {
+            console.error('downloadPdfFromHtml error', err);
+            Swal.fire({ icon:'error', title:'Gagal Membuat PDF', text: (err && err.message) || 'Terjadi kesalahan saat merender dokumen.' });
+        } finally {
+            try { document.body.removeChild(holder); } catch(_){}
+        }
+    };
+
+    window.printViaIframe = function(htmlBody, title) {
+        // DELEGASI: seluruh fungsi cetak portal sekarang langsung men-download PDF.
+        // Loader, riwayat ekspor, base href untuk asset, dan style A4 sudah ditangani
+        // di window.downloadPdfFromHtml. printViaIframe dipertahankan sebagai
+        // alias agar semua callsite legacy tetap berjalan tanpa perubahan.
+        return window.downloadPdfFromHtml(htmlBody, title);
     };
 
     // ===== KOPERASI: Cetak BA Rekap Tabungan (per bulan/global) =====
@@ -5203,9 +5305,19 @@ html[data-theme="dark"] select option {
             let dbMandiri = JSON.parse(localStorage.getItem('data_warga_mandiri')) || []; let mIdx = dbMandiri.findIndex(x => String(x.id) === String(loggedInWarga.id));
             if(mIdx !== -1) { dbMandiri[mIdx].password = passBaru; } else { dbMandiri.push({ id: loggedInWarga.id, nama: data.nama, password: passBaru }); }
             localStorage.setItem('data_warga_mandiri', JSON.stringify(dbMandiri));
-            Swal.fire({icon:'success', title:'Aktivasi Selesai!', text:'Silakan login kembali dengan sandi baru.', confirmButtonColor: '#10b981'}).then(() => location.reload()); return;
+            Swal.fire({icon:'success', title:'Aktivasi Selesai!', text:'Silakan login kembali dengan sandi baru.', confirmButtonColor: '#10b981'}).then(async function(){
+                try { if (typeof window.tawarkanAktivasiBiometrik === 'function') { await window.tawarkanAktivasiBiometrik(window.loggedInWarga); } } catch(_){}
+                location.reload();
+            });
+            return;
         }
         loggedInWarga.nama = data.nama; loggedInWarga.nik = data.nik; loggedInWarga.alamat = data.alamat; tampilFormKeluarga(false); syncSemuaData(); Toast.fire({icon:'success', title:'Diperbarui!'});
+        // Tawarkan aktivasi biometrik (hanya sekali per warga & per perangkat)
+        try {
+            if (typeof window.tawarkanAktivasiBiometrik === 'function') {
+                setTimeout(function(){ window.tawarkanAktivasiBiometrik(window.loggedInWarga); }, 500);
+            }
+        } catch(_){}
     };
     window.loadProfilPribadiWarga = function() {
         if(!loggedInWarga) return; let db = JSON.parse(localStorage.getItem('db_warga')) || []; let myData = db.find(x => String(x.id) === String(loggedInWarga.id)); let tb = document.getElementById('tbody-profil-saya');
@@ -5421,6 +5533,9 @@ html[data-theme="dark"] select option {
                 </div>
             </div>`;
     }
+    // Render area PDF (admin info + warga viewer)
+    try { if (typeof renderPengurusPdfAdmin === 'function') renderPengurusPdfAdmin(); } catch(_){}
+    try { if (typeof renderPengurusPdfWarga === 'function') renderPengurusPdfWarga(); } catch(_){}
 };
 
     // === 7. MUTASI, BERITA, AGENDA ===
@@ -7609,34 +7724,9 @@ window.cetakPDFSurat = function(id, isSalinan) {
         </table>
     </div>`;
 
-    // Proses Iframe & Printing
-    let iframe = document.createElement('iframe');
-    iframe.style.position = 'absolute'; iframe.style.width = '0px'; iframe.style.height = '0px'; iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-    
-    let doc = iframe.contentWindow.document;
-    let style = doc.createElement('style');
-    style.innerHTML = `
-        @page { size: A4; margin: 0; } 
-        body { margin: 0; background:white; -webkit-print-color-adjust: exact !important; }
-        @media print { body { -webkit-print-color-adjust: exact; } }
-    `;
-    doc.head.appendChild(style);
-    
-    doc.title = (isSalinan ? 'Salinan_' : 'Surat_') + dt.nama.replace(/\s/g,'_');
-    doc.body.innerHTML = htmlCetak;
-
-    Swal.fire({ 
-        title: 'Menyiapkan Dokumen...', 
-        text: 'Sedang memproses tata letak presisi.', 
-        timer: 1000, 
-        showConfirmButton: false, 
-        didOpen: () => { Swal.showLoading(); } 
-    }).then(() => {
-        iframe.contentWindow.focus();
-        iframe.contentWindow.print();
-        setTimeout(() => { document.body.removeChild(iframe); }, 2000);
-    });
+    // Download langsung sebagai PDF (bukan dialog Print) — Riwayat Ekspor tetap tercatat.
+    var __title = (isSalinan ? 'Salinan_Surat_' : 'Surat_Pengantar_') + String(dt.nama||'').replace(/\s/g,'_') + '_' + String(dt.noSurat||'').replace(/[^A-Za-z0-9]+/g,'-');
+    return window.downloadPdfFromHtml(htmlCetak, __title);
 };
     // === FUNGSI PENGGERAK HIDE & SEEK SIDEBAR ===
     window.toggleSidebar = function() {
@@ -7653,6 +7743,27 @@ window.cetakPDFSurat = function(id, isSalinan) {
         if (localStorage.getItem('sidebar_state') === 'hidden') {
             document.body.classList.add('sidebar-collapsed');
         }
+        // Tampilkan tombol biometric jika ada pendaftaran
+        try { if (typeof tampilkanTombolBiometrikLogin === 'function') tampilkanTombolBiometrikLogin(); } catch(_){}
+        // Restore sesi (refresh tetap di portal terakhir, bukan splash)
+        try {
+            // Tunggu sync layer selesai boot baru restore
+            var tries = 0;
+            (function tryRestore(){
+                tries++;
+                if (window.__GT_SYNC_BOOTED__ || tries > 50) {
+                    setTimeout(function(){
+                        try {
+                            if (typeof gtRestoreSession === 'function') gtRestoreSession();
+                            if (typeof renderPengurusPdfAdmin === 'function') renderPengurusPdfAdmin();
+                            if (typeof renderPengurusPdfWarga === 'function') renderPengurusPdfWarga();
+                        } catch(_){}
+                    }, 50);
+                } else {
+                    setTimeout(tryRestore, 100);
+                }
+            })();
+        } catch(_){}
     });
     // Tarik data saat aplikasi pertama kali dibuka
     syncSemuaData();
@@ -7695,6 +7806,367 @@ window.cetakPDFSurat = function(id, isSalinan) {
             footer.appendChild(pullTab);
         });
     }, 500);
+    // ============================================================
+    // PENGURUS PDF (admin upload + warga viewer)
+    // ============================================================
+    window.uploadPengurusPdf = function(){
+        var inp = document.getElementById('pengurus-pdf-input');
+        if(!inp || !inp.files || !inp.files[0]) return Swal.fire('Pilih File','Silakan pilih file PDF dahulu.','warning');
+        var f = inp.files[0];
+        if (f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)) return Swal.fire('Format Salah','Hanya file PDF yang diperbolehkan.','error');
+        var maxBytes = 5 * 1024 * 1024;
+        if (f.size > maxBytes) return Swal.fire('File Terlalu Besar','Maksimum 5 MB. File Anda: '+ (f.size/1024/1024).toFixed(2) +' MB.','error');
+        Swal.fire({ title:'Mengupload...', html:'Memproses '+ f.name +'<br><small>Mohon tunggu.</small>', allowOutsideClick:false, didOpen:function(){ Swal.showLoading(); }});
+        var fr = new FileReader();
+        fr.onload = function(e){
+            try {
+                var dataUrl = e.target.result; // data:application/pdf;base64,...
+                var record = {
+                    name: f.name,
+                    size: f.size,
+                    type: 'application/pdf',
+                    data: dataUrl,
+                    uploadedAt: new Date().toISOString(),
+                    uploadedAtId: new Date().toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })
+                };
+                localStorage.setItem('db_pengurus_pdf', JSON.stringify(record));
+                localStorage.setItem('ts_pengurus_pdf', new Date().toISOString());
+                if (typeof syncSemuaData === 'function') syncSemuaData(true);
+                Swal.fire({ icon:'success', title:'Upload Berhasil', text: f.name +' siap dilihat warga.' });
+                renderPengurusPdfAdmin();
+                renderPengurusPdfWarga();
+                inp.value = '';
+            } catch(err){
+                console.error(err);
+                Swal.fire('Gagal Menyimpan', (err && err.message) || 'Tidak dapat menyimpan PDF.', 'error');
+            }
+        };
+        fr.onerror = function(){ Swal.fire('Gagal Membaca','Tidak dapat membaca file.','error'); };
+        fr.readAsDataURL(f);
+    };
+    window.lihatPengurusPdf = function(){
+        var rec = JSON.parse(localStorage.getItem('db_pengurus_pdf') || 'null');
+        if(!rec || !rec.data) return Swal.fire('Tidak Ada','Belum ada PDF yang ter-upload.','info');
+        var w = window.open('about:blank');
+        if (w) { w.document.title = rec.name; w.document.body.style.margin='0'; var f = w.document.createElement('iframe'); f.style.cssText='width:100vw; height:100vh; border:0;'; f.src = rec.data; w.document.body.appendChild(f); }
+        else Swal.fire('Pop-up Diblokir','Mohon izinkan pop-up untuk pratinjau.','warning');
+    };
+    window.hapusPengurusPdf = function(){
+        Swal.fire({title:'Hapus Dokumen?', text:'PDF struktur pengurus akan dihapus dari portal.', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444', confirmButtonText:'Hapus'})
+            .then(function(r){ if(!r.isConfirmed) return;
+                localStorage.removeItem('db_pengurus_pdf');
+                localStorage.setItem('ts_pengurus_pdf', new Date().toISOString());
+                if (typeof syncSemuaData === 'function') syncSemuaData(true);
+                renderPengurusPdfAdmin();
+                renderPengurusPdfWarga();
+                Toast.fire({icon:'success', title:'Dokumen dihapus.'});
+            });
+    };
+    window.renderPengurusPdfAdmin = function(){
+        var rec = JSON.parse(localStorage.getItem('db_pengurus_pdf') || 'null');
+        var info = document.getElementById('pengurus-pdf-info');
+        var btnV = document.getElementById('btn-view-pengurus-pdf');
+        var btnD = document.getElementById('btn-del-pengurus-pdf');
+        if (!info) return;
+        if (rec && rec.data) {
+            info.innerHTML = '<i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> <b>'+ (rec.name||'dokumen.pdf') +'</b> &nbsp; <span style="color:#94a3b8;">('+ ((rec.size||0)/1024).toFixed(1) +' KB &middot; '+ (rec.uploadedAtId||'') +')</span>';
+            if (btnV) btnV.style.display = 'inline-flex';
+            if (btnD) btnD.style.display = 'inline-flex';
+        } else {
+            info.innerText = 'Belum ada dokumen ter-upload.';
+            if (btnV) btnV.style.display = 'none';
+            if (btnD) btnD.style.display = 'none';
+        }
+    };
+    window.renderPengurusPdfWarga = function(){
+        var card = document.getElementById('warga-pengurus-pdf-card');
+        if (!card) return;
+        var rec = JSON.parse(localStorage.getItem('db_pengurus_pdf') || 'null');
+        if (!rec || !rec.data) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
+        var meta = document.getElementById('warga-pengurus-pdf-meta');
+        if (meta) meta.innerHTML = '<i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> <b>'+ (rec.name||'dokumen.pdf') +'</b> &middot; '+ ((rec.size||0)/1024).toFixed(1) +' KB &middot; diupload '+ (rec.uploadedAtId||'-');
+        var frame = document.getElementById('warga-pengurus-pdf-frame');
+        var dl = document.getElementById('warga-pengurus-pdf-download');
+        if (dl) { dl.href = rec.data; dl.setAttribute('download', rec.name||'Struktur_Pengurus.pdf'); }
+        if (frame) {
+            try { frame.src = rec.data + '#toolbar=1&navpanes=0&zoom=page-fit'; }
+            catch(_) { frame.src = rec.data; }
+            // Fallback hint kalau iframe blank di Safari iOS lama
+            setTimeout(function(){
+                try {
+                    var doc = frame.contentDocument;
+                    if (doc && doc.body && doc.body.innerHTML === '') {
+                        var fb = document.getElementById('warga-pengurus-pdf-fallback');
+                        if (fb) fb.style.display = 'block';
+                    }
+                } catch(_){}
+            }, 1500);
+        }
+    };
+    window.bukaPdfFullscreen = function(frameId){
+        var rec = JSON.parse(localStorage.getItem('db_pengurus_pdf') || 'null');
+        if (!rec || !rec.data) return;
+        var w = window.open('about:blank');
+        if (w) { w.document.title = rec.name; w.document.body.style.margin='0'; var f = w.document.createElement('iframe'); f.style.cssText='width:100vw; height:100vh; border:0;'; f.src = rec.data; w.document.body.appendChild(f); }
+        else Swal.fire('Pop-up Diblokir','Mohon izinkan pop-up.','warning');
+    };
+
+    // ============================================================
+    // BIOMETRIC LOGIN (WebAuthn — sidik jari / Face ID)
+    // ============================================================
+    window.gtBio = (function(){
+        var KEY_LOCAL_HINT = 'gt_local_biometric_hint'; // perangkat ini terakhir kali login dgn warga ini
+        var KEY_REGISTRY = 'db_warga_biometric';        // {wargaId: { credentialId, displayName, registeredAt }}
+
+        function b64ToBuf(b64){
+            b64 = b64.replace(/-/g,'+').replace(/_/g,'/');
+            while (b64.length % 4) b64 += '=';
+            var bin = atob(b64);
+            var buf = new Uint8Array(bin.length);
+            for (var i=0; i<bin.length; i++) buf[i] = bin.charCodeAt(i);
+            return buf.buffer;
+        }
+        function bufToB64(buf){
+            var bytes = new Uint8Array(buf);
+            var s = '';
+            for (var i=0; i<bytes.length; i++) s += String.fromCharCode(bytes[i]);
+            return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+        }
+        function getRegistry(){ try { return JSON.parse(localStorage.getItem(KEY_REGISTRY)) || {}; } catch(_) { return {}; } }
+        function saveRegistry(r){ localStorage.setItem(KEY_REGISTRY, JSON.stringify(r)); localStorage.setItem('ts_warga_biometric', new Date().toISOString()); if (typeof syncSemuaData==='function') { try { syncSemuaData(true); } catch(_){} } }
+
+        async function isSupported(){
+            if (!window.PublicKeyCredential) return false;
+            if (!navigator.credentials || !navigator.credentials.create) return false;
+            try {
+                if (typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function') {
+                    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                }
+            } catch(_){}
+            return true;
+        }
+
+        async function register(warga){
+            if (!warga || !warga.id) throw new Error('Data warga tidak lengkap');
+            if (!(await isSupported())) throw new Error('Perangkat tidak mendukung biometrik');
+            var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+            var userIdStr = String(warga.id);
+            var userIdBuf = new TextEncoder().encode(userIdStr);
+            var pubKey = {
+                challenge: challenge,
+                rp: { name: 'Smart Portal RT 005' },
+                user: { id: userIdBuf, name: (warga.nik||userIdStr), displayName: (warga.nama||'Warga') },
+                pubKeyCredParams: [
+                    { type:'public-key', alg:-7 }, // ES256
+                    { type:'public-key', alg:-257 } // RS256
+                ],
+                authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
+                timeout: 60000,
+                attestation: 'none'
+            };
+            var cred = await navigator.credentials.create({ publicKey: pubKey });
+            if (!cred) throw new Error('Pendaftaran biometrik dibatalkan.');
+            var registry = getRegistry();
+            registry[String(warga.id)] = {
+                credentialId: bufToB64(cred.rawId),
+                displayName: warga.nama || ('Warga #'+warga.id),
+                nik: warga.nik || '',
+                registeredAt: new Date().toISOString()
+            };
+            saveRegistry(registry);
+            try { localStorage.setItem(KEY_LOCAL_HINT, String(warga.id)); } catch(_){}
+            return true;
+        }
+
+        async function authenticate(wargaIdHint){
+            if (!(await isSupported())) throw new Error('Biometrik tidak tersedia di perangkat ini.');
+            var registry = getRegistry();
+            var entries = Object.keys(registry).map(function(k){ return Object.assign({ wargaId: k }, registry[k]); });
+            if (wargaIdHint && registry[String(wargaIdHint)]) entries = [Object.assign({ wargaId: String(wargaIdHint) }, registry[String(wargaIdHint)])];
+            if (entries.length === 0) throw new Error('Belum ada warga yang mengaktifkan biometrik di portal ini.');
+            var challenge = new Uint8Array(32); crypto.getRandomValues(challenge);
+            var allow = entries.map(function(e){ return { type:'public-key', id: b64ToBuf(e.credentialId), transports: ['internal'] }; });
+            var assertion = await navigator.credentials.get({ publicKey: { challenge: challenge, allowCredentials: allow, userVerification: 'required', timeout: 60000 } });
+            if (!assertion) throw new Error('Otentikasi dibatalkan.');
+            var matchId = bufToB64(assertion.rawId);
+            var hit = entries.find(function(e){ return e.credentialId === matchId; });
+            if (!hit) throw new Error('Kredensial tidak dikenali.');
+            try { localStorage.setItem(KEY_LOCAL_HINT, hit.wargaId); } catch(_){}
+            return hit.wargaId;
+        }
+
+        function isRegistered(wargaId){
+            var r = getRegistry();
+            return !!(wargaId && r[String(wargaId)]);
+        }
+        function unregister(wargaId){
+            var r = getRegistry(); delete r[String(wargaId)]; saveRegistry(r);
+        }
+        function lastHint(){ return localStorage.getItem(KEY_LOCAL_HINT) || ''; }
+
+        return {
+            isSupported: isSupported,
+            register: register,
+            authenticate: authenticate,
+            isRegistered: isRegistered,
+            unregister: unregister,
+            lastHint: lastHint
+        };
+    })();
+
+    window.tampilkanTombolBiometrikLogin = async function(){
+        try {
+            var ok = await window.gtBio.isSupported();
+            var btn = document.getElementById('btn-login-biometrik');
+            if (!btn) return;
+            var registry = (function(){ try { return JSON.parse(localStorage.getItem('db_warga_biometric'))||{}; } catch(_) { return {}; } })();
+            var hasAny = Object.keys(registry).length > 0;
+            btn.style.display = (ok && hasAny) ? 'flex' : 'none';
+        } catch(_){}
+    };
+
+    window.loginBiometrik = async function(){
+        try {
+            var hint = window.gtBio.lastHint();
+            var wargaId = await window.gtBio.authenticate(hint);
+            // Cari warga di db
+            var db = JSON.parse(localStorage.getItem('db_warga')) || [];
+            var w = db.find(function(x){ return String(x.id) === String(wargaId); });
+            if (!w) { Swal.fire('Data Hilang','Akun warga sudah tidak terdaftar di sistem.','error'); window.gtBio.unregister(wargaId); return; }
+            window.loggedInWarga = { id: w.id, nama: w.nama, nik: w.nik||'', alamat: w.alamat||'' };
+            try { sessionStorage.setItem('gt_session_warga', JSON.stringify(window.loggedInWarga)); } catch(_){}
+            try { localStorage.setItem('gt_local_session', JSON.stringify({ role:'warga', warga: window.loggedInWarga, at: Date.now() })); } catch(_){}
+            window.BukaPortal('warga');
+            Toast.fire({icon:'success', title:'Login biometrik berhasil — selamat datang '+ w.nama});
+        } catch(err){
+            console.warn('biometrik gagal', err);
+            Swal.fire({icon:'error', title:'Login Biometrik Gagal', text: (err && err.message) || 'Coba lagi.'});
+        }
+    };
+
+    window.tawarkanAktivasiBiometrik = async function(warga){
+        try {
+            if (!warga || !warga.id) return;
+            if (!(await window.gtBio.isSupported())) return;
+            if (window.gtBio.isRegistered(warga.id)) return;
+            var ans = await Swal.fire({
+                icon:'question',
+                title:'Aktifkan Login Biometrik?',
+                html:'Login berikutnya cukup pakai <b>sidik jari / Face ID</b> tanpa mengetik password.<br><small>Anda bisa mematikannya kapan saja di pengaturan profil.</small>',
+                showCancelButton:true,
+                confirmButtonText:'<i class="fa-solid fa-fingerprint"></i> Aktifkan',
+                cancelButtonText:'Lain Kali',
+                confirmButtonColor:'#2563eb'
+            });
+            if (!ans.isConfirmed) return;
+            await window.gtBio.register(warga);
+            Swal.fire({icon:'success', title:'Biometrik Aktif', text:'Login berikutnya bisa pakai sidik jari / Face ID.'});
+        } catch(err){
+            console.warn('biometric register failed', err);
+            Swal.fire({icon:'warning', title:'Tidak Bisa Mengaktifkan', text:(err && err.message)||'Perangkat tidak mendukung atau dibatalkan.'});
+        }
+    };
+
+    // ============================================================
+    // SESSION RESTORE — refresh tetap di halaman terakhir, bukan splash
+    // ============================================================
+    window.gtSaveLastView = function(role, tab){
+        try {
+            var cur = JSON.parse(localStorage.getItem('gt_local_lastView') || '{}');
+            cur.role = role || cur.role;
+            if (tab) cur.tab = tab;
+            cur.at = Date.now();
+            localStorage.setItem('gt_local_lastView', JSON.stringify(cur));
+        } catch(_){}
+    };
+    // Wrap tab openers untuk mencatat tab terakhir per role
+    (function(){
+        function wrap(name, role){
+            var orig = window[name];
+            if (!orig || orig.__gtLastViewWrapped) return;
+            window[name] = function(t){ try { window.gtSaveLastView(role, t); } catch(_){} return orig.apply(this, arguments); };
+            window[name].__gtLastViewWrapped = true;
+        }
+        wrap('openWargaTab','warga');
+        wrap('openAdminTab','admin');
+        wrap('openKopTab','koperasi');
+        if (typeof window.openBenTab === 'function') wrap('openBenTab','bendahara');
+    })();
+    // Wrap BukaPortal untuk simpan session login + tahu role aktif
+    (function(){
+        var orig = window.BukaPortal;
+        if (!orig || orig.__gtSessionWrapped) return;
+        window.BukaPortal = function(role){
+            try {
+                var sess = { role: role, warga: (role==='warga' ? window.loggedInWarga : null), at: Date.now() };
+                localStorage.setItem('gt_local_session', JSON.stringify(sess));
+                window.gtSaveLastView(role, null);
+            } catch(_){}
+            var r = orig.apply(this, arguments);
+            // Setelah portal terbuka & lastView ada → restore tab terakhir untuk role ini
+            try {
+                var lv = JSON.parse(localStorage.getItem('gt_local_lastView')||'{}');
+                if (lv && lv.role === role && lv.tab) {
+                    setTimeout(function(){
+                        if (role==='warga' && typeof window.openWargaTab==='function') window.openWargaTab(lv.tab);
+                        else if (role==='admin' && typeof window.openAdminTab==='function') window.openAdminTab(lv.tab);
+                        else if (role==='koperasi' && typeof window.openKopTab==='function') window.openKopTab(lv.tab);
+                        else if (role==='bendahara' && typeof window.openBenTab==='function') window.openBenTab(lv.tab);
+                    }, 60);
+                }
+            } catch(_){}
+            return r;
+        };
+        window.BukaPortal.__gtSessionWrapped = true;
+    })();
+    // Wrap logout — bersihkan session lokal
+    (function(){
+        var orig = window.logout;
+        if (!orig || orig.__gtSessionWrapped) return;
+        window.logout = function(){
+            try { localStorage.removeItem('gt_local_session'); } catch(_){}
+            try { localStorage.removeItem('gt_local_lastView'); } catch(_){}
+            return orig.apply(this, arguments);
+        };
+        window.logout.__gtSessionWrapped = true;
+    })();
+    // Auto-restore saat halaman dimuat
+    window.gtRestoreSession = function(){
+        try {
+            var raw = localStorage.getItem('gt_local_session');
+            if (!raw) return false;
+            var sess = JSON.parse(raw);
+            if (!sess || !sess.role) return false;
+            // Sesi kadaluwarsa setelah 12 jam tanpa aktivitas
+            if (sess.at && (Date.now() - sess.at) > 12*60*60*1000) {
+                localStorage.removeItem('gt_local_session');
+                return false;
+            }
+            // Sembunyikan splash + login form
+            var splash = document.getElementById('splash-view');
+            var loginForm = document.getElementById('login-form-view');
+            if (splash) splash.style.display = 'none';
+            if (loginForm) loginForm.style.display = 'none';
+            if (sess.role === 'warga' && sess.warga) {
+                window.loggedInWarga = sess.warga;
+            }
+            if (typeof window.BukaPortal === 'function') window.BukaPortal(sess.role);
+            return true;
+        } catch(err){ console.warn('gtRestoreSession failed', err); return false; }
+    };
+    // Render PDF struktur otomatis setelah data sync masuk
+    window.addEventListener('storage', function(e){
+        if (!e || !e.key) return;
+        if (e.key === 'db_pengurus_pdf') {
+            try { renderPengurusPdfAdmin(); } catch(_){}
+            try { renderPengurusPdfWarga(); } catch(_){}
+        }
+        if (e.key === 'db_warga_biometric') {
+            try { tampilkanTombolBiometrikLogin(); } catch(_){}
+        }
+    });
+
     // === FUNGSI TRANSISI GAYA SIPADA ===
     window.bukaFormLogin = function() {
         const splash = document.getElementById('splash-view');
