@@ -1,8 +1,77 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Response } from "express";
 import { db, kvStoreTable } from "@workspace/db";
 import { gt, inArray, sql } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+// ---------------------------------------------------------------------------
+// In-memory Server-Sent Events (SSE) subscriber registry.
+// Every browser tab opens a long-lived EventSource on /api/kv/stream and gets
+// instant push updates whenever any other client writes through PUT /api/kv.
+// Polling on /api/kv?since=... remains as a resilience fallback.
+// ---------------------------------------------------------------------------
+type SseClient = {
+  id: number;
+  res: Response;
+};
+const sseClients: Set<SseClient> = new Set();
+let sseClientSeq = 0;
+
+function sseSend(client: SseClient, event: string, data: unknown) {
+  try {
+    client.res.write(`event: ${event}\n`);
+    client.res.write(`data: ${JSON.stringify(data)}\n\n`);
+  } catch {
+    // ignore - client will be reaped on close
+  }
+}
+
+function broadcast(event: string, data: unknown) {
+  for (const client of sseClients) {
+    sseSend(client, event, data);
+  }
+}
+
+// Heartbeat keeps proxies (Vite, nginx, Replit edge) from closing the stream.
+setInterval(() => {
+  for (const client of sseClients) {
+    try {
+      client.res.write(`: ping ${Date.now()}\n\n`);
+    } catch {
+      // ignore
+    }
+  }
+}, 15000).unref?.();
+
+router.get("/kv/stream", (req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no"); // disable proxy buffering
+  res.flushHeaders?.();
+
+  const client: SseClient = { id: ++sseClientSeq, res };
+  sseClients.add(client);
+
+  // Initial hello so the client knows the stream is live.
+  sseSend(client, "hello", {
+    serverTime: new Date().toISOString(),
+    clientId: client.id,
+  });
+
+  const cleanup = () => {
+    sseClients.delete(client);
+    try {
+      res.end();
+    } catch {
+      // ignore
+    }
+  };
+  req.on("close", cleanup);
+  req.on("aborted", cleanup);
+  res.on("error", cleanup);
+});
 
 router.get("/kv", async (req, res, next) => {
   try {
@@ -37,6 +106,8 @@ router.put("/kv", async (req, res, next) => {
     const body = req.body ?? {};
     const writesRaw = Array.isArray(body.writes) ? body.writes : [];
     const deletesRaw = Array.isArray(body.deletes) ? body.deletes : [];
+    const originId =
+      typeof body.originId === "string" ? body.originId : undefined;
 
     const writes = writesRaw
       .filter(
@@ -78,8 +149,30 @@ router.put("/kv", async (req, res, next) => {
       await db.delete(kvStoreTable).where(inArray(kvStoreTable.key, deletes));
     }
 
+    const serverTime = new Date().toISOString();
+
+    // Push to every other connected device immediately.
+    if (writes.length > 0 || deletes.length > 0) {
+      broadcast("kv", {
+        serverTime,
+        originId,
+        entries: [
+          ...writes.map((w) => ({
+            key: w.key,
+            value: w.value,
+            updatedAt: serverTime,
+          })),
+          ...deletes.map((k) => ({
+            key: k,
+            value: null,
+            updatedAt: serverTime,
+          })),
+        ],
+      });
+    }
+
     res.json({
-      serverTime: new Date().toISOString(),
+      serverTime,
       written: writes.length,
       deleted: deletes.length,
     });
@@ -91,6 +184,11 @@ router.put("/kv", async (req, res, next) => {
 router.delete("/kv", async (_req, res, next) => {
   try {
     await db.delete(kvStoreTable);
+    broadcast("kv", {
+      serverTime: new Date().toISOString(),
+      cleared: true,
+      entries: [],
+    });
     res.json({ ok: true });
   } catch (err) {
     next(err);
