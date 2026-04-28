@@ -1,0 +1,58 @@
+Act as senior backend architect.
+
+NON-NEGOTIABLE OBJECTIVE:
+Convert this application into a true online multi-device application connected to a centralized Replit PostgreSQL database with realtime shared data synchronization.
+
+STRICT REQUIREMENTS (MANDATORY):
+1. The single source of truth MUST be server-side PostgreSQL only.
+2. Absolutely DO NOT use localStorage, sessionStorage, browser memory, mock persistence, fake database wrappers, or client-side storage as primary data storage.
+3. Remove or refactor any existing localStorage dependency.
+4. All devices/users must read and write to the same centralized online database.
+5. Data entered on one device must be visible and updated on other devices in realtime.
+
+EXECUTE THESE TASKS:
+
+PHASE 1
+Scan the full codebase and identify:
+- all localStorage usage
+- all current persistence logic
+- all CRUD flows
+- all data models needing synchronization
+
+PHASE 2
+Enable and configure Replit PostgreSQL as actual production database.
+Create schema from existing application data structures.
+
+PHASE 3
+Build/patch backend APIs for all shared data:
+GET, POST, PUT, DELETE endpoints.
+
+PHASE 4
+Refactor frontend so all forms, dashboards, lists and records use server APIs only.
+All reads and writes must go through server database.
+
+PHASE 5
+Implement realtime synchronization across devices using WebSocket or equivalent realtime mechanism.
+When data changes on one device, connected devices update automatically.
+
+PHASE 6
+Verify and enforce:
+- data persists after refresh
+- data persists after logout
+- data survives restart
+- data is shared across devices
+- no shared records remain stored only in browser
+
+COMPLIANCE RULES:
+- Do NOT simulate a database.
+- Do NOT keep localStorage as fallback for shared records.
+- Do NOT rebuild the application from scratch.
+- Patch existing application.
+- Keep UI intact.
+- Use PostgreSQL as the only source of truth.
+- Reject any implementation that is not truly online and realtime.
+
+Before finishing, run an audit and confirm:
+“Application now uses centralized server-side PostgreSQL with realtime multi-device synchronization and no client-side shared-data persistence.”
+
+Start execution immediately.

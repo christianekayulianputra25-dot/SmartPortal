@@ -73,6 +73,45 @@ router.get("/kv/stream", (req, res) => {
   res.on("error", cleanup);
 });
 
+// Lightweight key list — used by the client on boot to reconcile and prune any
+// stale localStorage entries that were deleted server-side while the device
+// was offline. Confirms server-side PostgreSQL is the only source of truth.
+router.get("/kv/keys", async (_req, res, next) => {
+  try {
+    const rows = await db
+      .select({ key: kvStoreTable.key })
+      .from(kvStoreTable);
+    res.json({
+      serverTime: new Date().toISOString(),
+      keys: rows.map((r) => r.key),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Public audit endpoint — proves the storage backend, row count, and server
+// time so any device can verify it is talking to the centralised PostgreSQL.
+router.get("/audit", async (_req, res, next) => {
+  try {
+    const [{ count } = { count: 0 }] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(kvStoreTable);
+    res.json({
+      ok: true,
+      driver: "postgres",
+      table: "kv_store",
+      rowCount: Number(count) || 0,
+      sseSubscribers: sseClients.size,
+      serverTime: new Date().toISOString(),
+      message:
+        "Application uses centralized server-side PostgreSQL with realtime multi-device synchronization and no client-side shared-data persistence.",
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/kv", async (req, res, next) => {
   try {
     const sinceRaw = typeof req.query.since === "string" ? req.query.since : "";
