@@ -729,9 +729,23 @@
   function pollNow() {
     if (polling) return Promise.resolve();
     polling = true;
-    var url = serverTime
-      ? API_BASE + "?since=" + encodeURIComponent(serverTime)
-      : API_BASE;
+    var url = API_BASE;
+
+if(serverTime){
+
+  var t=new Date(serverTime);
+
+  t=new Date(
+    t.getTime()-5000
+  ); // overlap 5 detik anti missed updates
+
+  url=
+    API_BASE+
+    "?since="+
+    encodeURIComponent(
+      t.toISOString()
+    );
+}
     return fetch(url, { headers: { Accept: "application/json" } })
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);
