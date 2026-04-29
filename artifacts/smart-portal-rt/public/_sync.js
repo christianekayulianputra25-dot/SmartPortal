@@ -718,7 +718,7 @@
 
   // ---- SSE: instant push from server -------------------------------------
   var es = null;
-  var sseRetryMs = 1500;
+  var sseRetryMs = 3000;
   function startSSE() {
     if (typeof EventSource === "undefined") return;
     try {
