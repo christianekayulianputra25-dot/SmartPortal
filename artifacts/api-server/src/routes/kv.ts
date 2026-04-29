@@ -114,37 +114,57 @@ const count = result?.[0]?.count ?? 0;
   }
 });
 
-router.get("/kv", async (req, res, next) => {
+router.get("/kv", async (req, res) => {
   try {
-    const sinceRaw = typeof req.query.since === "string" ? req.query.since : "";
+    const sinceRaw =
+      typeof req.query.since === "string"
+        ? req.query.since
+        : "";
+
     const since = sinceRaw ? new Date(sinceRaw) : null;
 
-    let rows;
-    if (since && !Number.isNaN(since.getTime())) {
-      rows = await db
-        .select()
-        .from(kvStoreTable)
-        .where(gt(kvStoreTable.updatedAt, since));
-    } else {
-      rows = await db.select().from(kvStoreTable);
+    let rows = [];
+
+    try {
+      if (since && !Number.isNaN(since.getTime())) {
+        rows = await db
+          .select()
+          .from(kvStoreTable)
+          .where(gt(kvStoreTable.updatedAt, since));
+      } else {
+        rows = await db
+          .select()
+          .from(kvStoreTable);
+      }
+    } catch(dbErr) {
+      console.error("DB query failed:", dbErr);
+
+      return res.status(200).json({
+        serverTime: new Date().toISOString(),
+        entries:[]
+      });
     }
 
-    res.json({
+    return res.json({
       serverTime: new Date().toISOString(),
-      entries: rows.map((r) => ({
+      entries: rows.map(r => ({
         key: r.key,
         value: r.value,
-        updatedAt:
-  r.updatedAt instanceof Date
-    ? r.updatedAt.toISOString()
-    : new Date(r.updatedAt || Date.now()).toISOString(),
-  } catch (err) {
-  console.error("/api/kv failed:", err);
-  res.status(200).json({
-    serverTime: new Date().toISOString(),
-    entries: []
-  });
-}
+        updatedAt: new Date(
+          r.updatedAt || Date.now()
+        ).toISOString()
+      }))
+    });
+
+  } catch(err) {
+    console.error("KV route crash:", err);
+
+    return res.status(200).json({
+      serverTime:new Date().toISOString(),
+      entries:[]
+    });
+  }
+});
 
 router.put("/kv", async (req, res, next) => {
   try {
