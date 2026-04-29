@@ -432,7 +432,7 @@
       if (v === null) deletes.push(k);
       else writes.push({ key: k, value: v });
     }
-    pendingWrites = Object.create(null);
+    
     flushing = true;
     setPill({ mode: "syncing", pending: writes.length + deletes.length });
     fetch(API_BASE, {
@@ -448,14 +448,27 @@
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
-      .then(function (resp) {
-        if (resp && resp.serverTime) serverTime = resp.serverTime;
-        setPill({
-          mode: sseConnected ? "online" : "online",
-          lastSync: serverTime,
-          pending: pendingCount(),
-        });
-      })
+      .then(function (resp) {.then(function (resp) {
+
+  if (resp && resp.serverTime)
+    serverTime = resp.serverTime;
+
+  // hapus queue hanya setelah write sukses
+  for (var i = 0; i < writes.length; i++) {
+    delete pendingWrites[writes[i].key];
+  }
+
+  for (var j = 0; j < deletes.length; j++) {
+    delete pendingWrites[deletes[j]];
+  }
+
+  setPill({
+    mode: "online",
+    lastSync: serverTime,
+    pending: pendingCount(),
+  });
+
+})
       .catch(function (err) {
         console.warn("[gt-sync] flush failed, re-queueing:", err);
         for (var i = 0; i < writes.length; i++) {
@@ -469,9 +482,18 @@
         scheduleFlush();
       })
       .finally(function () {
-        flushing = false;
-        if (Object.keys(pendingWrites).length > 0) scheduleFlush();
-      });
+
+  flushing = false;
+
+  setPill({
+    pending: pendingCount()
+  });
+
+  if (pendingCount() > 0) {
+    scheduleFlush();
+  }
+
+});
   }
 
   function queueWrite(key, value) {
@@ -719,7 +741,13 @@
   // ---- SSE: instant push from server -------------------------------------
   var es = null;
   var sseRetryMs = 3000;
+  var sseReconnectTimer = null;
+  var sseConnecting = false;
   function startSSE() {
+
+ if (sseConnecting || es) return;
+
+ sseConnecting = true;
     if (typeof EventSource === "undefined") return;
     try {
       if (es) {
@@ -728,8 +756,17 @@
         } catch (_) {}
         es = null;
       }
-      es = new EventSource(SSE_URL);
+      es = new EventSource(SSE_URL + "?t=" + Date.now());
       es.addEventListener("open", function () {
+
+  sseConnecting=false;
+
+  if(sseReconnectTimer){
+    clearTimeout(sseReconnectTimer);
+    sseReconnectTimer=null;
+  }
+
+  sseConnected=true;
         sseConnected = true;
         sseRetryMs = 1500;
         setPill({
@@ -777,24 +814,36 @@
         }
       });
       es.addEventListener("error", function () {
-        sseConnected = false;
-        try {
-          if (es) es.close();
-        } catch (_) {}
-        es = null;
-        setPill({ mode: "offline", pending: pendingCount() });
-        // Exponential backoff up to 15s.
-        sseRetryMs = Math.min(sseRetryMs * 1.7, 15000);
-        setTimeout(startSSE, sseRetryMs);
-      });
-    } catch (e) {
-      console.warn("[gt-sync] sse start failed", e);
-      sseConnected = false;
-      setPill({ mode: "offline", pending: pendingCount() });
-      setTimeout(startSSE, 5000);
-    }
-  }
-  startSSE();
+
+ if(sseReconnectTimer) return; // cegah reconnect ganda
+
+ sseConnected=false;
+ sseConnecting=false;
+
+ try{
+   if(es) es.close();
+ }catch(_){}
+
+ es=null;
+
+ setPill({
+   mode:"offline",
+   pending:pendingCount()
+ });
+
+ sseRetryMs=Math.min(
+   sseRetryMs*1.7,
+   15000
+ );
+
+ sseReconnectTimer=setTimeout(function(){
+
+   sseReconnectTimer=null;
+   startSSE();
+
+ },sseRetryMs);
+
+});
 
   // Expose helpers.
   window.__GT_SYNC_REFRESH__ = function () {
