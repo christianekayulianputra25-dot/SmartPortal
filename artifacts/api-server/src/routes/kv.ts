@@ -41,17 +41,26 @@ setInterval(() => {
       // ignore
     }
   }
-}, 15000).unref?.();
+}, 10000).unref?.();
 
 router.get("/kv/stream", (req, res) => {
   res.status(200);
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no"); // disable proxy buffering
+  res.setHeader("X-Accel-Buffering", "no");
+
   res.flushHeaders?.();
 
-  const client: SseClient = { id: ++sseClientSeq, res };
+  
+  req.socket.setKeepAlive(true);
+  req.socket.setTimeout(0);
+
+  const client: SseClient = {
+    id: ++sseClientSeq,
+    res
+  };
+
   sseClients.add(client);
 
   // Initial hello so the client knows the stream is live.
@@ -60,17 +69,33 @@ router.get("/kv/stream", (req, res) => {
     clientId: client.id,
   });
 
-  const cleanup = () => {
-    sseClients.delete(client);
-    try {
+  let closed = false;
+
+const cleanup = () => {  
+
+  if (closed) return;
+  closed = true;
+
+  sseClients.delete(client);
+
+  try{
+    res.removeAllListeners?.();
+    req.removeAllListeners?.();
+  }catch{}
+
+  try{
+    if(!res.writableEnded){
       res.end();
-    } catch {
-      // ignore
     }
-  };
-  req.on("close", cleanup);
-  req.on("aborted", cleanup);
-  res.on("error", cleanup);
+  }catch{}
+};
+
+req.on("close", cleanup);
+req.on("aborted", cleanup);
+req.on("error", cleanup);
+res.on("close", cleanup);
+res.on("finish", cleanup);
+res.on("error", cleanup);
 });
 
 // Lightweight key list — used by the client on boot to reconcile and prune any
