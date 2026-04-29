@@ -211,10 +211,10 @@
 
   function bootLoadAsync() {
     fetch(API_BASE, {
-      headers: { Accept: "application/json" },
-      credentials: "same-origin",
-      cache: "no-store",
-    })
+  headers: {
+    Accept: "application/json",
+    "Cache-Control": "no-cache"
+  },
       .then(function (r) {
         if (!r.ok) {
           var err = new Error("HTTP " + r.status);
