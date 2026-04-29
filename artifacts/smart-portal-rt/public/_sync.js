@@ -134,49 +134,23 @@
   }
 
   /**
-   * Synchronous boot load. Blocks the parser via sync XHR and refuses to let
-   * the app continue if the server is unreachable. This is what guarantees
-   * "PostgreSQL is the only source of truth" — there is no local-only mode.
+   * Boot load. Tries a SYNCHRONOUS XHR first (so all inline scripts that
+   * follow this file see a populated localStorage), and falls back to an
+   * ASYNCHRONOUS fetch when the browser blocks sync XHR on the main thread
+   * — this is what was breaking fresh devices in iOS Safari Private mode,
+   * PWA contexts and some Android incognito modes, where sync XHR throws
+   * (or silently returns status 0) and used to leave the app stuck on the
+   * "Memuat data dari server…" overlay.
+   *
+   * Either path enforces the same invariant: PostgreSQL is the only source
+   * of truth — there is no local-only fallback. The overlay stays up until
+   * the server snapshot has been applied.
+   *
+   * After the async fallback path applies data, runRefreshers() is called
+   * so any inline UI loader that already ran (against empty localStorage,
+   * because the parser did NOT block) is re-rendered with the real data.
    */
-  function bootLoad() {
-    var xhr = new XMLHttpRequest();
-    try {
-      xhr.open("GET", API_BASE, false); // synchronous
-      xhr.setRequestHeader("Accept", "application/json");
-      xhr.send(null);
-    } catch (err) {
-      console.error("[gt-sync] boot load network error:", err);
-      setBootStatus(
-        "error",
-        "Tidak bisa menghubungi server",
-        "Periksa koneksi internet Anda. Aplikasi tidak akan berjalan dari cache lokal — data harus berasal dari PostgreSQL pusat.",
-      );
-      return;
-    }
-
-    if (!(xhr.status >= 200 && xhr.status < 300)) {
-      console.error("[gt-sync] boot load failed:", xhr.status);
-      setBootStatus(
-        "error",
-        "Server menolak permintaan (" + xhr.status + ")",
-        "Server pusat tersedia tetapi mengembalikan error. Silakan coba lagi.",
-      );
-      return;
-    }
-
-    var data;
-    try {
-      data = JSON.parse(xhr.responseText);
-    } catch (e) {
-      console.error("[gt-sync] boot parse error:", e);
-      setBootStatus(
-        "error",
-        "Respons server tidak valid",
-        "Tidak dapat memuat data. Coba lagi dalam beberapa saat.",
-      );
-      return;
-    }
-
+  function applyBootData(data, viaAsync) {
     serverTime = data.serverTime || new Date().toISOString();
     var entries = data.entries || [];
     var serverKeys = Object.create(null);
@@ -213,12 +187,127 @@
       );
     }
     console.info(
-      "%c✓ Smart Portal RT terhubung ke PostgreSQL pusat — multi-device realtime sync aktif (%d entries dari server, t=%s)",
+      "%c✓ Smart Portal RT terhubung ke PostgreSQL pusat — multi-device realtime sync aktif (%d entries dari server, t=%s%s)",
       "color:#16a34a;font-weight:600",
       entries.length,
       serverTime,
+      viaAsync ? ", boot=async" : "",
     );
     hideBootOverlay();
+
+    // Fire a one-shot event + re-run UI loaders. On the SYNC path this is a
+    // no-op (loaders haven't run yet). On the ASYNC path this is what makes
+    // fresh devices on iOS Safari Private / PWA actually see the data,
+    // because their inline scripts ran with empty localStorage.
+    if (viaAsync) {
+      try {
+        window.dispatchEvent(new Event("__gt-sync-booted"));
+      } catch (_) {}
+      try {
+        runRefreshers();
+      } catch (_) {}
+    }
+  }
+
+  function bootLoadAsync() {
+    fetch(API_BASE, {
+      headers: { Accept: "application/json" },
+      credentials: "same-origin",
+      cache: "no-store",
+    })
+      .then(function (r) {
+        if (!r.ok) {
+          var err = new Error("HTTP " + r.status);
+          err.__status = r.status;
+          throw err;
+        }
+        return r.json();
+      })
+      .then(function (data) {
+        applyBootData(data, true);
+      })
+      .catch(function (err) {
+        console.error("[gt-sync] async boot failed:", err);
+        if (err && err.__status) {
+          setBootStatus(
+            "error",
+            "Server menolak permintaan (" + err.__status + ")",
+            "Server pusat tersedia tetapi mengembalikan error. Silakan coba lagi.",
+          );
+        } else {
+          setBootStatus(
+            "error",
+            "Tidak bisa menghubungi server",
+            "Periksa koneksi internet Anda. Aplikasi tidak akan berjalan dari cache lokal — data harus berasal dari PostgreSQL pusat.",
+          );
+        }
+      });
+  }
+
+  function bootLoad() {
+    // 1) Try sync XHR first — preferred because it blocks the HTML parser,
+    //    so every inline script that follows _sync.js sees a fully populated
+    //    localStorage. Works on virtually all desktop browsers.
+    var xhr = new XMLHttpRequest();
+    var syncBlocked = false;
+    try {
+      xhr.open("GET", API_BASE, false); // synchronous
+      xhr.setRequestHeader("Accept", "application/json");
+      xhr.send(null);
+    } catch (err) {
+      // 2) Sync XHR is forbidden in this context (iOS Safari Private,
+      //    PWA service-worker controlled page, some Android private modes,
+      //    or strict CSP). Fall back to async fetch.
+      syncBlocked = true;
+      console.warn(
+        "[gt-sync] sync boot rejected by browser, falling back to async fetch:",
+        (err && err.message) || err,
+      );
+    }
+
+    // Some browsers silently complete sync XHR with status 0 instead of
+    // throwing. Treat that as "blocked" too.
+    if (!syncBlocked && xhr.status === 0) {
+      syncBlocked = true;
+      console.warn(
+        "[gt-sync] sync boot returned status 0, falling back to async fetch",
+      );
+    }
+
+    if (syncBlocked) {
+      setBootStatus(
+        "loading",
+        "Memuat data dari server…",
+        "Aplikasi terhubung ke PostgreSQL pusat. Mohon tunggu.",
+      );
+      bootLoadAsync();
+      return;
+    }
+
+    if (!(xhr.status >= 200 && xhr.status < 300)) {
+      console.error("[gt-sync] boot load failed:", xhr.status);
+      setBootStatus(
+        "error",
+        "Server menolak permintaan (" + xhr.status + ")",
+        "Server pusat tersedia tetapi mengembalikan error. Silakan coba lagi.",
+      );
+      return;
+    }
+
+    var data;
+    try {
+      data = JSON.parse(xhr.responseText);
+    } catch (e) {
+      console.error("[gt-sync] boot parse error:", e);
+      setBootStatus(
+        "error",
+        "Respons server tidak valid",
+        "Tidak dapat memuat data. Coba lagi dalam beberapa saat.",
+      );
+      return;
+    }
+
+    applyBootData(data, false);
   }
   bootLoad();
 
