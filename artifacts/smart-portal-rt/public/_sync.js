@@ -29,7 +29,7 @@
   var AUDIT_URL = "/api/audit";
   var POLL_MS = 8000; // fallback polling (SSE handles real-time)
   var POLL_MS_NO_SSE = 2500; // faster polling when SSE is down
-  var DEBOUNCE_MS = 50; // outbound write debounce — near-immediate
+  var DEBOUNCE_MS = 500; // outbound write debounce — near-immediate
   var ECHO_GUARD_MS = 2500; // skip echoes of our own writes (matched by value)
 
   // Unique id per browser tab — server attaches this to broadcasts.
