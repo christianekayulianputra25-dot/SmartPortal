@@ -26,6 +26,10 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
 
+## GitHub push credential (`GITHUB_TOKEN`)
+
+**Decision (2026-04-28): remove.** The Personal Access Token added to the Replit Secret `GITHUB_TOKEN` was provisioned for a one-time push to `christianekayulianputra25-dot/SmartPortal` and is no longer needed. A long-lived `repo`-scoped PAT sitting indefinitely in the workspace's secret store is an unnecessary attack surface — especially while the repo still has open security findings — so the canonical path forward is **no stored push credential**. The next time a push is required from this workspace, use the Replit account-level GitHub reconnect first (Account → Connected services → GitHub → Reconnect, then reload the workspace); only if that path fails again should a fresh, short-lived PAT (fine-grained, Contents: Read & Write, expiry ≤ 7 days, single repo `SmartPortal`) be added on demand and deleted again immediately after the push. **Manual step still required:** the agent cannot delete user-scoped secrets, so the user must open the Secrets pane and remove `GITHUB_TOKEN` to complete this decision.
+
 ## Artifacts
 
 ### Smart Portal RT 005 Tegalsari (`artifacts/smart-portal-rt`)
