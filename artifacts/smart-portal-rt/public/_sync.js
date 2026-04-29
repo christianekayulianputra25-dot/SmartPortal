@@ -210,39 +210,46 @@
   }
 
   function bootLoadAsync() {
-    fetch(API_BASE, {
-  headers: {
-    Accept: "application/json",
-    "Cache-Control": "no-cache"
-  },
-      .then(function (r) {
-        if (!r.ok) {
-          var err = new Error("HTTP " + r.status);
-          err.__status = r.status;
-          throw err;
-        }
-        return r.json();
-      })
-      .then(function (data) {
-        applyBootData(data, true);
-      })
-      .catch(function (err) {
-        console.error("[gt-sync] async boot failed:", err);
-        if (err && err.__status) {
-          setBootStatus(
-            "error",
-            "Server menolak permintaan (" + err.__status + ")",
-            "Server pusat tersedia tetapi mengembalikan error. Silakan coba lagi.",
-          );
-        } else {
-          setBootStatus(
-            "error",
-            "Tidak bisa menghubungi server",
-            "Periksa koneksi internet Anda. Aplikasi tidak akan berjalan dari cache lokal — data harus berasal dari PostgreSQL pusat.",
-          );
-        }
-      });
-  }
+    function bootLoadAsync() {
+
+  fetch(API_BASE,{
+    headers:{
+      Accept:"application/json",
+      "Cache-Control":"no-cache"
+    },
+    credentials:"same-origin",
+    cache:"no-store"
+  })
+
+  .then(function(r){
+
+    if(!r.ok){
+      var err = new Error("HTTP "+r.status);
+      err.__status = r.status;
+      throw err;
+    }
+
+    return r.json();
+
+  })
+
+  .then(function(data){
+    applyBootData(data,true);
+  })
+
+  .catch(function(err){
+
+    console.error("[gt-sync] async boot failed:",err);
+
+    setBootStatus(
+      "error",
+      "Tidak bisa menghubungi server",
+      "Silakan coba lagi"
+    );
+
+  });
+
+}      
 
   function bootLoad() {
     // 1) Try sync XHR first — preferred because it blocks the HTML parser,
@@ -448,59 +455,102 @@
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
-      .then(function (resp) {.then(function (resp) {
+      function flush(){
 
-  if (resp && resp.serverTime)
-    serverTime = resp.serverTime;
+ if(flushing) return;
 
-  // hapus queue hanya setelah write sukses
-  for (var i = 0; i < writes.length; i++) {
-    delete pendingWrites[writes[i].key];
-  }
+ var keys=Object.keys(pendingWrites);
 
-  for (var j = 0; j < deletes.length; j++) {
-    delete pendingWrites[deletes[j]];
-  }
+ if(!keys.length){
+   setPill({pending:0});
+   return;
+ }
 
-  setPill({
-    mode: "online",
-    lastSync: serverTime,
-    pending: pendingCount(),
-  });
+ var writes=[];
+ var deletes=[];
 
-})
-      .catch(function (err) {
-        console.warn("[gt-sync] flush failed, re-queueing:", err);
-        for (var i = 0; i < writes.length; i++) {
-          if (!(writes[i].key in pendingWrites))
-            pendingWrites[writes[i].key] = writes[i].value;
-        }
-        for (var j = 0; j < deletes.length; j++) {
-          if (!(deletes[j] in pendingWrites)) pendingWrites[deletes[j]] = null;
-        }
-        setPill({ mode: "offline", pending: pendingCount() });
-        scheduleFlush();
-      })
-      .finally(function () {
+ for(var i=0;i<keys.length;i++){
 
-  flushing = false;
+   var k=keys[i];
+   var v=pendingWrites[k];
 
-  setPill({
-    pending: pendingCount()
-  });
+   if(v===null)
+      deletes.push(k);
+   else
+      writes.push({
+        key:k,
+        value:v
+      });
 
-  if (pendingCount() > 0) {
-    scheduleFlush();
-  }
+ }
 
-});
-  }
+ flushing=true;
 
-  function queueWrite(key, value) {
-    pendingWrites[key] = value;
-    lastLocalWrite[key] = { value: value, ts: Date.now() };
-    scheduleFlush();
-  }
+ setPill({
+   mode:"syncing",
+   pending:keys.length
+ });
+
+ fetch(API_BASE,{
+   method:"PUT",
+   headers:{
+      "Content-Type":"application/json"
+   },
+   body:JSON.stringify({
+      writes:writes,
+      deletes:deletes,
+      originId:ORIGIN_ID
+   })
+ })
+
+ .then(function(r){
+
+   if(!r.ok)
+      throw new Error("HTTP "+r.status);
+
+   return r.json();
+
+ })
+
+ .then(function(resp){
+
+    if(resp.serverTime)
+       serverTime=resp.serverTime;
+
+    for(var i=0;i<keys.length;i++){
+      delete pendingWrites[keys[i]];
+    }
+
+    setPill({
+      mode:"online",
+      lastSync:serverTime,
+      pending:pendingCount()
+    });
+
+ })
+
+ .catch(function(err){
+
+   console.warn("[gt-sync] flush failed:",err);
+
+   setPill({
+      mode:"offline",
+      pending:pendingCount()
+   });
+
+ })
+
+ .finally(function(){
+
+   flushing=false;
+
+   if(pendingCount()>0){
+      setTimeout(flush,800);
+   }
+
+ });
+
+}
 
   // ---- Wrap localStorage --------------------------------------------------
   // The wrapper guarantees server-write-through: any application code that
@@ -815,35 +865,56 @@
       });
       es.addEventListener("error", function () {
 
- if(sseReconnectTimer) return; // cegah reconnect ganda
+  if (sseReconnectTimer) return; // cegah reconnect ganda
 
- sseConnected=false;
- sseConnecting=false;
+  sseConnected = false;
+  sseConnecting = false;
 
- try{
-   if(es) es.close();
- }catch(_){}
+  try {
+    if (es) es.close();
+  } catch (_) {}
 
- es=null;
+  es = null;
 
- setPill({
-   mode:"offline",
-   pending:pendingCount()
- });
+  setPill({
+    mode: "offline",
+    pending: pendingCount()
+  });
 
- sseRetryMs=Math.min(
-   sseRetryMs*1.7,
-   15000
- );
+  // exponential backoff
+  sseRetryMs = Math.min(
+    sseRetryMs * 1.7,
+    15000
+  );
 
- sseReconnectTimer=setTimeout(function(){
+  sseReconnectTimer = setTimeout(function () {
 
-   sseReconnectTimer=null;
-   startSSE();
+    sseReconnectTimer = null;
+    startSSE();
 
- },sseRetryMs);
+  }, sseRetryMs);
 
 });
+
+} catch (err) {
+
+  console.warn("[gt-sync] SSE init failed", err);
+
+  sseConnecting = false;
+  sseConnected = false;
+
+  if (!sseReconnectTimer) {
+    sseReconnectTimer = setTimeout(function () {
+
+      sseReconnectTimer = null;
+      startSSE();
+
+    }, sseRetryMs);
+  }
+
+}
+
+} // <-- penutup function startSSE()
 
   // Expose helpers.
   window.__GT_SYNC_REFRESH__ = function () {
